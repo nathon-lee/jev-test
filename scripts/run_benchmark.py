@@ -60,7 +60,10 @@ def run_dataset(
     limit: int | None = None,
     prompt_version: str = "v1",
 ):
-    input_path = DATA_DIR / f"{dataset}.csv"
+    if dataset == "jailbreak":
+        input_path = DATA_DIR / "jailbreak_all.csv"
+    else:
+        input_path = DATA_DIR / f"{dataset}.csv"
     output_path = (
         OUTPUT_DIR /
         f"{dataset}_{prompt_version}_predictions.csv"
@@ -189,6 +192,7 @@ def main():
             "toxigen",
             "hatecheck",
             "aegis2",
+            "jailbreak",
             "all",
         ],
         default="all",
@@ -222,6 +226,7 @@ def main():
             "toxigen",
             "hatecheck",
             "aegis2",
+            "jailbreak",
         ]
     else:
         datasets = [
