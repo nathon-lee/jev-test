@@ -60,7 +60,9 @@ def run_dataset(
     limit: int | None = None,
     prompt_version: str = "v1",
 ):
-    if dataset == "jailbreak":
+    if dataset in {"benign-behaviors", "harmful-behaviors", "judge-comparison"}:
+        input_path = DATA_DIR / f"{dataset}.csv"
+    elif dataset == "jailbreak":
         input_path = DATA_DIR / "jailbreak_all.csv"
     else:
         input_path = DATA_DIR / f"{dataset}.csv"
@@ -192,6 +194,9 @@ def main():
             "toxigen",
             "hatecheck",
             "aegis2",
+            "benign-behaviors",
+            "harmful-behaviors",
+            "judge-comparison",
             "jailbreak",
             "all",
         ],
@@ -226,6 +231,9 @@ def main():
             "toxigen",
             "hatecheck",
             "aegis2",
+            "benign-behaviors",
+            "harmful-behaviors",
+            "judge-comparison",
             "jailbreak",
         ]
     else:
