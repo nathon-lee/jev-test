@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import pandas as pd
 from datasets import load_dataset
@@ -255,3 +256,92 @@ def prepare_aegis2() -> pd.DataFrame:
     result["label"] = result["label"].astype(int)
     assert result["label"].isin([0, 1]).all()
     return result
+
+# ============================================================
+# PII Masking benchmarks
+# ============================================================
+def _parse_privacy_mask(mask_value):
+    if mask_value is None or (isinstance(mask_value, float) and pd.isna(mask_value)):
+        return []
+
+    if isinstance(mask_value, list):
+        return mask_value
+
+    if isinstance(mask_value, str):
+        text = mask_value.strip()
+        if not text:
+            return []
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError:
+            return []
+        if isinstance(parsed, list):
+            return parsed
+        if isinstance(parsed, dict):
+            return [parsed]
+        return []
+
+    if isinstance(mask_value, dict):
+        return [mask_value]
+
+    return []
+
+
+def prepare_pii_masking(dataset_name: str, limit: int | None = None) -> pd.DataFrame:
+    """
+    Prepare AI4Privacy PII masking datasets into the benchmark CSV format.
+
+    Each row retains the original source text plus the ground-truth masked target
+    and a parsed privacy_mask list describing PII spans and labels.
+    """
+    print("\n" + "=" * 70)
+    print(f"Preparing {dataset_name}")
+    print("=" * 70)
+
+    ds = load_dataset(dataset_name, split="train")
+    df = ds.to_pandas()
+    if limit is not None:
+        df = df.head(limit)
+
+    required = {"source_text", "target_text", "privacy_mask"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(f"{dataset_name} missing columns: {missing}")
+
+    df = df.loc[:, ["source_text", "target_text", "privacy_mask"]].copy()
+    df["source_text"] = df["source_text"].fillna("").astype(str)
+    df["target_text"] = df["target_text"].fillna("").astype(str)
+    df["privacy_mask"] = df["privacy_mask"].map(_parse_privacy_mask)
+
+    # Keep only rows containing sensitive spans; this matches the intention of
+    # privacy-masking benchmarks and avoids empty negative examples.
+    df = df[df["privacy_mask"].map(bool)].copy()
+
+    df["dataset"] = dataset_name.replace("/", "_").replace("-", "_")
+    df["sample_id"] = range(len(df))
+    df["text"] = df["source_text"]
+    df["label"] = 1
+
+    result = df[
+        [
+            "dataset",
+            "sample_id",
+            "text",
+            "label",
+            "source_text",
+            "target_text",
+            "privacy_mask",
+        ]
+    ].copy()
+
+    assert result["sample_id"].is_unique
+    assert result["label"].isin([1]).all()
+    return result
+
+
+def prepare_pii_masking_300k(limit: int | None = None) -> pd.DataFrame:
+    return prepare_pii_masking("ai4privacy/pii-masking-300k", limit=limit)
+
+
+def prepare_pii_masking_43k(limit: int | None = None) -> pd.DataFrame:
+    return prepare_pii_masking("ai4privacy/pii-masking-43k", limit=limit)
