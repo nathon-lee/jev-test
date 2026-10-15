@@ -6,6 +6,8 @@ from benchmark.datasets import (
     prepare_detect_jailbreak,
     prepare_jailbreak_classification,
     prepare_jailbreakhub,
+    prepare_pii_masking_nano_1k,
+    prepare_pii_masking_mini_10k,
     save_dataset,
 )
 
@@ -53,6 +55,16 @@ def main():
         OUTPUT_DIR / f"{canonical_dataset_file_stem('jailbreakhub')}.csv",
     )
 
+    pii_nano_1k = prepare_pii_masking_nano_1k()
+    save_dataset(
+        pii_nano_1k,
+        OUTPUT_DIR / "pii_masking_nano_1k.csv",
+    )
 
+    pii_mini_10k = prepare_pii_masking_mini_10k()
+    save_dataset(
+        pii_mini_10k,
+        OUTPUT_DIR / "pii_masking_mini_10k.csv",
+    )
 if __name__ == "__main__":
     main()
