@@ -19,43 +19,41 @@ def _normalize_dataset_name(dataset: str) -> str:
     return dataset.strip().lower().replace("-", "_")
 
 
+def _provider_dirs(provider: str | None = None) -> list[Path]:
+    if provider:
+        return [OUTPUT_DIR / provider]
+
+    if OUTPUT_DIR.exists():
+        children = sorted(
+            [p for p in OUTPUT_DIR.iterdir() if p.is_dir()],
+            key=lambda p: (p.name != "typesafe.ai", p.name.lower()),
+        )
+        if children:
+            return children
+
+    return [OUTPUT_DIR]
+
+
 def _iter_candidate_paths(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None):
     dataset_stem = _normalize_dataset_name(dataset)
     candidates = []
 
-    if prompt_version and threshold is not None:
-        threshold_variant = f"{prompt_version}_t{float(threshold)}"
-        threshold_variant_1 = f"{prompt_version}_t{float(threshold):.1f}"
-        if provider:
-            provider_dir = OUTPUT_DIR / provider
-            if provider_dir.exists():
-                candidates.extend([
-                    provider_dir / f"{dataset}_{threshold_variant}.csv",
-                    provider_dir / f"{dataset}_{threshold_variant_1}.csv",
-                    provider_dir / f"{dataset_stem}_{threshold_variant}.csv",
-                    provider_dir / f"{dataset_stem}_{threshold_variant_1}.csv",
-                ])
-        candidates.extend([
-            OUTPUT_DIR / f"{dataset}_{threshold_variant}.csv",
-            OUTPUT_DIR / f"{dataset}_{threshold_variant_1}.csv",
-            OUTPUT_DIR / f"{dataset_stem}_{threshold_variant}.csv",
-            OUTPUT_DIR / f"{dataset_stem}_{threshold_variant_1}.csv",
-        ])
-
-    if provider:
-        provider_dir = OUTPUT_DIR / provider
-        if provider_dir.exists():
+    for base_dir in _provider_dirs(provider):
+        if prompt_version and threshold is not None:
+            threshold_variant = f"{prompt_version}_t{float(threshold)}"
+            threshold_variant_1 = f"{prompt_version}_t{float(threshold):.1f}"
             candidates.extend([
-                provider_dir / f"{dataset}.csv",
-                provider_dir / f"{dataset}_predictions.csv",
-                provider_dir / f"{dataset_stem}_predictions.csv",
+                base_dir / f"{dataset}_{threshold_variant}.csv",
+                base_dir / f"{dataset}_{threshold_variant_1}.csv",
+                base_dir / f"{dataset_stem}_{threshold_variant}.csv",
+                base_dir / f"{dataset_stem}_{threshold_variant_1}.csv",
             ])
 
-    candidates.extend([
-        OUTPUT_DIR / f"{dataset}.csv",
-        OUTPUT_DIR / f"{dataset}_predictions.csv",
-        OUTPUT_DIR / f"{dataset_stem}_predictions.csv",
-    ])
+        candidates.extend([
+            base_dir / f"{dataset}.csv",
+            base_dir / f"{dataset}_predictions.csv",
+            base_dir / f"{dataset_stem}_predictions.csv",
+        ])
 
     seen = set()
     for path in candidates:
