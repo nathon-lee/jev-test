@@ -410,7 +410,10 @@ def run_single_benchmark(
 
     rows = []
     prompt = prompt_for_dataset(dataset_name, prompt_version)
-    for _, row in df.iterrows():
+    total_rows = len(df)
+    print(f"Running benchmark for {provider_name} | {dataset_name} | {prompt_version} | threshold={threshold} | total_rows={total_rows}")
+
+    for idx, (_, row) in enumerate(df.iterrows()):
         sample_id = row.get("sample_id", len(rows))
         text = str(row.get("text", ""))
         label = int(row.get("label", 0))
@@ -451,6 +454,13 @@ def run_single_benchmark(
                     "provider": provider_name,
                     "error": repr(exc),
                 }
+            )
+
+        if (idx + 1) % 50 == 0 or idx == total_rows - 1:
+            print(
+                f"Progress: {idx + 1}/{total_rows} "
+                f"({(idx + 1) / total_rows:.1%}) | "
+                f"provider={provider_name} | dataset={dataset_name} | prompt={prompt_version}"
             )
     return rows
 
