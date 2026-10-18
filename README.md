@@ -93,7 +93,7 @@ MICROSOFT_DECISION_1_BASE_URL=https://your-internal-url/v1
 python scripts/prepare_datasets.py
 ```
 
-This prepares the local datasets and downloads the additional Hugging Face jailbreak datasets into `data/prepared/`.
+The first three datasets (`toxigen`, `hatecheck`, `aegis2`) are already included in the project or fetched via the standard Hugging Face dataset loaders in the repo. The remaining three datasets (`detect-jailbreak`, `jailbreak-classification`, `jailbreakhub`) are the ones that are pulled from Hugging Face.
 
 4. Run benchmark
 

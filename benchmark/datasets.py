@@ -64,21 +64,35 @@ def prepare_hf_binary_dataset(
             "non_jailbreak": 0,
             "not_jailbreak": 0,
             "no": 0,
+            "false": 0,
             "0": 0,
             "unsafe": 1,
             "harmful": 1,
             "jailbreak": 1,
             "yes": 1,
+            "true": 1,
             "malicious": 1,
             "1": 1,
         }
 
+    def normalize_label_value(value):
+        if pd.isna(value):
+            return None
+        if isinstance(value, (bool,)):
+            return int(value)
+        if isinstance(value, (int, float)):
+            if value in (0, 1):
+                return int(value)
+            return None
+        normalized = str(value).strip().lower().replace(" ", "_")
+        return normalized
+
     cleaned = df[[text_col, label_col]].copy()
     cleaned = cleaned.rename(columns={text_col: "text", label_col: "label_raw"})
     cleaned["text"] = cleaned["text"].astype(str)
-    cleaned["label_raw"] = cleaned["label_raw"].astype(str).str.strip().str.lower()
+    cleaned["label_raw"] = cleaned["label_raw"].map(normalize_label_value)
     cleaned["label"] = cleaned["label_raw"].map(
-        lambda v: label_map.get(v, label_map.get(v.replace(" ", "_"), -1))
+        lambda v: v if v in (0, 1) else label_map.get(v, -1)
     )
     cleaned = cleaned[cleaned["label"].isin([0, 1])].copy()
     cleaned["sample_id"] = range(len(cleaned))
@@ -331,11 +345,13 @@ def prepare_detect_jailbreak() -> pd.DataFrame:
             "non_jailbreak": 0,
             "not_jailbreak": 0,
             "no": 0,
+            "false": 0,
             "0": 0,
             "unsafe": 1,
             "harmful": 1,
             "jailbreak": 1,
             "yes": 1,
+            "true": 1,
             "malicious": 1,
             "1": 1,
         },
@@ -347,17 +363,19 @@ def prepare_jailbreak_classification() -> pd.DataFrame:
         repo_name="jackhhao/jailbreak-classification",
         dataset_name="jailbreak-classification",
         text_candidates=["text", "prompt", "instruction", "content"],
-        label_candidates=["label", "classification", "target", "is_jailbreak"],
+        label_candidates=["label", "classification", "target", "type", "is_jailbreak"],
         label_map={
             "safe": 0,
             "benign": 0,
             "non_jailbreak": 0,
             "not_jailbreak": 0,
+            "false": 0,
             "0": 0,
             "unsafe": 1,
             "harmful": 1,
             "jailbreak": 1,
             "jailbreak_prompt": 1,
+            "true": 1,
             "1": 1,
         },
     )
