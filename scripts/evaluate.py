@@ -218,6 +218,37 @@ def evaluate(dataset: str, provider: str | None = None, prompt_version: str | No
         print(
             f"P99 : {np.percentile(latency, 99):.2f} ms"
         )
+def _classification_summary_from_frame(df: pd.DataFrame) -> dict[str, float]:
+    if "error" in df.columns:
+        valid = df[df["error"].fillna("") == ""].copy()
+    else:
+        valid = df.copy()
+    if valid.empty:
+        return {}
+
+    y_true = valid["label"].astype(int) if "label" in valid.columns else pd.Series([1] * len(valid), index=valid.index)
+    y_pred = valid["prediction"].astype(int) if "prediction" in valid.columns else y_true.copy()
+    y_score = valid["score"].astype(float) if "score" in valid.columns else y_pred.astype(float)
+
+    accuracy = accuracy_score(y_true, y_pred)
+    precision = precision_score(y_true, y_pred, zero_division=0)
+    recall = recall_score(y_true, y_pred, zero_division=0)
+    f1 = f1_score(y_true, y_pred, zero_division=0)
+
+    try:
+        auroc = roc_auc_score(y_true, y_score)
+    except ValueError:
+        auroc = float("nan")
+
+    return {
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "auroc": auroc,
+    }
+
+
 def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None, debug: bool = False):
     candidate_paths = list(_iter_candidate_paths(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold))
     if debug:
@@ -233,6 +264,13 @@ def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str 
     print(dataset.upper())
     print("=" * 70)
     print("Total rows:", len(df))
+
+    standard_metrics = _classification_summary_from_frame(df)
+    if standard_metrics:
+        print("\nClassification metrics")
+        print("-------------------------")
+        for name, value in standard_metrics.items():
+            print(f"{name}: {value:.4f}")
 
     rows = []
     for _, row in df.iterrows():
@@ -258,7 +296,9 @@ def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str 
         })
 
     metrics_df = pd.DataFrame(rows)
-    summary = metrics_df.mean(numeric_only=True)
+    summary = metrics_df.drop(columns=["sample_id"], errors="ignore").mean(numeric_only=True)
+    print("\nPII privacy metrics")
+    print("-------------------------")
     for name, value in summary.items():
         print(f"{name}: {value:.4f}")
 

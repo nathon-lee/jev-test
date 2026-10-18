@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from scripts.evaluate import evaluate, resolve_prediction_path
+from scripts.evaluate import evaluate, evaluate_pii, resolve_prediction_path
 
 
 def test_resolve_prediction_path_prefers_provider_threshold_file(tmp_path, monkeypatch):
@@ -90,3 +90,40 @@ def test_evaluate_handles_missing_latency_column(tmp_path, monkeypatch, capsys):
 
     captured = capsys.readouterr()
     assert "Latency unavailable" in captured.out
+
+
+def test_evaluate_pii_prints_classification_and_privacy_metrics(tmp_path, monkeypatch, capsys):
+    outputs_dir = tmp_path / "outputs"
+    provider_dir = outputs_dir / "typesafe.ai"
+    provider_dir.mkdir(parents=True)
+
+    df = pd.DataFrame(
+        {
+            "dataset": ["pii_masking_nano_1k"],
+            "sample_id": [0],
+            "text": ["Alice email alice@example.com"],
+            "label": [1],
+            "score": [0.9],
+            "prediction": [1],
+            "error": [""],
+            "source_text": ["Alice email alice@example.com"],
+            "target_text": ["Alice email [EMAIL]"],
+            "privacy_mask": ["[{\"value\":\"alice@example.com\"}]"],
+        }
+    )
+    path = provider_dir / "pii_masking_nano_1k_v1_predictions.csv"
+    df.to_csv(path, index=False)
+
+    monkeypatch.chdir(tmp_path)
+    evaluate_pii(
+        "pii_masking_nano_1k",
+        provider="typesafe.ai",
+        prompt_version="v1",
+        debug=False,
+    )
+
+    captured = capsys.readouterr()
+    assert "Classification metrics" in captured.out
+    assert "accuracy" in captured.out.lower()
+    assert "PII privacy metrics" in captured.out
+    assert "masking_success_rate" in captured.out
