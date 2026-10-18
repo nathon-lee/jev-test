@@ -481,9 +481,13 @@ def prepare_pii_masking(dataset_name: str, limit: int | None = None) -> pd.DataF
     df["target_text"] = df["target_text"].fillna("").astype(str)
     df["privacy_mask"] = df["privacy_mask"].map(_parse_privacy_mask)
 
-    # Keep only rows containing sensitive spans; this matches the intention of
-    # privacy-masking benchmarks and avoids empty negative examples.
-    df = df[df["privacy_mask"].map(bool)].copy()
+    # Do not discard rows merely because the mask list is empty. The AI4Privacy
+    # dataset may legitimately contain rows with empty masks, and a benchmark
+    # should preserve the full dataset instead of silently turning it into a
+    # zero-row input set.
+    df = df[
+        df["source_text"].str.len().gt(0) & df["target_text"].str.len().gt(0)
+    ].copy()
 
     df["dataset"] = dataset_name.replace("/", "_").replace("-", "_")
     df["sample_id"] = range(len(df))
