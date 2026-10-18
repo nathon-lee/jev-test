@@ -189,6 +189,9 @@ def main():
             "toxigen",
             "hatecheck",
             "aegis2",
+            "detect-jailbreak",
+            "jailbreak-classification",
+            "jailbreakhub",
             "all",
         ],
         default="all",
@@ -222,6 +225,9 @@ def main():
             "toxigen",
             "hatecheck",
             "aegis2",
+            "detect-jailbreak",
+            "jailbreak-classification",
+            "jailbreakhub",
         ]
     else:
         datasets = [
