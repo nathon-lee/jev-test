@@ -15,6 +15,8 @@ SUPPORTED_DATASETS = [
     "detect-jailbreak",
     "jailbreak-classification",
     "jailbreakhub",
+    "pii_masking_nano_1k",
+    "pii_masking_mini_10k",
 ]
 
 
