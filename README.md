@@ -42,6 +42,18 @@ Then install dependencies:
 pip install -r requirements.txt
 ```
 
+Set the project root on `PYTHONPATH` so the package imports work when you run scripts directly:
+
+```bash
+export PYTHONPATH=$PWD
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:PYTHONPATH = "$PWD"
+```
+
 ## Quick start
 
 1. Copy environment template
@@ -162,7 +174,10 @@ python scripts/evaluate_model_suite.py --provider typesafe.ai
 
 ## Important notes
 
-- `PYTHONPATH` is automatically set by `scripts/run_case.py`
+- If you run scripts directly with `python scripts/...`, set `PYTHONPATH` in the current shell:
+  - Linux / macOS: `export PYTHONPATH=$PWD`
+  - PowerShell: `$env:PYTHONPATH = "$PWD"`
+- `scripts/run_case.py` also sets this automatically for the compatibility runner.
 - The compatibility runner copies results like:
   - `outputs/toxigen_v1_predictions.csv` -> `outputs/toxigen_predictions.csv`
 - This is useful because the older evaluator expects the shorter filename.
