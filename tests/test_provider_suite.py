@@ -67,9 +67,16 @@ def test_fastino_uses_systemone_endpoint(monkeypatch):
 
             def json(self):
                 return {
+                    "model": "glide_v2",
                     "answers": {
-                        "score": {"score": 0.91},
-                    }
+                        "score": {
+                            "type": "noul",
+                            "noul": 0.06008665017400762,
+                            "confidence": 0.8798266996519848,
+                        }
+                    },
+                    "usage": {"input_tokens": 385, "output_tokens": 0},
+                    "token_usage": 422,
                 }
 
         return DummyResponse()
@@ -84,7 +91,7 @@ def test_fastino_uses_systemone_endpoint(monkeypatch):
         base_url="https://api.fastino.ai/v1",
     )
 
-    assert score == 0.91
+    assert score == 0.06008665017400762
     assert captured["url"].endswith("/v1/systemone")
     assert "Authorization" in captured["headers"]
     assert "state" in captured["json"]

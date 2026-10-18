@@ -221,6 +221,7 @@ def _parse_score_from_value(value: Any) -> float | None:
             "probability",
             "confidence",
             "value",
+            "noul",
             "unsafe_score",
             "risk_score",
             "output",
@@ -236,25 +237,26 @@ def _parse_score_from_value(value: Any) -> float | None:
 
 def _extract_score(payload: Any) -> float:
     if isinstance(payload, dict):
-        for key in ("score", "probability", "confidence", "value"):
+        for key in ("score", "probability", "confidence", "value", "noul"):
             if key in payload:
                 parsed = _parse_score_from_value(payload[key])
                 if parsed is not None:
                     return parsed
-        for key in ("choices", "message", "content", "output", "result"):
+        for key in ("answers", "choices", "message", "content", "output", "result", "data"):
             if key in payload:
                 parsed = _extract_score(payload[key])
                 if parsed is not None:
                     return parsed
-        if "data" in payload:
-            parsed = _extract_score(payload["data"])
+        for nested in payload.values():
+            parsed = _extract_score(nested) if isinstance(nested, (dict, list)) else _parse_score_from_value(nested)
             if parsed is not None:
                 return parsed
-    if isinstance(payload, list):
+    elif isinstance(payload, list):
         for item in payload:
             parsed = _extract_score(item)
             if parsed is not None:
                 return parsed
+
     parsed = _parse_score_from_value(payload)
     if parsed is not None:
         return parsed
