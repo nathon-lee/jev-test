@@ -1,0 +1,43 @@
+from benchmark.provider_suite import (
+    DEFAULT_THRESHOLDS,
+    available_datasets,
+    prompt_for_dataset,
+    resolve_provider,
+    normalize_provider_name,
+)
+
+
+def test_provider_aliases_normalize():
+    assert normalize_provider_name("typesafe") == "typesafe.ai"
+    assert normalize_provider_name("fastino") == "fastino.ai"
+    assert normalize_provider_name("laya") == "laya-ai.com"
+    assert normalize_provider_name("galileo") == "galileo.ai"
+    assert normalize_provider_name("microsoft") == "microsoft-decision-1"
+
+
+def test_default_thresholds_exist():
+    assert DEFAULT_THRESHOLDS == [0.5, 0.6, 0.7, 0.8]
+
+
+def test_prompt_versions_are_defined():
+    assert "Does this text express toxicity" in prompt_for_dataset("toxigen", "v2")
+    assert "Is this text hateful?" in prompt_for_dataset("hatecheck", "v1")
+    assert "Is this text unsafe?" in prompt_for_dataset("aegis2", "v1")
+
+
+def test_dataset_names_are_available():
+    datasets = available_datasets()
+    assert set(datasets) >= {
+        "toxigen",
+        "hatecheck",
+        "aegis2",
+        "detect-jailbreak",
+        "jailbreak-classification",
+        "jailbreakhub",
+    }
+
+
+def test_provider_config_is_resolved():
+    provider = resolve_provider("typesafe")
+    assert provider["kind"] == "api_key"
+    assert provider["api_key_env"] == "TYPESAFE_API_KEY"
