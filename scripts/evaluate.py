@@ -23,28 +23,39 @@ def _iter_candidate_paths(dataset: str, provider: str | None = None, prompt_vers
     dataset_stem = _normalize_dataset_name(dataset)
     candidates = []
 
+    if prompt_version and threshold is not None:
+        threshold_variant = f"{prompt_version}_t{float(threshold)}"
+        threshold_variant_1 = f"{prompt_version}_t{float(threshold):.1f}"
+        if provider:
+            provider_dir = OUTPUT_DIR / provider
+            if provider_dir.exists():
+                candidates.extend([
+                    provider_dir / f"{dataset}_{threshold_variant}.csv",
+                    provider_dir / f"{dataset}_{threshold_variant_1}.csv",
+                    provider_dir / f"{dataset_stem}_{threshold_variant}.csv",
+                    provider_dir / f"{dataset_stem}_{threshold_variant_1}.csv",
+                ])
+        candidates.extend([
+            OUTPUT_DIR / f"{dataset}_{threshold_variant}.csv",
+            OUTPUT_DIR / f"{dataset}_{threshold_variant_1}.csv",
+            OUTPUT_DIR / f"{dataset_stem}_{threshold_variant}.csv",
+            OUTPUT_DIR / f"{dataset_stem}_{threshold_variant_1}.csv",
+        ])
+
     if provider:
         provider_dir = OUTPUT_DIR / provider
         if provider_dir.exists():
-            candidates.append(provider_dir / f"{dataset}.csv")
-            candidates.append(provider_dir / f"{dataset}_predictions.csv")
-            if prompt_version and threshold is not None:
-                candidates.append(provider_dir / f"{dataset}_{prompt_version}_t{threshold}.csv")
-                candidates.append(provider_dir / f"{dataset}_{prompt_version}_t{float(threshold):.1f}.csv")
+            candidates.extend([
+                provider_dir / f"{dataset}.csv",
+                provider_dir / f"{dataset}_predictions.csv",
+                provider_dir / f"{dataset_stem}_predictions.csv",
+            ])
 
     candidates.extend([
         OUTPUT_DIR / f"{dataset}.csv",
         OUTPUT_DIR / f"{dataset}_predictions.csv",
         OUTPUT_DIR / f"{dataset_stem}_predictions.csv",
     ])
-
-    if prompt_version and threshold is not None:
-        candidates.extend([
-            OUTPUT_DIR / f"{dataset}_{prompt_version}_t{threshold}.csv",
-            OUTPUT_DIR / f"{dataset}_{prompt_version}_t{float(threshold):.1f}.csv",
-            OUTPUT_DIR / f"{dataset_stem}_{prompt_version}_t{threshold}.csv",
-            OUTPUT_DIR / f"{dataset_stem}_{prompt_version}_t{float(threshold):.1f}.csv",
-        ])
 
     seen = set()
     for path in candidates:
@@ -55,25 +66,21 @@ def _iter_candidate_paths(dataset: str, provider: str | None = None, prompt_vers
 
 def resolve_prediction_path(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None) -> Path:
     dataset_name = dataset.strip()
+
     if prompt_version and threshold is not None:
         for path in _iter_candidate_paths(dataset_name, provider=provider, prompt_version=prompt_version, threshold=threshold):
             if path.exists():
                 return path
 
+        raise FileNotFoundError(
+            f"No threshold-specific prediction file found for dataset '{dataset}' "
+            f"with prompt_version={prompt_version} and threshold={threshold}. "
+            f"Expected files like '{dataset}_{prompt_version}_t{float(threshold)}.csv'."
+        )
+
     for path in _iter_candidate_paths(dataset_name, provider=provider, prompt_version=prompt_version, threshold=threshold):
         if path.exists():
             return path
-
-    if prompt_version and threshold is not None:
-        searched = []
-        for root in OUTPUT_DIR.glob("**/*.csv"):
-            name = root.name
-            if dataset_name in name and f"_{prompt_version}_t{threshold}" in name:
-                return root
-            if _normalize_dataset_name(dataset_name) in _normalize_dataset_name(name) and f"_{prompt_version}_t{threshold}" in name:
-                searched.append(root)
-        if searched:
-            return searched[0]
 
     raise FileNotFoundError(
         f"No prediction file found for dataset '{dataset}'"
