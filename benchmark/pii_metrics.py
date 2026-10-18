@@ -46,7 +46,31 @@ def compute_pii_metrics(
     target_text: str,
     privacy_mask: Any,
 ):
-    """Compute PII privacy metrics with realistic masking semantics."""
+    """Compute PII privacy metrics with realistic masking semantics.
+
+    Why not use Accuracy / Precision / Recall / AUROC here?
+    ------------------------------------------------------
+    The PII dataset is constructed as a masking task, not a conventional binary
+    classification task. Each row is effectively a positive case (contains
+    sensitive values to be masked), so a standard label-only metric is not a
+    meaningful performance signal:
+
+      - all labels may be 1, causing class imbalance and single-class warnings
+      - AUROC becomes undefined when y_true has only one class
+      - a model can score "high" on accuracy simply because every sample is
+        treated as positive, even if it fails to redact the actual sensitive
+        spans
+
+    For PII evaluation, what matters is whether the model actually hides the
+    sensitive values, whether it leaks them, whether it over-masks unrelated
+    text, and whether it preserves the non-sensitive content. These are the
+    reasons we report leakage, masking success, over-masking, and text
+    preservation instead of binary-classification metrics.
+
+    We additionally report span-level precision/recall/F1 because those are the
+    closest analogues to entity-level masking quality: they tell us whether the
+    model redacted the right sensitive spans without introducing extra masking.
+    """
     source = source_text or ""
     predicted = predicted_text or ""
     target = target_text or ""
@@ -58,6 +82,9 @@ def compute_pii_metrics(
             "masking_success_rate": 1.0,
             "over_masking_rate": 0.0,
             "text_preservation": 1.0,
+            "span_precision": 1.0,
+            "span_recall": 1.0,
+            "span_f1": 1.0,
         }
 
     leaked = 0
@@ -84,9 +111,24 @@ def compute_pii_metrics(
     else:
         text_preservation = SequenceMatcher(None, source_clean, predicted_clean).ratio()
 
+    # Span-level metrics reflect the entity-masking task more faithfully than
+    # binary classification metrics. We treat each sensitive value as a discrete
+    # span to mask. Precision answers: "of the spans we masked, how many were
+    # actually sensitive?" Recall answers: "of all sensitive spans, how many did
+    # we successfully mask?" F1 balances the two.
+    true_positives = successfully_masked
+    false_negatives = leaked
+    false_positives = max(predicted_placeholder_count - target_placeholder_count, 0)
+    span_precision = true_positives / max(true_positives + false_positives, 1)
+    span_recall = true_positives / max(len(sensitive_values), 1)
+    span_f1 = 2 * span_precision * span_recall / max(span_precision + span_recall, 1e-9)
+
     return {
         "pii_leakage_rate": pii_leakage_rate,
         "masking_success_rate": masking_success_rate,
         "over_masking_rate": over_masking_rate,
         "text_preservation": text_preservation,
+        "span_precision": span_precision,
+        "span_recall": span_recall,
+        "span_f1": span_f1,
     }

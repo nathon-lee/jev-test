@@ -127,3 +127,5 @@ def test_evaluate_pii_prints_classification_and_privacy_metrics(tmp_path, monkey
     assert "accuracy" in captured.out.lower()
     assert "PII privacy metrics" in captured.out
     assert "masking_success_rate" in captured.out
+    assert "span_precision" in captured.out
+    assert "span_f1" in captured.out

@@ -297,10 +297,23 @@ def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str 
 
     metrics_df = pd.DataFrame(rows)
     summary = metrics_df.drop(columns=["sample_id"], errors="ignore").mean(numeric_only=True)
+    primary_order = [
+        "pii_leakage_rate",
+        "masking_success_rate",
+        "span_precision",
+        "span_recall",
+        "span_f1",
+        "over_masking_rate",
+        "text_preservation",
+    ]
     print("\nPII privacy metrics")
     print("-------------------------")
+    for name in primary_order:
+        if name in summary:
+            print(f"{name}: {summary[name]:.4f}")
     for name, value in summary.items():
-        print(f"{name}: {value:.4f}")
+        if name not in primary_order:
+            print(f"{name}: {value:.4f}")
 
 
 def main():
