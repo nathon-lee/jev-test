@@ -104,10 +104,20 @@ These are loaded from `ai4privacy/pii-masking-nano-1k` and `ai4privacy/pii-maski
 
 4. Run benchmark
 
-Single dataset, v1:
+Bare benchmark runner (single dataset, direct model inference):
+
+```bash
+python scripts/run_benchmark.py --dataset toxigen --prompt-version v1
+python scripts/run_benchmark.py --dataset pii_masking_nano_1k --prompt-version v1
+```
+
+Compatibility runner (single case + optional evaluation):
 
 ```bash
 python scripts/run_case.py --dataset toxigen --prompt-version v1
+python scripts/run_case.py --dataset pii_masking_nano_1k --prompt-version v1
+python scripts/run_case.py --dataset toxigen --prompt-version v1 --evaluate
+python scripts/run_case.py --dataset pii_masking_nano_1k --prompt-version v1 --evaluate
 ```
 
 Single dataset, v2:
@@ -141,6 +151,13 @@ Only one dataset:
 python scripts/run_model_suite.py --providers all --datasets toxigen --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8
 ```
 
+PII-specific multi-provider sweep:
+
+```bash
+python scripts/run_model_suite.py --providers typesafe.ai --datasets pii_masking_nano_1k --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8
+python scripts/run_model_suite.py --providers typesafe.ai --datasets pii_masking_mini_10k --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8
+```
+
 ## PII dataset quick start
 
 Prepare the PII datasets first:
@@ -149,10 +166,12 @@ Prepare the PII datasets first:
 python scripts/prepare_datasets.py
 ```
 
-Then evaluate them directly with the evaluator:
+Then generate predictions and evaluate them:
 
 ```bash
-python scripts/evaluate.py --dataset pii_masking_nano_1k
+python scripts/run_benchmark.py --dataset pii_masking_nano_1k --prompt-version v1
+python scripts/run_benchmark.py --dataset pii_masking_mini_10k --prompt-version v2
+
 python scripts/evaluate.py --dataset pii_masking_nano_1k --provider typesafe.ai --debug-path
 python scripts/evaluate.py --dataset pii_masking_mini_10k --provider typesafe.ai
 ```
@@ -165,6 +184,7 @@ The project also includes a simplified runner that handles the repeated setup st
 
 ```bash
 python scripts/run_case.py --dataset toxigen --prompt-version v1 --evaluate
+python scripts/run_case.py --dataset pii_masking_nano_1k --prompt-version v1 --evaluate
 ```
 
 This automatically does the equivalent of:
@@ -177,6 +197,7 @@ On PowerShell:
 
 ```powershell
 .\scripts\run_case.ps1 -Dataset toxigen -PromptVersion v1 -Evaluate
+.\scripts\run_case.ps1 -Dataset pii_masking_nano_1k -PromptVersion v1 -Evaluate
 ```
 
 ## Run evaluation manually
