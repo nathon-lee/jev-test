@@ -20,6 +20,28 @@ Supported datasets:
 - jailbreak-classification
 - jailbreakhub
 
+## Create a virtual environment
+
+On Linux / macOS:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+On Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Then install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Quick start
 
 1. Copy environment template
