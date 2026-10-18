@@ -11,12 +11,80 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 from benchmark.pii_metrics import compute_pii_metrics
+
 OUTPUT_DIR = Path("outputs")
-def evaluate(dataset: str):
-    path = (
-        OUTPUT_DIR /
-        f"{dataset}_predictions.csv"
+
+
+def _normalize_dataset_name(dataset: str) -> str:
+    return dataset.strip().lower().replace("-", "_")
+
+
+def _iter_candidate_paths(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None):
+    dataset_stem = _normalize_dataset_name(dataset)
+    candidates = []
+
+    if provider:
+        provider_dir = OUTPUT_DIR / provider
+        if provider_dir.exists():
+            candidates.append(provider_dir / f"{dataset}.csv")
+            candidates.append(provider_dir / f"{dataset}_predictions.csv")
+            if prompt_version and threshold is not None:
+                candidates.append(provider_dir / f"{dataset}_{prompt_version}_t{threshold}.csv")
+                candidates.append(provider_dir / f"{dataset}_{prompt_version}_t{float(threshold):.1f}.csv")
+
+    candidates.extend([
+        OUTPUT_DIR / f"{dataset}.csv",
+        OUTPUT_DIR / f"{dataset}_predictions.csv",
+        OUTPUT_DIR / f"{dataset_stem}_predictions.csv",
+    ])
+
+    if prompt_version and threshold is not None:
+        candidates.extend([
+            OUTPUT_DIR / f"{dataset}_{prompt_version}_t{threshold}.csv",
+            OUTPUT_DIR / f"{dataset}_{prompt_version}_t{float(threshold):.1f}.csv",
+            OUTPUT_DIR / f"{dataset_stem}_{prompt_version}_t{threshold}.csv",
+            OUTPUT_DIR / f"{dataset_stem}_{prompt_version}_t{float(threshold):.1f}.csv",
+        ])
+
+    seen = set()
+    for path in candidates:
+        if path not in seen:
+            seen.add(path)
+            yield path
+
+
+def resolve_prediction_path(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None) -> Path:
+    dataset_name = dataset.strip()
+    if prompt_version and threshold is not None:
+        for path in _iter_candidate_paths(dataset_name, provider=provider, prompt_version=prompt_version, threshold=threshold):
+            if path.exists():
+                return path
+
+    for path in _iter_candidate_paths(dataset_name, provider=provider, prompt_version=prompt_version, threshold=threshold):
+        if path.exists():
+            return path
+
+    if prompt_version and threshold is not None:
+        searched = []
+        for root in OUTPUT_DIR.glob("**/*.csv"):
+            name = root.name
+            if dataset_name in name and f"_{prompt_version}_t{threshold}" in name:
+                return root
+            if _normalize_dataset_name(dataset_name) in _normalize_dataset_name(name) and f"_{prompt_version}_t{threshold}" in name:
+                searched.append(root)
+        if searched:
+            return searched[0]
+
+    raise FileNotFoundError(
+        f"No prediction file found for dataset '{dataset}'"
+        f"{f' provider={provider}' if provider else ''}"
+        f"{f' prompt_version={prompt_version}' if prompt_version else ''}"
+        f"{f' threshold={threshold}' if threshold is not None else ''}."
     )
+
+
+def evaluate(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None):
+    path = resolve_prediction_path(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold)
     df = pd.read_csv(path)
     print("\n" + "=" * 70)
     print(dataset.upper())
@@ -110,8 +178,8 @@ def evaluate(dataset: str):
     print(
         f"P99 : {np.percentile(latency, 99):.2f} ms"
     )
-def evaluate_pii(dataset: str):
-    path = OUTPUT_DIR / f"{dataset}_predictions.csv"
+def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None):
+    path = resolve_prediction_path(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold)
     df = pd.read_csv(path)
     print("\n" + "=" * 70)
     print(dataset.upper())
@@ -149,15 +217,18 @@ def evaluate_pii(dataset: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--dataset",
-        required=True,
-    )
+    parser.add_argument("--dataset", required=True)
+    parser.add_argument("--provider", default=None)
+    parser.add_argument("--prompt-version", default=None)
+    parser.add_argument("--threshold", type=float, default=None)
     args = parser.parse_args()
+
     if "pii" in args.dataset.lower():
-        evaluate_pii(args.dataset)
+        evaluate_pii(args.dataset, provider=args.provider, prompt_version=args.prompt_version, threshold=args.threshold)
     else:
-        evaluate(args.dataset)
+        evaluate(args.dataset, provider=args.provider, prompt_version=args.prompt_version, threshold=args.threshold)
+
+
 if __name__ == "__main__":
     main()
 
