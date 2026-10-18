@@ -9,6 +9,17 @@ import time
 
 DATA_DIR = Path("data/prepared")
 OUTPUT_DIR = Path("outputs")
+
+
+def canonical_dataset_file_stem(dataset_name: str) -> str:
+    return dataset_name.strip().lower().replace("-", "_")
+
+
+def resolve_dataset_input_path(dataset: str) -> Path:
+    file_stem = canonical_dataset_file_stem(dataset)
+    return DATA_DIR / f"{file_stem}.csv"
+
+
 def load_existing(output_path: Path):
     if not output_path.exists():
         return pd.DataFrame()
@@ -60,7 +71,7 @@ def run_dataset(
     limit: int | None = None,
     prompt_version: str = "v1",
 ):
-    input_path = DATA_DIR / f"{dataset}.csv"
+    input_path = resolve_dataset_input_path(dataset)
     output_path = (
         OUTPUT_DIR /
         f"{dataset}_{prompt_version}_predictions.csv"
