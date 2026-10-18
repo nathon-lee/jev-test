@@ -34,7 +34,14 @@ def test_dataset_names_are_available():
         "detect-jailbreak",
         "jailbreak-classification",
         "jailbreakhub",
+        "pii_masking_nano_1k",
+        "pii_masking_mini_10k",
     }
+
+
+def test_pii_prompt_versions_are_defined():
+    assert "pii" in prompt_for_dataset("pii_masking_nano_1k", "v1").lower()
+    assert "pii" in prompt_for_dataset("pii_masking_mini_10k", "v2").lower()
 
 
 def test_provider_config_is_resolved():

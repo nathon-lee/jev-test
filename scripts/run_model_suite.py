@@ -35,6 +35,12 @@ def dataset_list(raw_value: str | None) -> list[str]:
         "guardrailsai/detect-jailbreak": "detect-jailbreak",
         "jackhhao-jailbreak-classification": "jailbreak-classification",
         "walledai-jailbreakhub": "jailbreakhub",
+        "pii_masking_nano_1k": "pii_masking_nano_1k",
+        "pii-masking-nano-1k": "pii_masking_nano_1k",
+        "ai4privacy/pii-masking-nano-1k": "pii_masking_nano_1k",
+        "pii_masking_mini_10k": "pii_masking_mini_10k",
+        "pii-masking-mini-10k": "pii_masking_mini_10k",
+        "ai4privacy/pii-masking-mini-10k": "pii_masking_mini_10k",
     }
     names = []
     for part in raw_value.split(","):

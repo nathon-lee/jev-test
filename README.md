@@ -19,6 +19,8 @@ Supported datasets:
 - detect-jailbreak
 - jailbreak-classification
 - jailbreakhub
+- pii_masking_nano_1k
+- pii_masking_mini_10k
 
 ## Create a virtual environment
 
@@ -93,7 +95,12 @@ MICROSOFT_DECISION_1_BASE_URL=https://your-internal-url/v1
 python scripts/prepare_datasets.py
 ```
 
-The first three datasets (`toxigen`, `hatecheck`, `aegis2`) are already included in the project or fetched via the standard Hugging Face dataset loaders in the repo. The remaining three datasets (`detect-jailbreak`, `jailbreak-classification`, `jailbreakhub`) are the ones that are pulled from Hugging Face.
+The first three datasets (`toxigen`, `hatecheck`, `aegis2`) are already included in the project or fetched via the standard Hugging Face dataset loaders in the repo. The remaining three datasets (`detect-jailbreak`, `jailbreak-classification`, `jailbreakhub`) are the ones that are pulled from Hugging Face. The PII datasets are also prepared here:
+
+- `pii_masking_nano_1k`
+- `pii_masking_mini_10k`
+
+These are loaded from `ai4privacy/pii-masking-nano-1k` and `ai4privacy/pii-masking-mini-10k`.
 
 4. Run benchmark
 
@@ -133,6 +140,24 @@ Only one dataset:
 ```bash
 python scripts/run_model_suite.py --providers all --datasets toxigen --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8
 ```
+
+## PII dataset quick start
+
+Prepare the PII datasets first:
+
+```bash
+python scripts/prepare_datasets.py
+```
+
+Then evaluate them directly with the evaluator:
+
+```bash
+python scripts/evaluate.py --dataset pii_masking_nano_1k
+python scripts/evaluate.py --dataset pii_masking_nano_1k --provider typesafe.ai --debug-path
+python scripts/evaluate.py --dataset pii_masking_mini_10k --provider typesafe.ai
+```
+
+The PII-specific evaluation path is triggered automatically whenever the dataset name contains `pii`.
 
 ## Compatibility runner
 
