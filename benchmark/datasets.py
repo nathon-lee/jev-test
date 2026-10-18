@@ -441,6 +441,10 @@ def prepare_pii_masking(dataset_name: str, limit: int | None = None) -> pd.DataF
 
     Each row retains the original source text plus the ground-truth masked target
     and a parsed privacy_mask list describing PII spans and labels.
+
+    Some AI4Privacy releases use alternate column names such as `text`/
+    `masked_text`/`entities`; accept those variants and normalize them to the
+    canonical benchmark schema expected by the evaluator.
     """
     print("\n" + "=" * 70)
     print(f"Preparing {dataset_name}")
@@ -451,12 +455,28 @@ def prepare_pii_masking(dataset_name: str, limit: int | None = None) -> pd.DataF
     if limit is not None:
         df = df.head(limit)
 
-    required = {"source_text", "target_text", "privacy_mask"}
-    missing = required - set(df.columns)
-    if missing:
-        raise ValueError(f"{dataset_name} missing columns: {missing}")
+    source_candidates = ["source_text", "text", "input_text", "original_text"]
+    target_candidates = ["target_text", "masked_text", "text_masked", "output_text", "masked"]
+    mask_candidates = ["privacy_mask", "pii_mask", "entities", "annotations", "spans"]
 
-    df = df.loc[:, ["source_text", "target_text", "privacy_mask"]].copy()
+    source_col = next((c for c in source_candidates if c in df.columns), None)
+    target_col = next((c for c in target_candidates if c in df.columns), None)
+    mask_col = next((c for c in mask_candidates if c in df.columns), None)
+
+    if source_col is None or target_col is None or mask_col is None:
+        raise ValueError(
+            f"{dataset_name} missing required PII columns. "
+            f"Expected one of {source_candidates} for source, one of {target_candidates} for target, "
+            f"and one of {mask_candidates} for privacy mask. "
+            f"Actual columns: {list(df.columns)}"
+        )
+
+    df = df.loc[:, [source_col, target_col, mask_col]].copy()
+    df = df.rename(columns={
+        source_col: "source_text",
+        target_col: "target_text",
+        mask_col: "privacy_mask",
+    })
     df["source_text"] = df["source_text"].fillna("").astype(str)
     df["target_text"] = df["target_text"].fillna("").astype(str)
     df["privacy_mask"] = df["privacy_mask"].map(_parse_privacy_mask)
