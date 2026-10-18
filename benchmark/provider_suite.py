@@ -411,6 +411,7 @@ def run_single_benchmark(
     rows = []
     prompt = prompt_for_dataset(dataset_name, prompt_version)
     total_rows = len(df)
+    start_time = __import__("time").perf_counter()
     print(f"Running benchmark for {provider_name} | {dataset_name} | {prompt_version} | threshold={threshold} | total_rows={total_rows}")
 
     for idx, (_, row) in enumerate(df.iterrows()):
@@ -457,10 +458,12 @@ def run_single_benchmark(
             )
 
         if (idx + 1) % 50 == 0 or idx == total_rows - 1:
+            elapsed = __import__("time").perf_counter() - start_time
             print(
                 f"Progress: {idx + 1}/{total_rows} "
                 f"({(idx + 1) / total_rows:.1%}) | "
-                f"provider={provider_name} | dataset={dataset_name} | prompt={prompt_version}"
+                f"provider={provider_name} | dataset={dataset_name} | prompt={prompt_version} | "
+                f"elapsed={elapsed:.1f}s"
             )
     return rows
 
