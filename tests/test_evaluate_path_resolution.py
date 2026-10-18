@@ -26,6 +26,41 @@ def test_resolve_prediction_path_prefers_provider_threshold_file(tmp_path, monke
     assert result == target
 
 
+def test_resolve_prediction_path_uses_prompt_version_without_threshold(tmp_path, monkeypatch):
+    outputs_dir = tmp_path / "outputs"
+    provider_dir = outputs_dir / "typesafe.ai"
+    provider_dir.mkdir(parents=True)
+
+    target = provider_dir / "pii_masking_nano_1k_v1_predictions.csv"
+    target.write_text("placeholder")
+
+    monkeypatch.chdir(tmp_path)
+    result = resolve_prediction_path(
+        "pii_masking_nano_1k",
+        provider="typesafe.ai",
+        prompt_version="v1",
+    )
+
+    assert result == target
+
+
+def test_resolve_prediction_path_falls_back_to_root_outputs_for_provider(tmp_path, monkeypatch):
+    outputs_dir = tmp_path / "outputs"
+    outputs_dir.mkdir(parents=True)
+
+    target = outputs_dir / "pii_masking_nano_1k_v1_predictions.csv"
+    target.write_text("placeholder")
+
+    monkeypatch.chdir(tmp_path)
+    result = resolve_prediction_path(
+        "pii_masking_nano_1k",
+        provider="typesafe.ai",
+        prompt_version="v1",
+    )
+
+    assert result == target
+
+
 def test_evaluate_handles_missing_latency_column(tmp_path, monkeypatch, capsys):
     outputs_dir = tmp_path / "outputs"
     provider_dir = outputs_dir / "typesafe.ai"

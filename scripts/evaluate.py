@@ -20,8 +20,10 @@ def _normalize_dataset_name(dataset: str) -> str:
 
 
 def _provider_dirs(provider: str | None = None) -> list[Path]:
+    dirs: list[Path] = []
+
     if provider:
-        return [OUTPUT_DIR / provider]
+        dirs.append(OUTPUT_DIR / provider)
 
     if OUTPUT_DIR.exists():
         children = sorted(
@@ -29,9 +31,17 @@ def _provider_dirs(provider: str | None = None) -> list[Path]:
             key=lambda p: (p.name != "typesafe.ai", p.name.lower()),
         )
         if children:
-            return children
+            dirs.extend(children)
 
-    return [OUTPUT_DIR]
+    dirs.append(OUTPUT_DIR)
+
+    ordered: list[Path] = []
+    seen: set[Path] = set()
+    for path in dirs:
+        if path not in seen:
+            ordered.append(path)
+            seen.add(path)
+    return ordered
 
 
 def _iter_candidate_paths(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None):
@@ -39,6 +49,14 @@ def _iter_candidate_paths(dataset: str, provider: str | None = None, prompt_vers
     candidates = []
 
     for base_dir in _provider_dirs(provider):
+        if prompt_version:
+            candidates.extend([
+                base_dir / f"{dataset}_{prompt_version}.csv",
+                base_dir / f"{dataset}_{prompt_version}_predictions.csv",
+                base_dir / f"{dataset_stem}_{prompt_version}.csv",
+                base_dir / f"{dataset_stem}_{prompt_version}_predictions.csv",
+            ])
+
         if prompt_version and threshold is not None:
             threshold_variant = f"{prompt_version}_t{float(threshold)}"
             threshold_variant_1 = f"{prompt_version}_t{float(threshold):.1f}"
@@ -47,6 +65,14 @@ def _iter_candidate_paths(dataset: str, provider: str | None = None, prompt_vers
                 base_dir / f"{dataset}_{threshold_variant_1}.csv",
                 base_dir / f"{dataset_stem}_{threshold_variant}.csv",
                 base_dir / f"{dataset_stem}_{threshold_variant_1}.csv",
+            ])
+
+        if threshold is not None:
+            candidates.extend([
+                base_dir / f"{dataset}_t{float(threshold)}.csv",
+                base_dir / f"{dataset}_t{float(threshold):.1f}.csv",
+                base_dir / f"{dataset_stem}_t{float(threshold)}.csv",
+                base_dir / f"{dataset_stem}_t{float(threshold):.1f}.csv",
             ])
 
         candidates.extend([

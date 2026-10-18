@@ -111,6 +111,8 @@ def main() -> None:
                 str(ROOT_DIR / "scripts" / "evaluate.py"),
                 "--dataset",
                 dataset,
+                "--prompt-version",
+                args.prompt_version,
             ]
             run_command(evaluate_command, env, dry_run=args.dry_run)
 
