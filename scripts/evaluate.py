@@ -90,8 +90,16 @@ def resolve_prediction_path(dataset: str, provider: str | None = None, prompt_ve
     )
 
 
-def evaluate(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None):
+def evaluate(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None, debug: bool = False):
+    candidate_paths = list(_iter_candidate_paths(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold))
+    if debug:
+        print(f"DEBUG dataset={dataset} provider={provider} prompt_version={prompt_version} threshold={threshold}")
+        print("DEBUG candidate paths:")
+        for p in candidate_paths:
+            print(f"  - {p} exists={p.exists()}")
     path = resolve_prediction_path(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold)
+    if debug:
+        print(f"DEBUG selected path: {path}")
     df = pd.read_csv(path)
     print("\n" + "=" * 70)
     print(dataset.upper())
@@ -185,8 +193,16 @@ def evaluate(dataset: str, provider: str | None = None, prompt_version: str | No
     print(
         f"P99 : {np.percentile(latency, 99):.2f} ms"
     )
-def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None):
+def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None, debug: bool = False):
+    candidate_paths = list(_iter_candidate_paths(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold))
+    if debug:
+        print(f"DEBUG dataset={dataset} provider={provider} prompt_version={prompt_version} threshold={threshold}")
+        print("DEBUG candidate paths:")
+        for p in candidate_paths:
+            print(f"  - {p} exists={p.exists()}")
     path = resolve_prediction_path(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold)
+    if debug:
+        print(f"DEBUG selected path: {path}")
     df = pd.read_csv(path)
     print("\n" + "=" * 70)
     print(dataset.upper())
@@ -228,12 +244,13 @@ def main():
     parser.add_argument("--provider", default=None)
     parser.add_argument("--prompt-version", default=None)
     parser.add_argument("--threshold", type=float, default=None)
+    parser.add_argument("--debug-path", action="store_true", help="Print the exact CSV candidate list and selected file before evaluation.")
     args = parser.parse_args()
 
     if "pii" in args.dataset.lower():
-        evaluate_pii(args.dataset, provider=args.provider, prompt_version=args.prompt_version, threshold=args.threshold)
+        evaluate_pii(args.dataset, provider=args.provider, prompt_version=args.prompt_version, threshold=args.threshold, debug=args.debug_path)
     else:
-        evaluate(args.dataset, provider=args.provider, prompt_version=args.prompt_version, threshold=args.threshold)
+        evaluate(args.dataset, provider=args.provider, prompt_version=args.prompt_version, threshold=args.threshold, debug=args.debug_path)
 
 
 if __name__ == "__main__":
