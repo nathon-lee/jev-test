@@ -24,6 +24,68 @@ def save_dataset(df: pd.DataFrame, path: Path):
     print(f"Rows : {len(df)}")
     print("Label distribution:")
     print(df["label"].value_counts().sort_index())
+
+
+def pick_column(df: pd.DataFrame, options):
+    for option in options:
+        if option in df.columns:
+            return option
+    return None
+
+
+def prepare_hf_binary_dataset(
+    repo_name: str,
+    dataset_name: str,
+    text_candidates,
+    label_candidates,
+    label_map=None,
+    split: str = "train",
+):
+    print("\n" + "=" * 70)
+    print(f"Preparing {dataset_name}")
+    print("=" * 70)
+
+    ds = load_dataset(repo_name, split=split)
+    df = ds.to_pandas()
+    print("Original rows:", len(df))
+    print("Columns:", list(df.columns))
+
+    text_col = pick_column(df, text_candidates)
+    label_col = pick_column(df, label_candidates)
+    if text_col is None:
+        raise ValueError(f"Could not find text column for {repo_name}. Tried: {text_candidates}")
+    if label_col is None:
+        raise ValueError(f"Could not find label column for {repo_name}. Tried: {label_candidates}")
+
+    if label_map is None:
+        label_map = {
+            "safe": 0,
+            "benign": 0,
+            "non_jailbreak": 0,
+            "not_jailbreak": 0,
+            "no": 0,
+            "0": 0,
+            "unsafe": 1,
+            "harmful": 1,
+            "jailbreak": 1,
+            "yes": 1,
+            "malicious": 1,
+            "1": 1,
+        }
+
+    cleaned = df[[text_col, label_col]].copy()
+    cleaned = cleaned.rename(columns={text_col: "text", label_col: "label_raw"})
+    cleaned["text"] = cleaned["text"].astype(str)
+    cleaned["label_raw"] = cleaned["label_raw"].astype(str).str.strip().str.lower()
+    cleaned["label"] = cleaned["label_raw"].map(
+        lambda v: label_map.get(v, label_map.get(v.replace(" ", "_"), -1))
+    )
+    cleaned = cleaned[cleaned["label"].isin([0, 1])].copy()
+    cleaned["sample_id"] = range(len(cleaned))
+    result = cleaned[["sample_id", "text", "label"]].copy()
+    result.insert(0, "dataset", dataset_name)
+    assert result["label"].isin([0, 1]).all()
+    return result
 # ============================================================
 # ToxiGen
 # ============================================================
@@ -255,3 +317,70 @@ def prepare_aegis2() -> pd.DataFrame:
     result["label"] = result["label"].astype(int)
     assert result["label"].isin([0, 1]).all()
     return result
+
+
+def prepare_detect_jailbreak() -> pd.DataFrame:
+    return prepare_hf_binary_dataset(
+        repo_name="GuardrailsAI/detect-jailbreak",
+        dataset_name="detect-jailbreak",
+        text_candidates=["text", "prompt", "instruction", "query", "content"],
+        label_candidates=["label", "jailbreak", "classification", "is_jailbreak"],
+        label_map={
+            "safe": 0,
+            "benign": 0,
+            "non_jailbreak": 0,
+            "not_jailbreak": 0,
+            "no": 0,
+            "0": 0,
+            "unsafe": 1,
+            "harmful": 1,
+            "jailbreak": 1,
+            "yes": 1,
+            "malicious": 1,
+            "1": 1,
+        },
+    )
+
+
+def prepare_jailbreak_classification() -> pd.DataFrame:
+    return prepare_hf_binary_dataset(
+        repo_name="jackhhao/jailbreak-classification",
+        dataset_name="jailbreak-classification",
+        text_candidates=["text", "prompt", "instruction", "content"],
+        label_candidates=["label", "classification", "target", "is_jailbreak"],
+        label_map={
+            "safe": 0,
+            "benign": 0,
+            "non_jailbreak": 0,
+            "not_jailbreak": 0,
+            "0": 0,
+            "unsafe": 1,
+            "harmful": 1,
+            "jailbreak": 1,
+            "jailbreak_prompt": 1,
+            "1": 1,
+        },
+    )
+
+
+def prepare_jailbreakhub() -> pd.DataFrame:
+    return prepare_hf_binary_dataset(
+        repo_name="walledai/JailbreakHub",
+        dataset_name="jailbreakhub",
+        text_candidates=["text", "prompt", "instruction", "query", "content"],
+        label_candidates=["label", "category", "target", "jailbreak"],
+        label_map={
+            "safe": 0,
+            "benign": 0,
+            "non_jailbreak": 0,
+            "not_jailbreak": 0,
+            "regular": 0,
+            "0": 0,
+            "unsafe": 1,
+            "harmful": 1,
+            "jailbreak": 1,
+            "jailbreak_prompt": 1,
+            "malicious": 1,
+            "1": 1,
+        },
+    )
