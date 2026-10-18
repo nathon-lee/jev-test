@@ -6,6 +6,12 @@ from typing import Any
 import httpx
 import pandas as pd
 
+try:
+    from typesafe_sdk import Noul, TypeSafeClient
+except Exception:  # pragma: no cover - optional at import time for non-Typesafe environments
+    Noul = None
+    TypeSafeClient = None
+
 DATA_DIR = Path("data/prepared")
 OUTPUT_DIR = Path("outputs")
 DEFAULT_THRESHOLDS = [0.5, 0.6, 0.7, 0.8]
@@ -245,6 +251,33 @@ def _extract_score(payload: Any) -> float:
     raise ValueError(f"Cannot extract numeric score from response payload: {payload}")
 
 
+def _call_typesafe_sdk(prompt: str, text: str, api_key: str | None, timeout: float) -> float:
+    if Noul is None or TypeSafeClient is None:
+        raise RuntimeError("typesafe_sdk is required for the Typesafe provider but is not installed.")
+
+    if not api_key:
+        raise RuntimeError("No API key configured for provider 'typesafe.ai'. Set TYPESAFE_API_KEY or pass --api-key.")
+
+    http_client = httpx.Client(verify=False)
+    client = TypeSafeClient(
+        http_client=http_client,
+        timeout=timeout,
+        api_key=api_key,
+    )
+
+    response = client.system_one(
+        state={"user_input": text},
+        questions={"score": Noul(instructions=prompt)},
+    )
+
+    if hasattr(response, "answers"):
+        answer = getattr(response, "answers", {}).get("score")
+        if answer is not None and hasattr(answer, "noul"):
+            return float(answer.noul)
+
+    return _extract_score(response)
+
+
 def call_provider(
     provider_name: str,
     prompt: str,
@@ -256,6 +289,10 @@ def call_provider(
     provider = resolve_provider(provider_name)
     resolved_api_key = resolve_api_key(provider_name, api_key)
     resolved_base_url = resolve_base_url(provider_name, base_url)
+
+    if normalize_provider_name(provider_name) == "typesafe.ai":
+        return _call_typesafe_sdk(prompt=prompt, text=text, api_key=resolved_api_key, timeout=timeout)
+
     if not resolved_base_url:
         raise RuntimeError(
             f"No base URL configured for provider '{provider_name}'. Set the matching environment variable or pass --base-url."
@@ -271,8 +308,12 @@ def call_provider(
 
     headers = {"Content-Type": "application/json"}
     if provider.get("auth") == "bearer":
+        if resolved_api_key is None:
+            raise RuntimeError(f"No API key configured for provider '{provider_name}'.")
         headers["Authorization"] = f"Bearer {resolved_api_key}"
     elif provider.get("auth") == "x-api-key":
+        if resolved_api_key is None:
+            raise RuntimeError(f"No API key configured for provider '{provider_name}'.")
         headers["x-api-key"] = resolved_api_key
 
     payload = {
