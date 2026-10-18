@@ -123,8 +123,7 @@ def test_evaluate_pii_prints_classification_and_privacy_metrics(tmp_path, monkey
     )
 
     captured = capsys.readouterr()
-    assert "Classification metrics" in captured.out
-    assert "accuracy" in captured.out.lower()
+    assert "Classification metrics" not in captured.out
     assert "PII privacy metrics" in captured.out
     assert "masking_success_rate" in captured.out
     assert "span_precision" in captured.out

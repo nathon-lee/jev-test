@@ -265,12 +265,13 @@ def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str 
     print("=" * 70)
     print("Total rows:", len(df))
 
-    standard_metrics = _classification_summary_from_frame(df)
-    if standard_metrics:
-        print("\nClassification metrics")
-        print("-------------------------")
-        for name, value in standard_metrics.items():
-            print(f"{name}: {value:.4f}")
+    if debug:
+        standard_metrics = _classification_summary_from_frame(df)
+        if standard_metrics:
+            print("\nClassification metrics (debug only; not the primary PII score)")
+            print("-------------------------")
+            for name, value in standard_metrics.items():
+                print(f"{name}: {value:.4f}")
 
     rows = []
     for _, row in df.iterrows():
