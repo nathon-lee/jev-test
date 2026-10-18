@@ -151,9 +151,7 @@ def evaluate(dataset: str, provider: str | None = None, prompt_version: str | No
     # -----------------------------------------------
     # Latency
     # -----------------------------------------------
-    latency = valid[
-        "latency_ms"
-    ].dropna()
+    latency = valid["latency_ms"].dropna() if "latency_ms" in valid.columns else pd.Series(dtype=float)
     print("\nMetrics")
     print("-------------------------")
     print(
@@ -179,18 +177,21 @@ def evaluate(dataset: str, provider: str | None = None, prompt_version: str | No
     print(f"TP: {tp}")
     print("\nLatency")
     print("-------------------------")
-    print(
-        f"Mean: {latency.mean():.2f} ms"
-    )
-    print(
-        f"P50 : {np.percentile(latency, 50):.2f} ms"
-    )
-    print(
-        f"P95 : {np.percentile(latency, 95):.2f} ms"
-    )
-    print(
-        f"P99 : {np.percentile(latency, 99):.2f} ms"
-    )
+    if latency.empty:
+        print("Latency unavailable: 'latency_ms' column not present in this CSV.")
+    else:
+        print(
+            f"Mean: {latency.mean():.2f} ms"
+        )
+        print(
+            f"P50 : {np.percentile(latency, 50):.2f} ms"
+        )
+        print(
+            f"P95 : {np.percentile(latency, 95):.2f} ms"
+        )
+        print(
+            f"P99 : {np.percentile(latency, 99):.2f} ms"
+        )
 def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str | None = None, threshold: float | None = None, debug: bool = False):
     candidate_paths = list(_iter_candidate_paths(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold))
     if debug:
