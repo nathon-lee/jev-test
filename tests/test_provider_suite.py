@@ -1,6 +1,9 @@
+import httpx
+
 from benchmark.provider_suite import (
     DEFAULT_THRESHOLDS,
     available_datasets,
+    call_provider,
     prompt_for_dataset,
     resolve_provider,
     normalize_provider_name,
@@ -48,3 +51,41 @@ def test_provider_config_is_resolved():
     provider = resolve_provider("typesafe")
     assert provider["kind"] == "api_key"
     assert provider["api_key_env"] == "TYPESAFE_API_KEY"
+
+
+def test_fastino_uses_systemone_endpoint(monkeypatch):
+    captured = {}
+
+    def fake_post(url, headers=None, json=None, timeout=None, verify=None):
+        captured["url"] = url
+        captured["headers"] = headers
+        captured["json"] = json
+
+        class DummyResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {
+                    "answers": {
+                        "score": {"score": 0.91},
+                    }
+                }
+
+        return DummyResponse()
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+
+    score = call_provider(
+        "fastino.ai",
+        "Does this text contain PII?",
+        "John Doe <john@example.com>",
+        api_key="fast_test_key",
+        base_url="https://api.fastino.ai/v1",
+    )
+
+    assert score == 0.91
+    assert captured["url"].endswith("/v1/systemone")
+    assert "Authorization" in captured["headers"]
+    assert "state" in captured["json"]
+    assert "questions" in captured["json"]

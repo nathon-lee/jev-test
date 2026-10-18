@@ -43,8 +43,8 @@ PROVIDER_SPECS = {
         "kind": "api_key",
         "api_key_env": "FASTINO_API_KEY",
         "base_url_env": "FASTINO_BASE_URL",
-        "default_base_url": "https://api.fastino.ai",
-        "model": "fastino-standard",
+        "default_base_url": "https://api.fastino.ai/v1",
+        "model": "fastino/glide",
         "auth": "bearer",
     },
     "laya-ai.com": {
@@ -288,6 +288,46 @@ def _call_typesafe_sdk(prompt: str, text: str, api_key: str | None, timeout: flo
     return _extract_score(response)
 
 
+def _call_fastino_systemone(
+    prompt: str,
+    text: str,
+    api_key: str | None,
+    base_url: str | None,
+    timeout: float,
+) -> float:
+    if not api_key:
+        raise RuntimeError("No API key configured for provider 'fastino.ai'. Set FASTINO_API_KEY or pass --api-key.")
+
+    url = (base_url or "https://api.fastino.ai/v1").rstrip("/")
+    if not url.endswith("/systemone"):
+        url = url + "/systemone"
+
+    payload = {
+        "model": "fastino/glide",
+        "state": {"user_input": text},
+        "questions": {
+            "score": {
+                "type": "noul",
+                "instructions": prompt,
+            }
+        },
+    }
+
+    response = httpx.post(
+        url,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
+        json=payload,
+        timeout=timeout,
+        verify=False,
+    )
+    response.raise_for_status()
+    response_json = response.json()
+    return _extract_score(response_json)
+
+
 def call_provider(
     provider_name: str,
     prompt: str,
@@ -302,6 +342,15 @@ def call_provider(
 
     if normalize_provider_name(provider_name) == "typesafe.ai":
         return _call_typesafe_sdk(prompt=prompt, text=text, api_key=resolved_api_key, timeout=timeout)
+
+    if normalize_provider_name(provider_name) == "fastino.ai":
+        return _call_fastino_systemone(
+            prompt=prompt,
+            text=text,
+            api_key=resolved_api_key,
+            base_url=resolved_base_url,
+            timeout=timeout,
+        )
 
     if not resolved_base_url:
         raise RuntimeError(
