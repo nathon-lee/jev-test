@@ -8,6 +8,14 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT_DIR / "outputs"
+SUPPORTED_DATASETS = [
+    "toxigen",
+    "hatecheck",
+    "aegis2",
+    "detect-jailbreak",
+    "jailbreak-classification",
+    "jailbreakhub",
+]
 
 
 def load_env_file() -> None:
@@ -39,7 +47,7 @@ def build_env() -> dict:
 def ensure_compatibility_aliases(dataset_name: str, prompt_version: str) -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     if dataset_name == "all":
-        dataset_names = ["toxigen", "hatecheck", "aegis2"]
+        dataset_names = SUPPORTED_DATASETS
     else:
         dataset_names = [dataset_name]
 
@@ -65,7 +73,11 @@ def main() -> None:
             "filename expected by the evaluator."
         )
     )
-    parser.add_argument("--dataset", choices=["toxigen", "hatecheck", "aegis2", "all"], default="all")
+    parser.add_argument(
+        "--dataset",
+        choices=SUPPORTED_DATASETS + ["all"],
+        default="all",
+    )
     parser.add_argument("--prompt-version", choices=["v1", "v2"], default="v1")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--evaluate", action="store_true", help="Run the evaluation script after the benchmark finishes.")
@@ -75,7 +87,7 @@ def main() -> None:
     load_env_file()
     env = build_env()
 
-    datasets = ["toxigen", "hatecheck", "aegis2"] if args.dataset == "all" else [args.dataset]
+    datasets = SUPPORTED_DATASETS if args.dataset == "all" else [args.dataset]
     for dataset in datasets:
         command = [
             sys.executable,
