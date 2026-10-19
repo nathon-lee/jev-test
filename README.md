@@ -151,6 +151,27 @@ Run in the background with timestamped logs (recommended for remote / SSH sessio
 cd /home/nathon/jev-test && mkdir -p logs && nohup bash -lc 'stdbuf -o0 -e0 python -u scripts/run_model_suite.py --providers typesafe.ai,fastino.ai,laya-ai.com --datasets all --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8 2>&1 | awk "{ print strftime(\"[%Y-%m-%d %H:%M:%S]\"), \$0; fflush(); }" >> /home/nathon/jev-test/logs/run_model_suite.log' >/dev/null 2>&1 &
 ```
 
+Alternative background command (timestamp in log filename + startup self-check):
+
+```bash
+cd /workspace/jev-test
+mkdir -p logs
+LOG="logs/run_model_suite_$(date +%F_%H%M%S).log"
+
+nohup stdbuf -o0 -e0 python -u scripts/run_model_suite.py \
+  --providers typesafe.ai \
+  --datasets all \
+  --prompt-versions v1,v2 \
+  --thresholds 0.5,0.6,0.7,0.8 \
+  > "$LOG" 2>&1 &
+
+PID=$!
+echo "PID=$PID LOG=$LOG"
+sleep 1
+ps -p "$PID" -o pid,cmd
+tail -n 30 "$LOG"
+```
+
 Check the live log:
 
 ```bash
