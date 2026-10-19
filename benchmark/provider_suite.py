@@ -296,6 +296,7 @@ def _call_fastino_systemone(
     api_key: str | None,
     base_url: str | None,
     timeout: float,
+    debug: bool = False,
 ) -> float:
     if not api_key:
         raise RuntimeError("No API key configured for provider 'fastino.ai'. Set FASTINO_API_KEY or pass --api-key.")
@@ -314,6 +315,10 @@ def _call_fastino_systemone(
             }
         },
     }
+    if debug:
+        print("[DEBUG][fastino.ai] URL:", url)
+        print("[DEBUG][fastino.ai] HEADERS:", {"Content-Type": "application/json", "Authorization": "Bearer ***"})
+        print("[DEBUG][fastino.ai] PAYLOAD:", payload)
 
     response = httpx.post(
         url,
@@ -337,6 +342,7 @@ def call_provider(
     api_key: str | None = None,
     base_url: str | None = None,
     timeout: float = 60.0,
+    debug: bool = False,
 ) -> float:
     provider = resolve_provider(provider_name)
     resolved_api_key = resolve_api_key(provider_name, api_key)
@@ -352,6 +358,7 @@ def call_provider(
             api_key=resolved_api_key,
             base_url=resolved_base_url,
             timeout=timeout,
+            debug=debug,
         )
 
     if not resolved_base_url:
@@ -382,6 +389,10 @@ def call_provider(
         "messages": [{"role": "user", "content": f"{prompt}\n\nText to judge:\n{text}"}],
         "temperature": 0.0,
     }
+    if debug:
+        print("[DEBUG]", provider_name, "URL:", url)
+        print("[DEBUG]", provider_name, "HEADERS:", headers)
+        print("[DEBUG]", provider_name, "PAYLOAD:", payload)
 
     response = httpx.post(url, headers=headers, json=payload, timeout=timeout, verify=False)
     response.raise_for_status()
@@ -397,6 +408,7 @@ def run_single_benchmark(
     limit: int | None = None,
     api_key: str | None = None,
     base_url: str | None = None,
+    debug: bool = False,
 ) -> list[dict[str, Any]]:
     dataset_path = DATA_DIR / DATASET_SPECS[dataset_name]["path"]
     if not dataset_path.exists():
@@ -425,6 +437,7 @@ def run_single_benchmark(
                 text=text,
                 api_key=api_key,
                 base_url=base_url,
+                debug=debug,
             )
             prediction = int(score >= threshold)
             rows.append(

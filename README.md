@@ -145,6 +145,18 @@ Only one provider:
 python scripts/run_model_suite.py --providers typesafe.ai --datasets all --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8
 ```
 
+Run in the background with timestamped logs (recommended for remote / SSH sessions):
+
+```bash
+cd /home/nathon/jev-test && mkdir -p logs && nohup bash -lc 'stdbuf -o0 -e0 python -u scripts/run_model_suite.py --providers typesafe.ai,fastino.ai,laya-ai.com --datasets all --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8 2>&1 | awk "{ print strftime(\"[%Y-%m-%d %H:%M:%S]\"), \$0; fflush(); }" >> /home/nathon/jev-test/logs/run_model_suite.log' >/dev/null 2>&1 &
+```
+
+Check the live log:
+
+```bash
+tail -f /home/nathon/jev-test/logs/run_model_suite.log
+```
+
 Only one dataset:
 
 ```bash
