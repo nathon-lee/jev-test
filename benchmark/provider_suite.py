@@ -290,6 +290,50 @@ def _call_typesafe_sdk(prompt: str, text: str, api_key: str | None, timeout: flo
     return _extract_score(response)
 
 
+def _call_typesafe_http_systemone(
+    prompt: str,
+    text: str,
+    api_key: str | None,
+    base_url: str | None,
+    timeout: float,
+    debug: bool = False,
+) -> float:
+    if not api_key:
+        raise RuntimeError("No API key configured for provider 'typesafe.ai'. Set TYPESAFE_API_KEY or pass --api-key.")
+
+    url = (base_url or "https://api.typesafe.ai").rstrip("/")
+    if not url.endswith("/systemone"):
+        url = url + "/systemone"
+
+    payload = {
+        "state": {"user_input": text},
+        "questions": {
+            "score": {
+                "type": "noul",
+                "instructions": prompt,
+            }
+        },
+    }
+    if debug:
+        print("[DEBUG][typesafe.ai] URL:", url)
+        print("[DEBUG][typesafe.ai] HEADERS:", {"Content-Type": "application/json", "Authorization": "Bearer ***"})
+        print("[DEBUG][typesafe.ai] PAYLOAD:", payload)
+
+    response = httpx.post(
+        url,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
+        json=payload,
+        timeout=timeout,
+        verify=False,
+    )
+    response.raise_for_status()
+    response_json = response.json()
+    return _extract_score(response_json)
+
+
 def _call_fastino_systemone(
     prompt: str,
     text: str,
@@ -396,7 +440,14 @@ def call_provider(
     resolved_base_url = resolve_base_url(provider_name, base_url)
 
     if normalize_provider_name(provider_name) == "typesafe.ai":
-        return _call_typesafe_sdk(prompt=prompt, text=text, api_key=resolved_api_key, timeout=timeout)
+        return _call_typesafe_http_systemone(
+            prompt=prompt,
+            text=text,
+            api_key=resolved_api_key,
+            base_url=resolved_base_url,
+            timeout=timeout,
+            debug=debug,
+        )
 
     if normalize_provider_name(provider_name) == "fastino.ai":
         return _call_fastino_systemone(
