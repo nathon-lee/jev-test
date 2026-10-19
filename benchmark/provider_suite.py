@@ -265,7 +265,10 @@ def _extract_score(payload: Any) -> float:
 
 def _call_typesafe_sdk(prompt: str, text: str, api_key: str | None, timeout: float) -> float:
     if Noul is None or TypeSafeClient is None:
-        raise RuntimeError("typesafe_sdk is required for the Typesafe provider but is not installed.")
+        raise RuntimeError(
+            "typesafe_sdk is required for provider 'typesafe.ai' but is not installed. "
+            "Install dependencies with 'pip install -r requirements.txt' or install only this package with 'pip install typesafe-sdk'."
+        )
 
     if not api_key:
         raise RuntimeError("No API key configured for provider 'typesafe.ai'. Set TYPESAFE_API_KEY or pass --api-key.")
