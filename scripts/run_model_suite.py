@@ -58,6 +58,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=None, help="Optional limit for rows per dataset")
     parser.add_argument("--api-key", default=None, help="Optional API key override for the selected provider")
     parser.add_argument("--base-url", default=None, help="Optional base URL override for the selected provider")
+    parser.add_argument("--debug", action="store_true", help="Print the exact outgoing request URL, headers, and payload for each provider call")
     args = parser.parse_args()
 
     providers = provider_list(args.providers)
@@ -83,6 +84,7 @@ def main() -> None:
                         limit=args.limit,
                         api_key=args.api_key,
                         base_url=args.base_url,
+                        debug=args.debug,
                     )
                     saved_path = save_rows(rows, provider, dataset, prompt_version, threshold)
                     print(f"Saved: {saved_path}")

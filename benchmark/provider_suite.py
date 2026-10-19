@@ -44,15 +44,15 @@ PROVIDER_SPECS = {
         "api_key_env": "FASTINO_API_KEY",
         "base_url_env": "FASTINO_BASE_URL",
         "default_base_url": "https://api.fastino.ai/v1",
-        "model": "fastino/glide",
+        "model": "fastino/GLiDE",
         "auth": "bearer",
     },
     "laya-ai.com": {
         "kind": "api_key",
         "api_key_env": "LAYA_API_KEY",
         "base_url_env": "LAYA_BASE_URL",
-        "default_base_url": "https://api.laya-ai.com",
-        "model": "laya-standard",
+        "default_base_url": "https://api.laya-ai.com/v1",
+        "model": "typed-decisions",
         "auth": "bearer",
     },
     "openjev": {
@@ -296,6 +296,7 @@ def _call_fastino_systemone(
     api_key: str | None,
     base_url: str | None,
     timeout: float,
+    debug: bool = False,
 ) -> float:
     if not api_key:
         raise RuntimeError("No API key configured for provider 'fastino.ai'. Set FASTINO_API_KEY or pass --api-key.")
@@ -305,7 +306,7 @@ def _call_fastino_systemone(
         url = url + "/systemone"
 
     payload = {
-        "model": "fastino/glide",
+        "model": "fastino/GLiDE",
         "state": {"user_input": text},
         "questions": {
             "score": {
@@ -314,6 +315,57 @@ def _call_fastino_systemone(
             }
         },
     }
+    if debug:
+        print("[DEBUG][fastino.ai] URL:", url)
+        print("[DEBUG][fastino.ai] HEADERS:", {"Content-Type": "application/json", "Authorization": "Bearer ***"})
+        print("[DEBUG][fastino.ai] PAYLOAD:", payload)
+
+    response = httpx.post(
+        url,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
+        json=payload,
+        timeout=timeout,
+        verify=False,
+    )
+    response.raise_for_status()
+    response_json = response.json()
+    return _extract_score(response_json)
+
+
+def _call_laya_systemone(
+    prompt: str,
+    text: str,
+    api_key: str | None,
+    base_url: str | None,
+    timeout: float,
+    debug: bool = False,
+) -> float:
+    if not api_key:
+        raise RuntimeError("No API key configured for provider 'laya-ai.com'. Set LAYA_API_KEY or pass --api-key.")
+
+    url = (base_url or "https://api.laya-ai.com/v1").rstrip("/")
+    if url.endswith("/v1"):
+        url = url + "/systemone"
+    elif not url.endswith("/systemone"):
+        url = url + "/v1/systemone"
+
+    payload = {
+        "model": "typed-decisions",
+        "state": {"user_input": text},
+        "questions": {
+            "score": {
+                "type": "noul",
+                "instructions": prompt,
+            }
+        },
+    }
+    if debug:
+        print("[DEBUG][laya-ai.com] URL:", url)
+        print("[DEBUG][laya-ai.com] HEADERS:", {"Content-Type": "application/json", "Authorization": "Bearer ***"})
+        print("[DEBUG][laya-ai.com] PAYLOAD:", payload)
 
     response = httpx.post(
         url,
@@ -337,6 +389,7 @@ def call_provider(
     api_key: str | None = None,
     base_url: str | None = None,
     timeout: float = 60.0,
+    debug: bool = False,
 ) -> float:
     provider = resolve_provider(provider_name)
     resolved_api_key = resolve_api_key(provider_name, api_key)
@@ -352,6 +405,17 @@ def call_provider(
             api_key=resolved_api_key,
             base_url=resolved_base_url,
             timeout=timeout,
+            debug=debug,
+        )
+
+    if normalize_provider_name(provider_name) == "laya-ai.com":
+        return _call_laya_systemone(
+            prompt=prompt,
+            text=text,
+            api_key=resolved_api_key,
+            base_url=resolved_base_url,
+            timeout=timeout,
+            debug=debug,
         )
 
     if not resolved_base_url:
@@ -382,6 +446,10 @@ def call_provider(
         "messages": [{"role": "user", "content": f"{prompt}\n\nText to judge:\n{text}"}],
         "temperature": 0.0,
     }
+    if debug:
+        print("[DEBUG]", provider_name, "URL:", url)
+        print("[DEBUG]", provider_name, "HEADERS:", headers)
+        print("[DEBUG]", provider_name, "PAYLOAD:", payload)
 
     response = httpx.post(url, headers=headers, json=payload, timeout=timeout, verify=False)
     response.raise_for_status()
@@ -397,6 +465,7 @@ def run_single_benchmark(
     limit: int | None = None,
     api_key: str | None = None,
     base_url: str | None = None,
+    debug: bool = False,
 ) -> list[dict[str, Any]]:
     dataset_path = DATA_DIR / DATASET_SPECS[dataset_name]["path"]
     if not dataset_path.exists():
@@ -425,6 +494,7 @@ def run_single_benchmark(
                 text=text,
                 api_key=api_key,
                 base_url=base_url,
+                debug=debug,
             )
             prediction = int(score >= threshold)
             rows.append(
@@ -463,7 +533,7 @@ def run_single_benchmark(
                 f"Progress: {idx + 1}/{total_rows} "
                 f"({(idx + 1) / total_rows:.1%}) | "
                 f"provider={provider_name} | dataset={dataset_name} | prompt={prompt_version} | "
-                f"elapsed={elapsed:.1f}s"
+                f"elapsed={elapsed:.8f}s"
             )
     return rows
 
