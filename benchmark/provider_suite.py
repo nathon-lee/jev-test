@@ -476,7 +476,7 @@ def run_single_benchmark(
                 f"Progress: {idx + 1}/{total_rows} "
                 f"({(idx + 1) / total_rows:.1%}) | "
                 f"provider={provider_name} | dataset={dataset_name} | prompt={prompt_version} | "
-                f"elapsed={elapsed:.1f}s"
+                f"elapsed={elapsed:.8f}s"
             )
     return rows
 
