@@ -52,7 +52,7 @@ PROVIDER_SPECS = {
         "api_key_env": "LAYA_API_KEY",
         "base_url_env": "LAYA_BASE_URL",
         "default_base_url": "https://api.laya-ai.com/v1",
-        "model": "laya-standard",
+        "model": "typed-decisions",
         "auth": "bearer",
     },
     "openjev": {
@@ -353,7 +353,7 @@ def _call_laya_systemone(
         url = url + "/v1/systemone"
 
     payload = {
-        "model": "laya-standard",
+        "model": "typed-decisions",
         "state": {"user_input": text},
         "questions": {
             "score": {
