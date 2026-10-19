@@ -51,7 +51,7 @@ PROVIDER_SPECS = {
         "kind": "api_key",
         "api_key_env": "LAYA_API_KEY",
         "base_url_env": "LAYA_BASE_URL",
-        "default_base_url": "https://api.laya-ai.com",
+        "default_base_url": "https://api.laya-ai.com/v1",
         "model": "laya-standard",
         "auth": "bearer",
     },
@@ -335,6 +335,53 @@ def _call_fastino_systemone(
     return _extract_score(response_json)
 
 
+def _call_laya_systemone(
+    prompt: str,
+    text: str,
+    api_key: str | None,
+    base_url: str | None,
+    timeout: float,
+    debug: bool = False,
+) -> float:
+    if not api_key:
+        raise RuntimeError("No API key configured for provider 'laya-ai.com'. Set LAYA_API_KEY or pass --api-key.")
+
+    url = (base_url or "https://api.laya-ai.com/v1").rstrip("/")
+    if url.endswith("/v1"):
+        url = url + "/systemone"
+    elif not url.endswith("/systemone"):
+        url = url + "/v1/systemone"
+
+    payload = {
+        "model": "laya-standard",
+        "state": {"user_input": text},
+        "questions": {
+            "score": {
+                "type": "noul",
+                "instructions": prompt,
+            }
+        },
+    }
+    if debug:
+        print("[DEBUG][laya-ai.com] URL:", url)
+        print("[DEBUG][laya-ai.com] HEADERS:", {"Content-Type": "application/json", "Authorization": "Bearer ***"})
+        print("[DEBUG][laya-ai.com] PAYLOAD:", payload)
+
+    response = httpx.post(
+        url,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        },
+        json=payload,
+        timeout=timeout,
+        verify=False,
+    )
+    response.raise_for_status()
+    response_json = response.json()
+    return _extract_score(response_json)
+
+
 def call_provider(
     provider_name: str,
     prompt: str,
@@ -353,6 +400,16 @@ def call_provider(
 
     if normalize_provider_name(provider_name) == "fastino.ai":
         return _call_fastino_systemone(
+            prompt=prompt,
+            text=text,
+            api_key=resolved_api_key,
+            base_url=resolved_base_url,
+            timeout=timeout,
+            debug=debug,
+        )
+
+    if normalize_provider_name(provider_name) == "laya-ai.com":
+        return _call_laya_systemone(
             prompt=prompt,
             text=text,
             api_key=resolved_api_key,

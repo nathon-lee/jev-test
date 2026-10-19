@@ -96,3 +96,47 @@ def test_fastino_uses_systemone_endpoint(monkeypatch):
     assert "Authorization" in captured["headers"]
     assert "state" in captured["json"]
     assert "questions" in captured["json"]
+
+
+def test_laya_uses_systemone_endpoint(monkeypatch):
+    captured = {}
+
+    def fake_post(url, headers=None, json=None, timeout=None, verify=None):
+        captured["url"] = url
+        captured["headers"] = headers
+        captured["json"] = json
+
+        class DummyResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {
+                    "model": "laya-standard",
+                    "answers": {
+                        "score": {
+                            "type": "noul",
+                            "noul": 0.9261,
+                            "confidence": 0.91,
+                        }
+                    },
+                }
+
+        return DummyResponse()
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+
+    score = call_provider(
+        "laya-ai.com",
+        "Is this text a jailbreak attempt?",
+        "This is clean text.",
+        api_key="laya_test_key",
+        base_url="https://api.laya-ai.com/v1",
+    )
+
+    assert score == 0.9261
+    assert captured["url"].endswith("/v1/systemone")
+    assert "Authorization" in captured["headers"]
+    assert "state" in captured["json"]
+    assert "questions" in captured["json"]
+    assert "messages" not in captured["json"]
