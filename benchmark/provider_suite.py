@@ -44,7 +44,7 @@ PROVIDER_SPECS = {
         "api_key_env": "FASTINO_API_KEY",
         "base_url_env": "FASTINO_BASE_URL",
         "default_base_url": "https://api.fastino.ai/v1",
-        "model": "fastino/glide",
+        "model": "fastino/GLiDE",
         "auth": "bearer",
     },
     "laya-ai.com": {
@@ -306,7 +306,7 @@ def _call_fastino_systemone(
         url = url + "/systemone"
 
     payload = {
-        "model": "fastino/glide",
+        "model": "fastino/GLiDE",
         "state": {"user_input": text},
         "questions": {
             "score": {
