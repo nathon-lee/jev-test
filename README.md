@@ -139,6 +139,17 @@ All providers, all datasets, v1 + v2, thresholds 0.5/0.6/0.7/0.8:
 python scripts/run_model_suite.py --providers all --datasets all --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8
 ```
 
+Parallel run (for example with 6 workers):
+
+```bash
+python scripts/run_model_suite.py --providers all --datasets all --prompt-versions v1,v2 --thresholds 0.5,0.6,0.7,0.8 --max-workers 6
+```
+
+`--max-workers` controls how many provider/dataset/prompt/threshold combinations run at the same time.
+- Default: `1` (fully serial, same behavior as before)
+- Typical value: `4` to `8` for network-bound provider calls
+- If provider-side rate limits are strict, lower this number
+
 Only one provider:
 
 ```bash
