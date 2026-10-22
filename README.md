@@ -271,6 +271,94 @@ Optional single-provider summary:
 python scripts/evaluate_model_suite.py --provider typesafe.ai
 ```
 
+### 可视化模型对比报告
+
+在项目根目录运行（无需 API Key，不会重新请求模型）。首次使用先安装依赖：
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+`requirements.txt` 已注明对比生成依赖的用途：`pandas`、`numpy`、`scikit-learn`
+用于数据处理与评分，`matplotlib` 用于对比图表；`pytest` 仅用于相关测试，
+不是生成报告的运行时依赖。这些包已统一列入依赖文件，无需再分别安装。
+
+**推荐：一条命令生成对比报告和全部图表。**
+
+```bash
+python -m scripts.compare_models --paper-figures
+```
+
+报告入口为 `outputs/comparison/comparison.html`，图表入口为
+`outputs/comparison/figures/index.html`。
+
+如果只需要生成对比报告，不绘图：
+
+```bash
+python -m scripts.compare_models
+```
+
+打开 `outputs/comparison/comparison.html` 查看中文结论、模型名称、固定配置排名、
+分数据集指标、提示词/阈值探索、覆盖率和日志耗时，以及可搜索的全部配置明细。
+同时生成 `comparison.md`、`comparison.json`、`runs.csv`、`paired.csv` 和 `pairwise.csv`。
+Laya 后续测试完成后重新运行同一命令即可更新快照。
+
+报告复用 `evaluate_model_suite.py` 的分类指标实现（提取于
+`benchmark/evaluation.py`），使用本地 `data/prepared` 校验样本，忽略隐藏的 notebook
+检查点，只扫描供应商目录下的 CSV 和日志。支持自定义路径或仅对比两家供应商：
+
+```bash
+python -m scripts.compare_models --input-dir outputs --data-dir data/prepared --output-dir outputs/comparison
+python -m scripts.compare_models --providers fastino.ai,typesafe.ai --output-dir outputs/comparison_two
+```
+
+公平基线固定为 `v1 / 0.5`，只比较共同完整落盘的数据集及共同成功样本；缺测不计零分。
+报告还包含两两共同基线，让已完成模型利用更多共同数据集比较；不同配对的分数不混排。
+PII 目前只有全正样本分类输出，不能用于评价实际脱敏质量。
+日志只能给出整轮平均每样本耗时，不能据此计算单请求 P95。
+报告按用户补充的模型身份区分请求、解析、服务和路由名称：
+
+| 供应商 | Request model | Resolved model | Serving model | Routed model |
+| --- | --- | --- | --- | --- |
+| TypeSafe | `jev-latest` | 需以接口返回为准，当前未确认 | — | — |
+| Fastino | `fastino/GLiDE` | `glide_v2` | — | — |
+| Laya | `typed-decisions` | — | `laya-rl-agent` | `typed-decisions` |
+
+这些身份信息不是从历史 CSV 或日志反查得到；`jev-latest` 不代表固定的后端版本。
+
+### 对比图表
+
+已有对比报告时，无需重新读取预测文件或调用模型：
+
+```bash
+python -m scripts.plot_model_comparison
+```
+
+打开 `outputs/comparison/figures/index.html` 查看以下图表及中文图注：
+
+- 共同样本的分数据集 F1 / AUROC 分组柱状图。
+- 误报—漏报、AUROC—日志平均耗时散点图。
+- v1 / v2 提示词与阈值敏感性曲线。
+- 全数据集测试覆盖率热力图，区分缺测和全部请求失败。
+
+每张图同时导出 300 DPI PNG、矢量 SVG 和 PDF；`paper_figures.pdf` 汇总全部图，
+`table01_baseline.tex` 为 LaTeX 三线表（需 `booktabs`）。
+图内采用英文标签、衬线字体、固定色盲友好配色，配合填充纹理和线型区分模型与提示词。
+模型的 request / resolved / serving / routed 身份保留在图例中。
+不以重复运行伪造置信区间，也不把测试集选参结果解释为独立验证后的提升。
+
+也可一条命令更新报告并生成图表：
+
+```bash
+python -m scripts.compare_models --paper-figures
+```
+
+仅从已有报告重绘为 600 DPI PNG（同时保留矢量 SVG / PDF）：
+
+```bash
+python -m scripts.plot_model_comparison --report outputs/comparison/comparison.json --output-dir outputs/comparison/figures --dpi 600
+```
+
 ## Important notes
 
 - If you run scripts directly with `python scripts/...`, set `PYTHONPATH` in the current shell:

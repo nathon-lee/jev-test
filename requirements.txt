@@ -1,9 +1,13 @@
 datasets
+# Comparison report: data loading, numerical processing and evaluation metrics.
 pandas
 numpy
 scikit-learn
+# Comparison figures: PNG, SVG and PDF export.
 matplotlib
 python-dotenv
 tqdm
 httpx
 typesafe-sdk
+# Tests for comparison reports, figures and existing benchmark code (not needed to generate reports).
+pytest
