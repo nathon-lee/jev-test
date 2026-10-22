@@ -1,0 +1,13 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>模型对比图</title><style>
+body{font:16px/1.7 system-ui,sans-serif;background:#f3f5f8;color:#172438;margin:0}
+main{max-width:1250px;margin:auto;padding:28px}section{background:white;padding:24px;margin:24px 0}
+img{width:100%;height:auto}a{color:#174c90}h1,h2{line-height:1.4}
+@media print{body{background:white}section{break-inside:avoid;padding:0}}
+</style><main><h1>模型对比图</h1>
+<p>图内使用英文标签，图注使用中文。PDF / SVG 为矢量格式，PNG 默认为 300 DPI。
+模型身份由用户补充；TypeSafe resolved model 需以接口返回为准。</p>
+<p><a href="paper_figures.pdf">下载全部图表 PDF</a> |
+<a href="table01_baseline.tex">下载 LaTeX 三线表</a> |
+<a href="../comparison.html">完整指标与结论报告（默认目录）</a></p><p>数据快照（UTC）：2026-10-21T23:45:11.563051+00:00</p><section><h2>共同样本分类能力对比</h2><img src="fig01_paired_quality.svg" alt="共同样本分类能力对比"><p>固定 v1 / 0.5，按数据集展示 F1 与 AUROC。每个数据集内，所有模型使用完全相同的成功样本。AUROC 图中的 50% 虚线表示随机排序基线；没有伪造置信区间。</p><p><a href="fig01_paired_quality.png">PNG</a> | <a href="fig01_paired_quality.svg">SVG</a> | <a href="fig01_paired_quality.pdf">PDF</a></p></section><section><h2>误报、漏报与耗时权衡</h2><img src="fig02_quality_cost_tradeoff.svg" alt="误报、漏报与耗时权衡"><p>左图越靠左下越好，右图越靠左上越好。质量指标按共同数据集等权平均；耗时来自整轮日志，按全部处理样本加权，含网络和失败等待，不能解读为纯推理时延或 P95。</p><p><a href="fig02_quality_cost_tradeoff.png">PNG</a> | <a href="fig02_quality_cost_tradeoff.svg">SVG</a> | <a href="fig02_quality_cost_tradeoff.pdf">PDF</a></p></section><section><h2>提示词与阈值敏感性</h2><img src="fig03_threshold_sensitivity.svg" alt="提示词与阈值敏感性"><p>颜色区分模型，实线圆点表示 v1，虚线三角表示 v2。缺测留空，不补零。每个点只在其配置内使用共同成功样本，不同点的样本集合可能随请求错误变化；这是同测试集探索，不是独立验证后的性能提升。</p><p><a href="fig03_threshold_sensitivity.png">PNG</a> | <a href="fig03_threshold_sensitivity.svg">SVG</a> | <a href="fig03_threshold_sensitivity.pdf">PDF</a></p></section><section><h2>测试覆盖率与请求失败</h2><img src="fig04_evaluation_coverage.svg" alt="测试覆盖率与请求失败"><p>覆盖率为成功样本数 / 参考样本数。灰色为未获得预测文件，斜线为完整落盘但全部请求失败；PII 行仅展示覆盖率，不代表脱敏质量。Laya 缺测不记零分。</p><p><a href="fig04_evaluation_coverage.png">PNG</a> | <a href="fig04_evaluation_coverage.svg">SVG</a> | <a href="fig04_evaluation_coverage.pdf">PDF</a></p></section></main></html>

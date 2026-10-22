@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score, roc_auc_score
+from benchmark.evaluation import evaluate_predictions
 
 OUTPUT_DIR = Path("outputs")
 
@@ -11,20 +11,6 @@ OUTPUT_DIR = Path("outputs")
 def summarize_file(path: Path) -> dict:
     df = pd.read_csv(path)
     valid = df[df["error"].fillna("") == ""].copy()
-    if valid.empty:
-        return {
-            "file": str(path),
-            "rows": len(df),
-            "valid": 0,
-            "error": len(df),
-            "accuracy": None,
-            "precision": None,
-            "recall": None,
-            "f1": None,
-            "auroc": None,
-            "mean_latency_ms": None,
-        }
-
     y_true = valid["label"].astype(int)
     y_pred = valid["prediction"].astype(int)
     y_score = valid["score"].astype(float)
@@ -35,11 +21,7 @@ def summarize_file(path: Path) -> dict:
         "rows": len(df),
         "valid": len(valid),
         "error": len(df) - len(valid),
-        "accuracy": accuracy_score(y_true, y_pred),
-        "precision": precision_score(y_true, y_pred, zero_division=0),
-        "recall": recall_score(y_true, y_pred, zero_division=0),
-        "f1": f1_score(y_true, y_pred, zero_division=0),
-        "auroc": roc_auc_score(y_true, y_score),
+        **evaluate_predictions(y_true, y_pred, y_score),
         "mean_latency_ms": latency.mean() if not latency.empty else None,
         "p95_latency_ms": np.percentile(latency, 95) if not latency.empty else None,
     }
@@ -51,11 +33,11 @@ def iter_csv_files(provider: str | None = None) -> list[Path]:
     files: list[Path] = []
     if provider is None:
         for child in base.iterdir():
-            if child.is_dir():
+            if child.is_dir() and not (child / "comparison.json").exists():
                 files.extend(sorted(child.glob("*.csv")))
     else:
         provider_dir = base / provider
-        if provider_dir.exists():
+        if provider_dir.exists() and not (provider_dir / "comparison.json").exists():
             files.extend(sorted(provider_dir.glob("*.csv")))
     return files
 

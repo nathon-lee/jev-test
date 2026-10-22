@@ -1,0 +1,67 @@
+{
+  "source_generated_at": "2026-10-21T23:45:11.563051+00:00",
+  "model_identities": {
+    "fastino.ai": {
+      "request_model": "fastino/GLiDE",
+      "resolved_model": "glide_v2"
+    },
+    "laya-ai.com": {
+      "request_model": "typed-decisions",
+      "serving_model": "laya-rl-agent",
+      "routed_model": "typed-decisions"
+    },
+    "typesafe.ai": {
+      "request_model": "jev-latest",
+      "resolved_model": null
+    }
+  },
+  "baseline_datasets": [
+    "aegis2",
+    "detect-jailbreak",
+    "hatecheck",
+    "toxigen"
+  ],
+  "dpi": 300,
+  "figures": [
+    {
+      "name": "fig01_paired_quality",
+      "title": "共同样本分类能力对比",
+      "caption": "固定 v1 / 0.5，按数据集展示 F1 与 AUROC。每个数据集内，所有模型使用完全相同的成功样本。AUROC 图中的 50% 虚线表示随机排序基线；没有伪造置信区间。",
+      "files": {
+        "png": "fig01_paired_quality.png",
+        "svg": "fig01_paired_quality.svg",
+        "pdf": "fig01_paired_quality.pdf"
+      }
+    },
+    {
+      "name": "fig02_quality_cost_tradeoff",
+      "title": "误报、漏报与耗时权衡",
+      "caption": "左图越靠左下越好，右图越靠左上越好。质量指标按共同数据集等权平均；耗时来自整轮日志，按全部处理样本加权，含网络和失败等待，不能解读为纯推理时延或 P95。",
+      "files": {
+        "png": "fig02_quality_cost_tradeoff.png",
+        "svg": "fig02_quality_cost_tradeoff.svg",
+        "pdf": "fig02_quality_cost_tradeoff.pdf"
+      }
+    },
+    {
+      "name": "fig03_threshold_sensitivity",
+      "title": "提示词与阈值敏感性",
+      "caption": "颜色区分模型，实线圆点表示 v1，虚线三角表示 v2。缺测留空，不补零。每个点只在其配置内使用共同成功样本，不同点的样本集合可能随请求错误变化；这是同测试集探索，不是独立验证后的性能提升。",
+      "files": {
+        "png": "fig03_threshold_sensitivity.png",
+        "svg": "fig03_threshold_sensitivity.svg",
+        "pdf": "fig03_threshold_sensitivity.pdf"
+      }
+    },
+    {
+      "name": "fig04_evaluation_coverage",
+      "title": "测试覆盖率与请求失败",
+      "caption": "覆盖率为成功样本数 / 参考样本数。灰色为未获得预测文件，斜线为完整落盘但全部请求失败；PII 行仅展示覆盖率，不代表脱敏质量。Laya 缺测不记零分。",
+      "files": {
+        "png": "fig04_evaluation_coverage.png",
+        "svg": "fig04_evaluation_coverage.svg",
+        "pdf": "fig04_evaluation_coverage.pdf"
+      }
+    }
+  ]
+}

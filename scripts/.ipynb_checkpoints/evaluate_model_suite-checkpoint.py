@@ -1,0 +1,93 @@
+import argparse
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score, roc_auc_score
+
+OUTPUT_DIR = Path("outputs")
+
+
+def summarize_file(path: Path) -> dict:
+    df = pd.read_csv(path)
+    valid = df[df["error"].fillna("") == ""].copy()
+    if valid.empty:
+        return {
+            "file": str(path),
+            "rows": len(df),
+            "valid": 0,
+            "error": len(df),
+            "accuracy": None,
+            "precision": None,
+            "recall": None,
+            "f1": None,
+            "auroc": None,
+            "mean_latency_ms": None,
+        }
+
+    y_true = valid["label"].astype(int)
+    y_pred = valid["prediction"].astype(int)
+    y_score = valid["score"].astype(float)
+    latency = valid["latency_ms"].dropna() if "latency_ms" in valid.columns else pd.Series(dtype=float)
+
+    metrics = {
+        "file": str(path),
+        "rows": len(df),
+        "valid": len(valid),
+        "error": len(df) - len(valid),
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred, zero_division=0),
+        "recall": recall_score(y_true, y_pred, zero_division=0),
+        "f1": f1_score(y_true, y_pred, zero_division=0),
+        "auroc": roc_auc_score(y_true, y_score),
+        "mean_latency_ms": latency.mean() if not latency.empty else None,
+        "p95_latency_ms": np.percentile(latency, 95) if not latency.empty else None,
+    }
+    return metrics
+
+
+def iter_csv_files(provider: str | None = None) -> list[Path]:
+    base = OUTPUT_DIR
+    files: list[Path] = []
+    if provider is None:
+        for child in base.iterdir():
+            if child.is_dir():
+                files.extend(sorted(child.glob("*.csv")))
+    else:
+        provider_dir = base / provider
+        if provider_dir.exists():
+            files.extend(sorted(provider_dir.glob("*.csv")))
+    return files
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Summarize all provider benchmark results across datasets, prompt versions, and thresholds.")
+    parser.add_argument("--provider", default=None, help="Optional provider name, e.g. typesafe.ai")
+    args = parser.parse_args()
+
+    csv_files = iter_csv_files(args.provider)
+    results = [summarize_file(path) for path in csv_files]
+
+    summary = pd.DataFrame(results)
+    if summary.empty:
+        print("No CSV results found in outputs.")
+        return
+
+    cols = [
+        "file",
+        "rows",
+        "valid",
+        "error",
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auroc",
+        "mean_latency_ms",
+        "p95_latency_ms",
+    ]
+    print(summary[cols].to_string(index=False))
+
+
+if __name__ == "__main__":
+    main()
