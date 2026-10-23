@@ -11,9 +11,14 @@ def main():
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/comparison"))
     parser.add_argument("--providers", default=",".join(MODELS), help="Comma-separated provider directory names")
     parser.add_argument("--paper-figures", action="store_true", help="Also export comparison PNG, SVG and PDF figures")
+    parser.add_argument("--external-summary", type=Path, help="Optional OpenJev aggregate CSV (reference-only comparison)")
     args = parser.parse_args()
     providers = [name.strip() for name in args.providers.split(",") if name.strip()]
     report = collect_report(args.input_dir, args.data_dir, providers)
+    if args.external_summary is not None:
+        from benchmark.external_summary import attach_openjev_summary
+
+        attach_openjev_summary(report, args.external_summary)
     write_report(report, args.output_dir)
     if args.paper_figures:
         from benchmark.paper_figures import write_paper_figures
