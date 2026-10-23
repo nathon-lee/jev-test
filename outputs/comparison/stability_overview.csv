@@ -1,0 +1,7 @@
+﻿provider,model,prompt,datasets,n,expected,coverage,rows,errors,error_rate,mean_score_std,mean_score_range,decision_flip_rate
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,v1,"['aegis2', 'detect-jailbreak', 'hatecheck', 'toxigen']",30685,30739,0.9982432740167214,122956,2,1.6265981326653436e-05,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,v1,"['aegis2', 'detect-jailbreak', 'hatecheck', 'toxigen']",30685,30739,0.9982432740167214,122956,64,0.00052051140245291,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,v1,"['aegis2', 'detect-jailbreak', 'hatecheck', 'toxigen']",30685,30739,0.9982432740167214,122956,0,0.0,0.005434898507012418,0.013370087573847615,0.012340083392853207
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,v2,"['aegis2', 'hatecheck', 'toxigen']",12467,12481,0.9988782950084127,49924,3,6.0091338835029246e-05,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,v2,"['aegis2', 'hatecheck', 'toxigen']",12467,12481,0.9988782950084127,49924,11,0.0002203349090617739,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,v2,"['aegis2', 'hatecheck', 'toxigen']",12467,12481,0.9988782950084127,49924,0,0.0,0.004918139563370749,0.012129623656597827,0.013236965088225411

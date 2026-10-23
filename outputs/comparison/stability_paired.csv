@@ -1,0 +1,22 @@
+﻿provider,model,dataset,prompt,expected,coverage,n,flipped,mean_score_std,mean_score_range,decision_flip_rate
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,toxigen,v1,6789,0.9988216232140227,6781,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,toxigen,v1,6789,0.9988216232140227,6781,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,toxigen,v1,6789,0.9988216232140227,6781,79,0.0051465029099867134,0.012672172245981418,0.011650199085680579
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,toxigen,v2,6789,0.9986743261157756,6780,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,toxigen,v2,6789,0.9986743261157756,6780,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,toxigen,v2,6789,0.9986743261157756,6780,88,0.004798653102207273,0.011799410029498525,0.012979351032448377
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,hatecheck,v1,3728,0.9997317596566524,3727,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,hatecheck,v1,3728,0.9997317596566524,3727,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,hatecheck,v1,3728,0.9997317596566524,3727,50,0.005096681632806716,0.012540917628119132,0.013415615776764154
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,hatecheck,v2,3728,0.9994635193133047,3726,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,hatecheck,v2,3728,0.9994635193133047,3726,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,hatecheck,v2,3728,0.9994635193133047,3726,35,0.004581185810270563,0.01127482555018787,0.00939345142243693
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,aegis2,v1,1964,1.0,1964,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,aegis2,v1,1964,1.0,1964,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,aegis2,v1,1964,1.0,1964,31,0.006415256584401719,0.01585030549898167,0.015784114052953158
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,aegis2,v2,1964,0.9984725050916496,1961,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,aegis2,v2,1964,0.9984725050916496,1961,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,aegis2,v2,1964,0.9984725050916496,1961,34,0.005374579777634409,0.013314635390107089,0.017338092809790925
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,detect-jailbreak,v1,18258,0.997535326979954,18213,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,detect-jailbreak,v1,18258,0.997535326979954,18213,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,detect-jailbreak,v1,18258,0.997535326979954,18213,155,0.005081152900854523,0.012416954922308241,0.008510404656014934
