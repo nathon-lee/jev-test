@@ -18,7 +18,13 @@ from benchmark.comparison import (
 )
 from scripts.evaluate_model_suite import summarize_file
 from scripts import evaluate_model_suite
-from benchmark.external_summary import attach_openjev_summary, read_openjev_summary
+from benchmark.external_summary import (
+    FOCUSED_DATASETS,
+    METRICS,
+    attach_openjev_summary,
+    read_openjev_summary,
+    reference_averages,
+)
 
 
 def save_csv(path, rows):
@@ -284,6 +290,39 @@ def test_external_summary_rejects_duplicates_and_missing_columns(tmp_path):
     path.write_text("dataset,prompt\ntoxigen,v1\n")
     with pytest.raises(ValueError, match="missing summary columns"):
         read_openjev_summary(path)
+
+
+def test_three_dataset_means_exclude_other_datasets_and_require_all_three():
+    providers = ["fastino.ai", "laya-ai.com", "typesafe.ai", "openjev"]
+    records = [
+        {
+            "provider": provider, "prompt": prompt, "dataset": dataset,
+            "status": "complete", "valid": 10,
+            **{metric: value if metric != "mean_elapsed_ms" else value * 1000 for metric in METRICS},
+        }
+        for provider in providers for prompt in ("v1", "v2")
+        for dataset, value in zip((*FOCUSED_DATASETS, "detect-jailbreak"), (0.1, 0.3, 0.5, 0.99))
+    ]
+    original = reference_averages(records, providers)
+    assert original[0]["accuracy"] == pytest.approx((0.1 + 0.3 + 0.5 + 0.99) / 4)
+    selected = reference_averages(records, providers, FOCUSED_DATASETS)
+    assert len(selected) == 8
+    for row in selected:
+        assert row["datasets"] == list(FOCUSED_DATASETS)
+        for metric in METRICS:
+            assert row[metric] == pytest.approx(300 if metric == "mean_elapsed_ms" else 0.3)
+    records = [
+        row for row in records if not (
+            row["provider"] == "laya-ai.com" and row["prompt"] == "v1" and row["dataset"] == "aegis2"
+        )
+    ]
+    missing = reference_averages(records, providers, FOCUSED_DATASETS)
+    for row in missing:
+        assert row["datasets"] == list(FOCUSED_DATASETS)
+        if row["prompt"] == "v1":
+            assert all(row[metric] is None for metric in METRICS)  # Never substitute a two-dataset mean.
+        else:
+            assert row["accuracy"] == pytest.approx(0.3)
 
 
 def test_shared_metrics_ties_and_single_class():

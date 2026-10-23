@@ -303,6 +303,15 @@ OpenJev 没有逐样本预测，不能核验共同输入/成功样本；总 Rows
 本地模型缺少完整四轮计时则标 N/A，不用某一阈值的耗时替代。
 `index.html` 展示三组新增参考图，稳定性三组仍仅保留超链接；汇总 PDF 保留全部图。
 该次完整报告生成后，`python -m scripts.plot_model_comparison` 可从保存的 JSON 重绘全部图表。
+另有 `outputs/comparison/figures/three_dataset_comparison.html` 独立页面，仅对 ToxiGen、HateCheck、
+AEGIS2 三个数据集等权平均，原四模型仅取 v1、阈值 0.5 的六项参考均值，并提供 PNG / SVG / PDF / CSV。
+该页本地模型耗时也只取对应 v1 / 0.5 运行的 elapsed/processed，不对四轮运行平均；
+OpenJev 取所提供汇总表中对应配置的耗时。其他参考图仍保留原有口径。
+该页另加入 Dynamo CPU、Dynamo GPU (A100)、Dynamo GPU (L4)、Mistral、Warden 的用户提供均值；
+用户已确认这些数值也覆盖相同三个数据集（原表 Scope 中的 4 为笔误）。新增配置各展示一次，
+图中不再区分 v1/v2，未提供的 F1 / AUROC 标 N/A，不从平均 Precision/Recall 推算 F1。
+新增配置的提示词、阈值与计时协议未知，仅作参考；耗时轴在 1 ms 以上使用对数刻度。
+该页由 `index.html` 超链接进入，不替换原有参考均值图；指定数据集缺失时标 N/A，不缩减范围。
 
 报告入口为 `outputs/comparison/comparison.html`，图表入口为
 `outputs/comparison/figures/index.html`。

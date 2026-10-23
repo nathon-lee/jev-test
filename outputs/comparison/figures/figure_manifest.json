@@ -153,6 +153,16 @@
         "svg": "fig12_openjev_reference_averages.svg",
         "pdf": "fig12_openjev_reference_averages.pdf"
       }
+    },
+    {
+      "name": "fig13_three_dataset_averages",
+      "title": "ToxiGen, HateCheck, AEGIS2: Multi-model Reference Averages",
+      "caption": "Accuracy, Precision, Recall, F1, AUROC and average latency are reported for ToxiGen, HateCheck and AEGIS2, with equal weights of one third per dataset; Detect-Jailbreak and all other datasets are excluded. The original four models use only prompt v1 at threshold 0.5, each with its own successful samples; OpenJev results are supplied internal summaries. Local model latency is elapsed/processed from each dataset's v1 / 0.5 run, averaged equally across datasets; OpenJev latency comes from the corresponding supplied summary entries. Missing quality results or complete timing for any required dataset make the corresponding mean N/A; the dataset scope is not reduced. Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied three-dataset means. The user confirmed that '4' in the original Scope column was a typo. These means are not averaged again; their prompts, thresholds and timing protocols were not supplied. Unreported F1 or AUROC values are N/A; F1 is not inferred from average Precision/Recall. The latency axis uses a logarithmic scale above 1 ms. Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking.",
+      "files": {
+        "png": "fig13_three_dataset_averages.png",
+        "svg": "fig13_three_dataset_averages.svg",
+        "pdf": "fig13_three_dataset_averages.pdf"
+      }
     }
   ],
   "external_comparison": {

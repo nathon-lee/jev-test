@@ -1,5 +1,7 @@
 """Plots of saved comparison metrics, without new inference."""
 
+import base64
+import csv
 import html
 import json
 import math
@@ -16,6 +18,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
 
 from benchmark.comparison import DATASETS, PROMPTS, STABILITY_METRICS, THRESHOLDS, baseline_rows
+from benchmark.external_summary import reference_averages, three_dataset_averages
 
 
 COLORS = {"fastino.ai": "#0072B2", "laya-ai.com": "#D55E00", "typesafe.ai": "#009E73", "openjev": "#CC79A7"}
@@ -477,22 +480,97 @@ def external_dataset_figure(report, prompt):
     return fig
 
 
-def external_averages_figure(report):
+def external_averages_figure(report, datasets=None):
     comparison = report["external_comparison"]
+    overview = comparison["overview"] if datasets is None else reference_averages(
+        comparison["runs"], comparison["providers"], datasets,
+    )
     labels, records = [], []
     for prompt in PROMPTS:
-        rows = [row for row in comparison["overview"] if row["prompt"] == prompt]
-        labels.append(f"{prompt}\n({len(rows[0]['datasets'])} shared datasets)")
+        rows = [row for row in overview if row["prompt"] == prompt]
+        scope = "shared" if datasets is None else "selected"
+        labels.append(f"{prompt}\n({len(rows[0]['datasets'])} {scope} datasets)")
         records.append({row["provider"]: row for row in rows})
     fig = six_metric_panels(comparison, labels, records)
     decorate(
-        fig, comparison, "Four-model reference averages (not sample-paired)",
-        "threshold = 0.5 | shared non-PII dataset names | equal dataset weights | prompts kept separate",
+        fig, comparison,
+        "Four-model reference averages (not sample-paired)" if datasets is None
+        else "Four-model reference averages: ToxiGen / HateCheck / AEGIS2",
+        "threshold = 0.5 | shared non-PII dataset names | equal dataset weights | prompts kept separate"
+        if datasets is None else
+        "threshold = 0.5 | ToxiGen / HateCheck / AEGIS2 | equal dataset weights | prompts kept separate",
         "Each model uses its own successful samples; no common OpenJev sample IDs are available. Not a fair ranking.\n"
         "Latency = mean per-run elapsed / processed across four complete runs, then an equal-weight dataset mean.\n"
-        "Missing any selected dataset's four-run timing makes average latency N/A; failure waiting is included.\n"
+        + (
+            "Missing any selected dataset's four-run timing makes average latency N/A; failure waiting is included.\n"
+            if datasets is None else
+            "Missing required data makes quality N/A; incomplete four-run timing makes latency N/A. Failures included.\n"
+        )
+        +
         "OpenJev summary precision is retained as supplied; raw predictions and repeat-call stability are unavailable.",
         legend_style="bars",
+    )
+    return fig
+
+
+def three_dataset_averages_figure(report):
+    rows = three_dataset_averages(report)
+    supplied_colors = {
+        "Dynamo CPU": "#6A3D9A", "Dynamo GPU (A100)": "#8C6BB1",
+        "Dynamo GPU (L4)": "#BC9BD3", "Mistral": "#B15928", "Warden": "#666666",
+    }
+    labels = [NAMES.get(row["provider"], row["provider"]) for row in rows]
+    fig, axes = plt.subplots(3, 2, figsize=(18.4, 16.5))
+    fig.subplots_adjust(left=0.15, right=0.97, top=0.88, bottom=0.14, hspace=0.3, wspace=0.65)
+    for ax, metric, title in zip(
+        axes.flat,
+        ("accuracy", "precision", "recall", "f1", "auroc", "mean_elapsed_ms"),
+        ("Accuracy", "Precision", "Recall", "F1", "AUROC", "AVG latency (ms)"),
+    ):
+        latency = metric == "mean_elapsed_ms"
+        values = [
+            row[metric] * (1 if latency else 100) if row[metric] is not None else np.nan
+            for row in rows
+        ]
+        bars = ax.barh(
+            np.arange(len(rows)), values,
+            color=[COLORS[row["provider"]] if row["provider"] in COLORS
+                   else supplied_colors[row["provider"]] for row in rows],
+            edgecolor="#263238", linewidth=0.4,
+        )
+        for bar, value in zip(bars, values):
+            available = math.isfinite(value)
+            ax.annotate(
+                f"{value:,.2f}" if available else "N/A",
+                (value if available else 0, bar.get_y() + bar.get_height() / 2),
+                xytext=(4, 0), textcoords="offset points", va="center", fontsize=8,
+            )
+        ax.set_yticks(np.arange(len(rows)), labels)
+        ax.set_ylim(len(rows) - 0.5, -0.5)
+        ax.set_title(title)
+        if latency:
+            ax.set_xscale("symlog", linthresh=1)
+            ax.set_xlim(0, max((value for value in values if math.isfinite(value)), default=1) * 6)
+            ax.set_xlabel("ms / sample (log scale above 1 ms; lower is better)")
+        else:
+            ax.set_xlim(0, 120)
+            ax.set_xticks(range(0, 101, 20))
+            ax.set_xlabel("% (higher is better)")
+        style_axis(ax, "x")
+    fig.suptitle("Three-dataset model reference averages", fontsize=16, y=0.97)
+    fig.text(
+        0.5, 0.935, "ToxiGen / HateCheck / AEGIS2 | equal dataset weights | not sample-paired",
+        ha="center", fontsize=10,
+    )
+    fig.text(
+        0.07, 0.095,
+        "Original four models: prompt v1, threshold 0.5; quality and latency are equal-weight dataset means.\n"
+        "Local latency uses only the v1 / 0.5 run per dataset; OpenJev uses its supplied summary latency.\n"
+        "Dynamo / Mistral / Warden: user-supplied three-dataset means, scope confirmed by user (original '4' was a typo).\n"
+        "Their prompt, threshold and timing protocol were not supplied; means are shown once.\n"
+        "N/A = not supplied or required source data missing. F1 is not inferred from average precision / recall.\n"
+        "Successful samples and timing protocols are not aligned; descriptive reference only, not a fair ranking.",
+        fontsize=9, va="top",
     )
     return fig
 
@@ -590,7 +668,38 @@ EXTERNAL_FIGURES = (
         "这里仅共同数据集名称相同，各模型成功样本未对齐，不能与原有共同样本模型均值混排。"
         "计时先对各数据集完整四轮取均值，再对数据集等权平均；任一计时缺失则平均耗时为 N/A。",
     ),
+    (
+        "fig13_three_dataset_averages",
+        three_dataset_averages_figure,
+        "ToxiGen, HateCheck, AEGIS2: Multi-model Reference Averages",
+        "Accuracy, Precision, Recall, F1, AUROC and average latency are reported for ToxiGen, HateCheck and AEGIS2, "
+        "with equal weights of one third per dataset; Detect-Jailbreak and all other datasets are excluded. "
+        "The original four models use only prompt v1 at threshold 0.5, each with its own successful samples; "
+        "OpenJev results are supplied internal summaries. "
+        "Local model latency is elapsed/processed from each dataset's v1 / 0.5 run, averaged equally across datasets; "
+        "OpenJev latency comes from the corresponding supplied summary entries. "
+        "Missing quality results or complete timing for any required dataset make the corresponding mean N/A; "
+        "the dataset scope is not reduced. "
+        "Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied three-dataset means. "
+        "The user confirmed that '4' in the original Scope column was a typo. These means are not averaged again; "
+        "their prompts, thresholds and timing protocols were not supplied. "
+        "Unreported F1 or AUROC values are N/A; F1 is not inferred from average Precision/Recall. "
+        "The latency axis uses a logarithmic scale above 1 ms. "
+        "Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking.",
+    ),
 )
+
+
+def gallery_header(title):
+    escaped = html.escape(title)
+    return """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>""" + escaped + """</title><style>
+body{font:16px/1.7 system-ui,sans-serif;background:#f3f5f8;color:#172438;margin:0}
+main{max-width:1250px;margin:auto;padding:28px}section{background:white;padding:24px;margin:24px 0}
+img{width:100%;height:auto}a{color:#174c90}h1,h2{line-height:1.4}
+@media print{body{background:white}section{break-inside:avoid;padding:0}}
+</style><main><h1>""" + escaped + "</h1>\n"
 
 
 def latex_escape(text):
@@ -694,20 +803,31 @@ def write_paper_figures(report, output_dir, dpi=300):
                 + "（" + downloads + "）</p>"
             )
             continue
-        cards.append(
+        image_source = figure["files"]["svg"]
+        if figure["name"] in ("fig01_paired_quality", "fig13_three_dataset_averages"):
+            image_data = base64.b64encode((output_dir / figure["files"]["png"]).read_bytes()).decode("ascii")
+            image_source = "data:image/png;base64," + image_data
+        card = (
             "<section><h2>" + html.escape(figure["title"]) + "</h2>"
-            + f'<img src="{figure["files"]["svg"]}" alt="{html.escape(figure["title"])}">'
+            + f'<img src="{image_source}" alt="{html.escape(figure["title"])}">'
             + "<p>" + html.escape(figure["caption"]) + "</p><p>" + downloads + "</p></section>"
         )
-    gallery = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>模型对比图</title><style>
-body{font:16px/1.7 system-ui,sans-serif;background:#f3f5f8;color:#172438;margin:0}
-main{max-width:1250px;margin:auto;padding:28px}section{background:white;padding:24px;margin:24px 0}
-img{width:100%;height:auto}a{color:#174c90}h1,h2{line-height:1.4}
-@media print{body{background:white}section{break-inside:avoid;padding:0}}
-</style><main><h1>模型对比图</h1>
-<p>图内使用英文标签，图注使用中文。PDF / SVG 为矢量格式，PNG 默认为 300 DPI。
+        if figure["name"] == "fig13_three_dataset_averages":
+            averages = three_dataset_averages(report)
+            with (output_dir / "three_dataset_averages.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+                writer = csv.DictWriter(stream, fieldnames=list(averages[0]))
+                writer.writeheader()
+                writer.writerows({**row, "datasets": ",".join(row["datasets"])} for row in averages)
+            page = gallery_header("Three-dataset Multi-model Reference Averages")
+            page += '<p><a href="index.html">返回完整图表报告</a> | '
+            page += '<a href="three_dataset_averages.csv">下载三数据集均值 CSV</a></p>'
+            page += "<p>数据快照（UTC）：" + html.escape(report["generated_at"]) + "</p>"
+            page += card + "</main></html>\n"
+            (output_dir / "three_dataset_comparison.html").write_text(page, encoding="utf-8")
+            continue
+        cards.append(card)
+    gallery = gallery_header("模型对比图")
+    gallery += """<p>图内使用英文标签，图注使用中文。PDF / SVG 为矢量格式，PNG 默认为 300 DPI。
 模型身份由用户补充；TypeSafe resolved model 需以接口返回为准。</p>
 <p><a href="paper_figures.pdf">下载全部图表 PDF</a> |
 <a href="table01_baseline.tex">下载 LaTeX 三线表</a> |
@@ -723,6 +843,8 @@ img{width:100%;height:auto}a{color:#174c90}h1,h2{line-height:1.4}
             '<a href="../openjev_summary.csv">汇总数据 CSV</a> | '
             '<a href="../external_comparison_runs.csv">四模型参考明细 CSV</a> | '
             '<a href="../external_comparison_overview.csv">参考均值 CSV</a></p>'
+            '<p><a href="three_dataset_comparison.html">'
+            'View separately: ToxiGen, HateCheck, AEGIS2 Multi-model Reference Averages</a></p>'
         )
     gallery += "<p>数据快照（UTC）：" + html.escape(report["generated_at"]) + "</p>"
     gallery += "".join(cards)
