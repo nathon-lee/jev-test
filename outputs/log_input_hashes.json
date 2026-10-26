@@ -1,0 +1,12 @@
+{
+  "fastino.ai/run_model_suite.log": {
+    "jailbreak-classification_v1_t0.5.csv": "e233c5026edda2d41c7317512dc9a0b7dc362a8c63667ef807225e2965569c6e",
+    "jailbreak-classification_v1_t0.8.csv": "94ad8c2f663db9cab59b6747fef19f1bce44005913366ca98b89ed71f36b881f",
+    "jailbreak-classification_v2_t0.5.csv": "044ab07e7483fb573683c59c07b0996066fe81c2eca4db5c1e05d32241e0fbd3",
+    "jailbreak-classification_v2_t0.8.csv": "af1eac1565a82e9951db68af1b127d27d6b2acded2398713218850cc97cb19d3"
+  },
+  "laya-ai.com/run_model_suite_2026-10-19_123324.log": {
+    "detect-jailbreak_v1_t0.5.csv": "d76f0bf6a0daf5257effc71be8830173b3ef5ad75e6df2171e2a0f0efbed70b3",
+    "detect-jailbreak_v2_t0.5.csv": "0a66f81a5927baff43f0f9c3a8af5cfdc8a08be54fd2c62d839e1f5968cae3aa"
+  }
+}

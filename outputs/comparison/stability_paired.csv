@@ -17,6 +17,15 @@ typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,aegi
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,aegis2,v2,1964,0.9984725050916496,1961,0,0.0,0.0,0.0
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,aegis2,v2,1964,0.9984725050916496,1961,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,aegis2,v2,1964,0.9984725050916496,1961,34,0.005374579777634409,0.013314635390107089,0.017338092809790925
-fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,detect-jailbreak,v1,18258,0.997535326979954,18213,0,0.0,0.0,0.0
-laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,detect-jailbreak,v1,18258,0.997535326979954,18213,0,0.0,0.0,0.0
-typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,detect-jailbreak,v1,18258,0.997535326979954,18213,155,0.005081152900854523,0.012416954922308241,0.008510404656014934
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,detect-jailbreak,v1,18258,0.998959360280425,18239,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,detect-jailbreak,v1,18258,0.998959360280425,18239,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,detect-jailbreak,v1,18258,0.998959360280425,18239,155,0.005079753679904526,0.012412961236909919,0.008498272931630024
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,jailbreakhub,v1,15140,0.9993394980184941,15130,35,0.000931248355644002,0.002150625980336231,0.002313284864507601
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,jailbreakhub,v1,15140,0.9993394980184941,15130,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,jailbreakhub,v1,15140,0.9993394980184941,15130,142,0.005014536337793048,0.01222009253139458,0.009385327164573694
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,jailbreakhub,v2,15140,0.9992073976221929,15128,2,0.0001125672596652245,0.00025996295067862347,0.00013220518244315177
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,jailbreakhub,v2,15140,0.9992073976221929,15128,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,jailbreakhub,v2,15140,0.9992073976221929,15128,109,0.004181532570515951,0.010136171337916446,0.0072051824431517714
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,pii_masking_nano_1k,v2,900,0.32666666666666666,294,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,pii_masking_nano_1k,v2,900,0.32666666666666666,294,0,0.0,0.0,0.0
+typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,pii_masking_nano_1k,v2,900,0.32666666666666666,294,1,0.0028633416115289396,0.006870748299319728,0.003401360544217687
