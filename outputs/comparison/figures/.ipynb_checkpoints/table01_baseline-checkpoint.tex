@@ -1,0 +1,16 @@
+% Requires \usepackage{booktabs}. Identity metadata supplied by the user.
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Model & Macro F1 (\%) & Macro AUROC (\%) & Macro FPR (\%) & Macro FNR (\%) & Elapsed (ms) \\
+\midrule
+\shortstack[l]{Fastino | request: fastino/GLiDE\\resolved: glide\_v2} & 55.48 & 57.20 & 87.10 & 14.28 & 432.75 \\
+\shortstack[l]{Laya | request: typed-decisions\\serving: laya-rl-agent\\routed: typed-decisions} & 59.28 & 40.44 & 100.00 & 0.00 & 717.83 \\
+\shortstack[l]{TypeSafe | request: jev-latest\\resolved: unconfirmed (API response required)} & 74.15 & 92.52 & 12.60 & 21.08 & 225.57 \\
+\bottomrule
+\end{tabular}
+\caption{Paired baseline on 4 common completed non-PII datasets (prompt v1, threshold 0.5). Quality metrics are dataset-macro averages over common successful sample IDs. Elapsed time is amortized end-to-end log time per processed sample, not pure inference latency. TypeSafe's resolved model remains unconfirmed until an API response is available.}
+\label{tab:model-comparison}
+\end{table*}

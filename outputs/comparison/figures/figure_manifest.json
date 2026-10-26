@@ -1,5 +1,5 @@
 {
-  "source_generated_at": "2026-10-21T23:45:11.563051+00:00",
+  "source_generated_at": "2026-10-23T04:34:55.578736+00:00",
   "model_identities": {
     "fastino.ai": {
       "request_model": "fastino/GLiDE",
@@ -21,6 +21,17 @@
     "hatecheck",
     "toxigen"
   ],
+  "stability_settings": {
+    "repeat_thresholds": [
+      0.5,
+      0.6,
+      0.7,
+      0.8
+    ],
+    "decision_threshold": 0.5,
+    "std_ddof": 0,
+    "required_repeats": 4
+  },
   "dpi": 300,
   "figures": [
     {
@@ -46,7 +57,7 @@
     {
       "name": "fig03_threshold_sensitivity",
       "title": "提示词与阈值敏感性",
-      "caption": "颜色区分模型，实线圆点表示 v1，虚线三角表示 v2。缺测留空，不补零。每个点只在其配置内使用共同成功样本，不同点的样本集合可能随请求错误变化；这是同测试集探索，不是独立验证后的性能提升。",
+      "caption": "颜色区分模型，实线圆点表示 v1，虚线三角表示 v2。缺测留空，不补零。每个点只在其配置内使用共同成功样本，不同点的样本集合可能随请求错误变化；各阈值重新调用模型，曲线混有重复调用波动，不是固定 score 下的纯阈值效应；这是同测试集探索，不是独立验证后的性能提升。",
       "files": {
         "png": "fig03_threshold_sensitivity.png",
         "svg": "fig03_threshold_sensitivity.svg",
@@ -62,6 +73,134 @@
         "svg": "fig04_evaluation_coverage.svg",
         "pdf": "fig04_evaluation_coverage.pdf"
       }
+    },
+    {
+      "name": "fig05_dataset_metrics",
+      "title": "逐数据集六项指标",
+      "caption": "固定 v1 / 0.5，展示全部数据集的 Accuracy、Precision、Recall、F1、AUROC 和 AVG latency (ms)。质量指标使用各模型自身成功样本，不是共同样本公平排名；请求错误不计入质量分数。PII 仅衡量是否含 PII 的检出，不是脱敏质量，单类 AUROC 无定义。耗时为完整对齐日志的 elapsed / processed，包含失败等待及网络开销。缺测、无成功预测、无定义指标或无完整计时均标 N/A，不补零；请求全失败仍可有日志耗时。",
+      "files": {
+        "png": "fig05_dataset_metrics.png",
+        "svg": "fig05_dataset_metrics.svg",
+        "pdf": "fig05_dataset_metrics.pdf"
+      }
+    },
+    {
+      "name": "fig06_model_averages",
+      "title": "模型平均指标",
+      "caption": "固定 v1 / 0.5，在共同完成且有共同成功样本的非 PII 数据集上，展示 Average Accuracy、Avg Precision、Avg Recall、Avg AUROC 和 Avg latency (ms)。分类指标先按共同成功样本计算，再对数据集等权平均；耗时也对各数据集的整轮平均耗时等权平均，与图 2 按样本数加权的耗时口径不同。缺少任一共同数据集完整计时，平均耗时即标 N/A。",
+      "files": {
+        "png": "fig06_model_averages.png",
+        "svg": "fig06_model_averages.svg",
+        "pdf": "fig06_model_averages.pdf"
+      }
+    },
+    {
+      "name": "fig07_repeat_consistency_v1",
+      "title": "重复调用一致性：v1 共同数据集",
+      "caption": "仅展示所有模型四轮均完整且有共同成功样本的数据集，每个数据集内使用所有模型四次均成功的同一批样本。平均分数总体标准差、平均分数极差、统一按 0.5 判定的翻转样本比例均越低越一致；前两项图内乘以 100 展示，原始分数单位为 0–1。同时展示所有模型四轮共同成功覆盖率及各模型的请求失败率。缺轮或无共同成功样本的数据集不展示。已测零值用基线标记显示，不是缺测或补零；一致不代表正确，历史服务变化也会影响结果。",
+      "files": {
+        "png": "fig07_repeat_consistency_v1.png",
+        "svg": "fig07_repeat_consistency_v1.svg",
+        "pdf": "fig07_repeat_consistency_v1.pdf"
+      }
+    },
+    {
+      "name": "fig08_repeat_consistency_v2",
+      "title": "重复调用一致性：v2 共同数据集",
+      "caption": "与 v1 相同，仅展示所有模型四轮完整且有共同成功样本的数据集，按所有模型共同样本计算；v2 独立统计。直接比较四次 score；判定统一使用 score >= 0.5，不比较原 CSV 各不相同阈值的 prediction。仅四次调用，属于探索性观察，无法将差异完全归因于模型本身的随机性。零值用基线标记显示，表示已测无波动，不是没有数据。覆盖率使用所有模型四轮共同成功样本，失败率针对这些数据集各模型的全部已落盘请求。",
+      "files": {
+        "png": "fig08_repeat_consistency_v2.png",
+        "svg": "fig08_repeat_consistency_v2.svg",
+        "pdf": "fig08_repeat_consistency_v2.pdf"
+      }
+    },
+    {
+      "name": "fig09_repeat_consistency_averages",
+      "title": "重复调用一致性：共同样本模型均值",
+      "caption": "v1、v2 分开统计。每个数据集要求所有模型四轮完整，使用所有模型四次均成功的同一批样本，再对有共同成功样本的非 PII 数据集等权平均。三项均越低越一致。不同提示词的共同数据集或样本可能不同，无可用共同数据集标 N/A。已测零值用基线标记显示，不是缺测或补零。原始指标、共同样本数、覆盖率及失败率见完整报告与 CSV。",
+      "files": {
+        "png": "fig09_repeat_consistency_averages.png",
+        "svg": "fig09_repeat_consistency_averages.svg",
+        "pdf": "fig09_repeat_consistency_averages.pdf"
+      }
+    },
+    {
+      "name": "fig10_openjev_reference_v1",
+      "title": "含 OpenJev 的四模型参考对比：v1",
+      "caption": "固定阈值 0.5。OpenJev 为用户提供的内部汇总结果，其他模型使用各自成功样本；无法按 OpenJev 的共同成功样本对齐，不作为公平排名。Rows 是总行数，不将其当作有效样本数。PII 仅为是否含 PII 的检出，单类 AUROC 标 N/A。四模型耗时统一取每个数据集/提示词四轮完整日志的 elapsed/processed 等权均值，包含失败等待、客户端及网络开销；缺少完整四轮计时标 N/A。原有共同样本基线与稳定性分析保持不变，不加入仅有汇总数据的 OpenJev。",
+      "files": {
+        "png": "fig10_openjev_reference_v1.png",
+        "svg": "fig10_openjev_reference_v1.svg",
+        "pdf": "fig10_openjev_reference_v1.pdf"
+      }
+    },
+    {
+      "name": "fig11_openjev_reference_v2",
+      "title": "含 OpenJev 的四模型参考对比：v2",
+      "caption": "口径与 v1 参考图相同，v2 独立统计。分类指标对应阈值 0.5，不对四个阈值的质量分数取平均。耗时则对同数据集/提示词四轮完整运行的 elapsed/processed 取均值。OpenJev 有效样本数及错误数未从有 OCR 错字的文本推断；原始数值采用最初清晰表格，不擅自修正。",
+      "files": {
+        "png": "fig11_openjev_reference_v2.png",
+        "svg": "fig11_openjev_reference_v2.svg",
+        "pdf": "fig11_openjev_reference_v2.pdf"
+      }
+    },
+    {
+      "name": "fig12_openjev_reference_averages",
+      "title": "含 OpenJev 的四模型参考均值",
+      "caption": "仅对所有模型均有可用质量结果的非 PII 数据集等权平均，v1/v2 分开。展示 Average Accuracy、Avg Precision、Avg Recall、Avg F1、Avg AUROC、Avg latency。这里仅共同数据集名称相同，各模型成功样本未对齐，不能与原有共同样本模型均值混排。计时先对各数据集完整四轮取均值，再对数据集等权平均；任一计时缺失则平均耗时为 N/A。",
+      "files": {
+        "png": "fig12_openjev_reference_averages.png",
+        "svg": "fig12_openjev_reference_averages.svg",
+        "pdf": "fig12_openjev_reference_averages.pdf"
+      }
+    },
+    {
+      "name": "fig13_three_dataset_averages",
+      "title": "ToxiGen, HateCheck, AEGIS2: Multi-model Reference Averages",
+      "caption": "Accuracy, Precision, Recall, F1, AUROC and average latency are reported for ToxiGen, HateCheck and AEGIS2, with equal weights of one third per dataset; Detect-Jailbreak and all other datasets are excluded. The original four models use only prompt v1 at threshold 0.5, each with its own successful samples; OpenJev results are supplied internal summaries. Local model latency is elapsed/processed from each dataset's v1 / 0.5 run, averaged equally across datasets; OpenJev latency comes from the corresponding supplied summary entries. Missing quality results or complete timing for any required dataset make the corresponding mean N/A; the dataset scope is not reduced. Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied three-dataset means. The user confirmed that '4' in the original Scope column was a typo. These means are not averaged again; their prompts, thresholds and timing protocols were not supplied. Unreported F1 or AUROC values are N/A; F1 is not inferred from average Precision/Recall. The latency axis uses a logarithmic scale above 1 ms. Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking.",
+      "files": {
+        "png": "fig13_three_dataset_averages.png",
+        "svg": "fig13_three_dataset_averages.svg",
+        "pdf": "fig13_three_dataset_averages.pdf"
+      }
     }
-  ]
+  ],
+  "external_comparison": {
+    "source": "data/external/openjev_summary.csv",
+    "source_kind": "user_supplied_aggregate",
+    "notes": "OpenJev 数值取自用户最初提供的清晰汇总表，分类阈值均为 0.5；补充 OCR 文本有错字，不据此修正数值或推断混淆矩阵。Rows 为总测试行数，有效样本数和错误数未可靠录入，保持未知，不将 Rows 当作有效样本数。OpenJev 只提供汇总指标，未提供逐样本 score、预测或模型版本；不能核验相同输入、共同成功样本或计算重复调用稳定性，不加入原有公平基线与排名。参考图按各模型自身成功样本统计，仅作描述性对照。耗时统一为每个数据集/提示词四轮完整运行的 elapsed/processed 算术平均，包含失败请求、等待、客户端及网络开销，不是纯推理时间；无完整四轮计时标 N/A。",
+    "providers": [
+      "fastino.ai",
+      "laya-ai.com",
+      "typesafe.ai",
+      "openjev"
+    ],
+    "model_identities": {
+      "fastino.ai": {
+        "request_model": "fastino/GLiDE",
+        "resolved_model": "glide_v2"
+      },
+      "laya-ai.com": {
+        "request_model": "typed-decisions",
+        "serving_model": "laya-rl-agent",
+        "routed_model": "typed-decisions"
+      },
+      "typesafe.ai": {
+        "request_model": "jev-latest",
+        "resolved_model": null
+      },
+      "openjev": {
+        "request_model": "not supplied",
+        "resolved_model": null
+      }
+    },
+    "classification_threshold": 0.5,
+    "latency_method": "mean_elapsed_per_processed_over_four_complete_runs",
+    "repeat_thresholds": [
+      0.5,
+      0.6,
+      0.7,
+      0.8
+    ]
+  }
 }

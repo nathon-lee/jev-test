@@ -289,6 +289,30 @@ python -m pip install -r requirements.txt
 python -m scripts.compare_models --paper-figures
 ```
 
+加入用户提供的 OpenJev 内部汇总表：
+
+```bash
+python -m scripts.compare_models --external-summary data/external/openjev_summary.csv --paper-figures
+```
+
+该表保留最初提供的 16 行 v1/v2、阈值 0.5 的指标及精度，PII 的 AUROC 留空。
+仅加入单独的四模型参考图与共同非 PII 数据集等权均值，不加入原有共同成功样本基线或稳定性分析。
+OpenJev 没有逐样本预测，不能核验共同输入/成功样本；总 Rows 不当作有效样本数，
+也不从有错字的 OCR 文本推断错误数或混淆矩阵。模型版本保持未确认。
+参考图的耗时对每个数据集/提示词的四轮完整日志 elapsed/processed 等权平均，包含失败等待；
+本地模型缺少完整四轮计时则标 N/A，不用某一阈值的耗时替代。
+`index.html` 展示三组新增参考图，稳定性三组仍仅保留超链接；汇总 PDF 保留全部图。
+该次完整报告生成后，`python -m scripts.plot_model_comparison` 可从保存的 JSON 重绘全部图表。
+另有 `outputs/comparison/figures/three_dataset_comparison.html` 独立页面，仅对 ToxiGen、HateCheck、
+AEGIS2 三个数据集等权平均，原四模型仅取 v1、阈值 0.5 的六项参考均值，并提供 PNG / SVG / PDF / CSV。
+该页本地模型耗时也只取对应 v1 / 0.5 运行的 elapsed/processed，不对四轮运行平均；
+OpenJev 取所提供汇总表中对应配置的耗时。其他参考图仍保留原有口径。
+该页另加入 Dynamo CPU、Dynamo GPU (A100)、Dynamo GPU (L4)、Mistral、Warden 的用户提供均值；
+用户已确认这些数值也覆盖相同三个数据集（原表 Scope 中的 4 为笔误）。新增配置各展示一次，
+图中不再区分 v1/v2，未提供的 F1 / AUROC 标 N/A，不从平均 Precision/Recall 推算 F1。
+新增配置的提示词、阈值与计时协议未知，仅作参考；耗时轴在 1 ms 以上使用对数刻度。
+该页由 `index.html` 超链接进入，不替换原有参考均值图；指定数据集缺失时标 N/A，不缩减范围。
+
 报告入口为 `outputs/comparison/comparison.html`，图表入口为
 `outputs/comparison/figures/index.html`。
 
@@ -340,6 +364,28 @@ python -m scripts.plot_model_comparison
 - 误报—漏报、AUROC—日志平均耗时散点图。
 - v1 / v2 提示词与阈值敏感性曲线。
 - 全数据集测试覆盖率热力图，区分缺测和全部请求失败。
+- 逐数据集 Accuracy / Precision / Recall / F1 / AUROC / AVG latency (ms) 分组柱状图。
+- 模型 Average Accuracy / Avg Precision / Avg Recall / Avg AUROC / Avg latency 分组柱状图。
+- v1 / v2 各自的逐数据集重复调用一致性，以及共同样本的模型宏平均一致性图。
+
+分类指标固定使用 `v1 / 0.5`。逐数据集图展示各模型自身成功样本（含 PII 检出，不代表脱敏质量），
+模型平均图则使用共同非 PII 基线的共同成功样本，对数据集等权平均。
+Avg latency 同样对各数据集的日志平均耗时等权平均，与散点图的样本加权耗时不同；
+均包含网络及失败等待，不是纯推理时延。缺测、无有效样本或无定义的 AUROC 标为 N/A，不补零。
+旧版 `comparison.json` 需先运行 `python -m scripts.compare_models` 补齐模型平均及一致性指标后再重绘。
+
+重复调用一致性复用四个阈值轮次的 `score`，无需重新调用模型：阈值只用于本地判定，不进入请求。
+v1、v2 分开统计，要求四轮完整落盘，并按 `sample_id` 取四次均成功的样本。
+每个样本计算总体标准差（`ddof=0`）、极差，再取样本平均；判定翻转率则将四次分数统一按
+`score >= 0.5` 判定，统计出现过不同判定的样本占比，不能直接比较原 CSV 的不同阈值 `prediction`。
+三项均越低越一致，但稳定不代表正确；历史服务版本、路由、运行时段变化也可能影响结果。
+图内标准差与极差乘以 100 展示，CSV 保留 0–1 原始分数单位，同时报告成功交集覆盖率与请求失败率。
+模型宏平均使用各提示词内所有模型四次均成功的共同样本，对共同非 PII 数据集等权平均；
+缺轮、部分落盘或无共同成功样本的指标标 N/A，不补零。
+逐数据集稳定性图也只展示所有模型四轮完整且有共同成功样本的数据集，并使用同一批共同样本计算；
+零波动以基线标记和数值 0 显示，不是缺测。完整逐模型记录仍保留在报告与 CSV 中。
+原阈值敏感性曲线混有重复调用波动，不代表固定分数下的纯阈值效应。
+原始结果导出到 `stability.csv`、`stability_paired.csv`、`stability_overview.csv`。
 
 每张图同时导出 300 DPI PNG、矢量 SVG 和 PDF；`paper_figures.pdf` 汇总全部图，
 `table01_baseline.tex` 为 LaTeX 三线表（需 `booktabs`）。

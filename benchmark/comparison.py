@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from itertools import combinations
 from pathlib import Path
-from statistics import mean
+from statistics import mean, pstdev
 
 import pandas as pd
 
@@ -52,6 +52,8 @@ DATASETS = {
 }
 PROMPTS = ("v1", "v2")
 THRESHOLDS = (0.5, 0.6, 0.7, 0.8)
+STABILITY_THRESHOLD = 0.5
+STABILITY_METRICS = ("mean_score_std", "mean_score_range", "decision_flip_rate")
 FILENAME = re.compile(r"(.+)_(v[12])_t(0\.\d+)\.csv$")
 START = re.compile(
     r"Running benchmark for (\S+) \| (\S+) \| (v[12]) \| "
@@ -134,6 +136,25 @@ def classification_metrics(rows):
     )
 
 
+def stability_metrics(frames, sample_ids):
+    """Compare scores from four calls, never predictions made at different thresholds."""
+    if len(frames) != len(THRESHOLDS):
+        raise ValueError("Stability requires all four repeat runs")
+    deviations, ranges, flipped = [], [], 0
+    for sample in sorted(sample_ids):
+        scores = [frame[sample].score for frame in frames]
+        deviations.append(pstdev(scores))
+        ranges.append(max(scores) - min(scores))
+        flipped += int(min(scores) < STABILITY_THRESHOLD <= max(scores))
+    count = len(deviations)
+    return {
+        "n": count, "flipped": flipped,
+        "mean_score_std": mean(deviations) if count else None,
+        "mean_score_range": mean(ranges) if count else None,
+        "decision_flip_rate": flipped / count if count else None,
+    }
+
+
 def read_predictions(path, reference, provider, dataset, prompt, threshold):
     valid, seen, errors = {}, set(), Counter()
     with path.open(encoding="utf-8-sig", newline="") as stream:
@@ -201,8 +222,11 @@ def collect_report(input_dir, data_dir, providers):
                 raise ValueError(f"Duplicate configuration: {path}")
             paths[key] = path
     runs, paired, pairwise, warnings = [], [], [], []
+    stability, stability_paired = [], []
     for dataset, reference in references.items():
         for prompt in PROMPTS:
+            repeat_frames = {provider: [] for provider in providers}
+            repeat_records = {provider: [] for provider in providers}
             for threshold in THRESHOLDS:
                 frames, records = {}, {}
                 for provider in providers:
@@ -243,6 +267,8 @@ def collect_report(input_dir, data_dir, providers):
                         record["status"] = "in_progress"
                     records[provider] = record
                     runs.append(record)
+                    repeat_frames[provider].append(frames.get(provider, {}))
+                    repeat_records[provider].append(record)
                 if all(records[p]["status"] == "complete" for p in providers):
                     common = set.intersection(*(set(frames[p]) for p in providers))
                     for provider in providers:
@@ -264,6 +290,39 @@ def collect_report(input_dir, data_dir, providers):
                                 "common_coverage": len(common) / len(reference),
                                 **classification_metrics(frames[provider][sample] for sample in common),
                             })
+            for provider in providers:
+                records = repeat_records[provider]
+                complete = all(row["status"] == "complete" for row in records)
+                common = (
+                    set.intersection(*(set(frame) for frame in repeat_frames[provider]))
+                    if complete else set()
+                )
+                rows = sum(row["rows"] for row in records)
+                errors = sum(row["errors"] for row in records)
+                stability.append({
+                    "provider": provider, "model": MODELS[provider],
+                    "dataset": dataset, "prompt": prompt, "expected": len(reference),
+                    "available_repeats": sum(row["file"] is not None for row in records),
+                    "complete_repeats": sum(row["status"] == "complete" for row in records),
+                    "status": (
+                        ("complete" if common else "no_common_success")
+                        if complete else "incomplete_repeats"
+                    ),
+                    "coverage": len(common) / len(reference) if complete else None,
+                    "rows": rows, "errors": errors, "error_rate": errors / rows if rows else None,
+                    **stability_metrics(repeat_frames[provider], common),
+                })
+            if all(row["status"] == "complete" for records in repeat_records.values() for row in records):
+                common = set.intersection(*(
+                    set(frame) for frames in repeat_frames.values() for frame in frames
+                ))
+                for provider in providers:
+                    stability_paired.append({
+                        "provider": provider, "model": MODELS[provider],
+                        "dataset": dataset, "prompt": prompt, "expected": len(reference),
+                        "coverage": len(common) / len(reference),
+                        **stability_metrics(repeat_frames[provider], common),
+                    })
     baseline = [
         row for row in paired
         if row["prompt"] == "v1" and row["threshold"] == 0.5
@@ -280,7 +339,7 @@ def collect_report(input_dir, data_dir, providers):
         ]
         timed = latency and all(row["elapsed_s"] is not None for row in latency)
         macro = {}
-        for metric in ("f1", "balanced_accuracy", "auroc", "fpr", "fnr"):
+        for metric in ("accuracy", "precision", "recall", "f1", "balanced_accuracy", "auroc", "fpr", "fnr"):
             values = [row[metric] for row in base if row[metric] is not None]
             macro["macro_" + metric] = mean(values) if values else None
         overview.append({
@@ -294,7 +353,32 @@ def collect_report(input_dir, data_dir, providers):
                 sum(row["elapsed_s"] for row in latency) * 1000 / sum(row["rows"] for row in latency)
                 if timed else None
             ),
+            "macro_elapsed_ms": mean(row["mean_elapsed_ms"] for row in latency) if timed else None,
         })
+    stability_overview = []
+    for prompt in PROMPTS:
+        for provider in providers:
+            base = [
+                row for row in stability_paired if row["provider"] == provider
+                and row["prompt"] == prompt and not row["dataset"].startswith("pii_") and row["n"]
+            ]
+            datasets = sorted(row["dataset"] for row in base)
+            own = [
+                row for row in stability if row["provider"] == provider
+                and row["prompt"] == prompt and row["dataset"] in datasets
+            ]
+            count = sum(row["n"] for row in base)
+            expected = sum(row["expected"] for row in base)
+            rows = sum(row["rows"] for row in own)
+            errors = sum(row["errors"] for row in own)
+            stability_overview.append({
+                "provider": provider, "model": MODELS[provider], "prompt": prompt,
+                "datasets": datasets, "n": count, "expected": expected,
+                "coverage": count / expected if expected else None,
+                "rows": rows, "errors": errors, "error_rate": errors / rows if rows else None,
+                **{metric: mean(row[metric] for row in base) if base else None
+                   for metric in STABILITY_METRICS},
+            })
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "input_dir": str(input_dir), "data_dir": str(data_dir),
@@ -302,6 +386,12 @@ def collect_report(input_dir, data_dir, providers):
         "model_identities": {provider: MODEL_IDENTITIES[provider] for provider in providers},
         "overview": overview, "runs": runs, "paired": paired,
         "pairwise": pairwise, "warnings": warnings,
+        "stability_settings": {
+            "repeat_thresholds": list(THRESHOLDS), "decision_threshold": STABILITY_THRESHOLD,
+            "std_ddof": 0, "required_repeats": len(THRESHOLDS),
+        },
+        "stability": stability, "stability_paired": stability_paired,
+        "stability_overview": stability_overview,
     }
 
 
@@ -446,6 +536,11 @@ def conclusions(report):
         "选型优先参考固定配置的 F1、AUROC、误报/漏报及错误率；"
         "表中的最优提示词/阈值是在同一测试集上挑选的探索性上限，部署前需独立验证集重新选参并复测。"
     )
+    if report.get("external_comparison"):
+        notes.append(
+            "OpenJev 为用户提供的内部汇总结果，仅加入独立参考图表，"
+            "未提供逐样本输出，不参与上述共同成功样本基线、排名或重复调用一致性分析。"
+        )
     return notes
 
 
@@ -499,6 +594,7 @@ def report_sections(report):
         "missing 表示未发现输出；in_progress 表示日志有记录但无输出，不保证进程仍在运行。\n\n"
         "日志 elapsed / processed 是整轮摊销平均每样本耗时，含失败等待、客户端及网络开销；"
         "仅 CSV 与日志完整计数一致的轮次进入耗时比较。基线耗时按处理行数加权；"
+        "Avg latency 则对共同基线各数据集的整轮平均耗时等权平均，缺少任一完整计时即不提供均值。"
         "它使用全部处理样本，质量指标则使用共同成功样本。没有单请求计时，不能计算请求 P50/P95/P99。"
         "报告不会从 50 条进度块伪造请求分位数。\n\n"
         "PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无定义；"
@@ -506,20 +602,26 @@ def report_sections(report):
         "未输出原始文本、敏感字段或完整错误内容；报告可离线打开，无 CDN、无联网请求。"
     )))
     sections.append(("共同基线总览", markdown_table(
-        ["供应商 / 模型", "完整配置", "共同数据集", "宏 F1", "宏平衡准确率", "宏 AUROC",
-         "宏误报率", "宏漏报率", "基线平均耗时 ms", "全套请求错误/已落盘行"],
+        ["供应商 / 模型", "完整配置", "共同数据集", "Average Accuracy", "Avg Precision",
+         "Avg Recall", "宏 F1", "宏平衡准确率", "宏 AUROC",
+         "宏误报率", "宏漏报率", "Avg latency ms（数据集等权）",
+         "基线平均耗时 ms（样本加权）", "全套请求错误/已落盘行"],
         [[
             f"{r['provider']} / {r['model']}", f"{r['complete']}/{r['total']}",
-            r["baseline_datasets"], fmt(r["macro_f1"]), fmt(r["macro_balanced_accuracy"]),
+            r["baseline_datasets"], fmt(r["macro_accuracy"]), fmt(r["macro_precision"]),
+            fmt(r["macro_recall"]), fmt(r["macro_f1"]), fmt(r["macro_balanced_accuracy"]),
             fmt(r["macro_auroc"]), fmt(r["macro_fpr"]), fmt(r["macro_fnr"]),
-            fmt(r["baseline_elapsed_ms"], False), f"{r['errors']}/{r['rows']}",
+            fmt(r["macro_elapsed_ms"], False), fmt(r["baseline_elapsed_ms"], False),
+            f"{r['errors']}/{r['rows']}",
         ] for r in report["overview"]],
     )))
     sections.append(("逐数据集固定基线（共同成功样本）", markdown_table(
-        ["数据集", "供应商 / 模型", "共同样本", "覆盖率", "F1", "AUROC", "平衡准确率", "误报率", "漏报率", "多数类准确率"],
+        ["数据集", "供应商 / 模型", "共同样本", "覆盖率", "Accuracy", "Precision",
+         "Recall", "F1", "AUROC", "平衡准确率", "误报率", "漏报率", "多数类准确率"],
         [[
             r["dataset"], f"{r['provider']} / {r['model']}", r["n"],
-            fmt(r["common_coverage"]), fmt(r["f1"]), fmt(r["auroc"]),
+            fmt(r["common_coverage"]), fmt(r["accuracy"]), fmt(r["precision"]),
+            fmt(r["recall"]), fmt(r["f1"]), fmt(r["auroc"]),
             fmt(r["balanced_accuracy"]), fmt(r["fpr"]), fmt(r["fnr"]), fmt(r["majority_accuracy"]),
         ] for r in report["paired"] if r["prompt"] == "v1" and r["threshold"] == 0.5
          and not r["dataset"].startswith("pii_")],
@@ -573,6 +675,53 @@ def report_sections(report):
             tuned,
         )
     )))
+    sections.append(("重复调用一致性：口径与逐数据集结果", (
+        "将同一供应商、数据集、提示词的 0.5/0.6/0.7/0.8 四轮视作四次重复调用。"
+        "阈值只在客户端用于判定，不进入模型请求；不直接比较各 CSV 原有 prediction。"
+        "v1、v2 分开统计，按 sample_id 对齐，四轮均完整落盘后仅使用四次均成功的样本。"
+        "少一轮或存在部分落盘即标 incomplete_repeats，不以较少轮次替代；"
+        "四轮完整但无共同成功样本标 no_common_success，稳定性无定义而不是零波动。\n\n"
+        "每个样本计算四个 score 的总体标准差（ddof=0）与极差，再对样本取平均；"
+        "分数保持原始 0–1 单位。判定统一使用 score >= 0.5，"
+        "翻转率为四次判定中至少出现一次正类、一次负类的样本比例，不是相邻轮次翻转次数。"
+        "三项指标均越低表示越一致。覆盖率为四次均成功样本 / 参考样本；"
+        "请求失败率为已有 CSV 的失败行 / 已落盘总行，缺失轮次不算成功也不算请求失败。\n\n"
+        "逐数据集表使用各模型自身的四轮成功交集，样本可能不同，不作为公平总排名。"
+        "历史调用可能混有后端版本、路由或运行时段变化，无法将差异完全归因于模型随机性；"
+        "仅四次调用是探索性观察，不提供伪造置信区间。稳定不代表正确，恒定错误输出也可能零波动。"
+        "原阈值敏感性曲线同时混有重复调用波动，不是固定 score 下的纯阈值效应。\n\n"
+        + markdown_table(
+            ["数据集", "供应商 / 模型", "提示词", "状态", "已有轮次", "完整轮次",
+             "四次均成功/参考", "覆盖率", "平均分数标准差", "平均分数极差",
+             "判定翻转样本", "判定翻转率（统一 0.5）", "失败/已落盘请求", "请求失败率"],
+            [[
+                r["dataset"], f"{r['provider']} / {r['model']}", r["prompt"], r["status"],
+                f"{r['available_repeats']}/4", f"{r['complete_repeats']}/4",
+                f"{r['n']}/{r['expected']}", fmt(r["coverage"]),
+                *(f"{r[key]:.6f}" if r[key] is not None else "—" for key in STABILITY_METRICS[:2]),
+                r["flipped"] if r["n"] else "—",
+                fmt(r["decision_flip_rate"]), f"{r['errors']}/{r['rows']}",
+                fmt(r["error_rate"]),
+            ] for r in report["stability"]],
+        )
+    )))
+    sections.append(("重复调用一致性：共同样本模型均值", (
+        "每个提示词单独选取所有供应商四轮均完整的数据集，"
+        "在每个数据集内进一步取所有供应商全部四轮的成功样本交集。"
+        "只对有共同成功样本的非 PII 数据集等权平均，不与上方各自样本均值混排。"
+        "不同提示词的共同数据集或样本可能不同；PII 仅在逐数据集一致性中展示。"
+        "覆盖率按共同样本总数 / 参考样本总数计算；请求失败率使用这些数据集全部已落盘请求。\n\n"
+        + markdown_table(
+            ["供应商 / 模型", "提示词", "共同数据集", "共同样本/参考", "共同覆盖率",
+             "宏平均分数标准差", "宏平均分数极差", "宏平均判定翻转率", "请求失败率"],
+            [[
+                f"{r['provider']} / {r['model']}", r["prompt"], "、".join(r["datasets"]) or "无",
+                f"{r['n']}/{r['expected']}", fmt(r["coverage"]),
+                *(f"{r[key]:.6f}" if r[key] is not None else "—" for key in STABILITY_METRICS[:2]),
+                fmt(r["decision_flip_rate"]), fmt(r["error_rate"]),
+            ] for r in report["stability_overview"]],
+        )
+    )))
     sections.append(("PII 检出（不是脱敏质量）", markdown_table(
         ["数据集", "供应商 / 模型", "提示词 / 阈值", "状态", "有效/预期", "正样本检出率"],
         [[
@@ -608,6 +757,36 @@ def report_sections(report):
         ["供应商 / 模型", "已落盘请求数", "失败数", "失败率", "异常类型计数"],
         error_rows,
     )))
+    external = report.get("external_comparison")
+    if external:
+        sections.append(("OpenJev 内部汇总结果（非共同样本基线）", (
+            external["notes"] + "\n\n"
+            + markdown_table(
+                ["数据集", "提示词", "阈值", "Rows（总行数）", "有效样本数", "错误数",
+                 "Accuracy", "Precision", "Recall", "F1", "AUROC", "四轮平均耗时 ms"],
+                [[
+                    row["dataset"], row["prompt"], row["threshold"], row["rows"],
+                    "未知", "未知",
+                    *(fmt(row[key]) for key in ("accuracy", "precision", "recall", "f1", "auroc")),
+                    fmt(row["mean_elapsed_ms"], False),
+                ] for row in external["source_rows"]],
+            )
+        )))
+        sections.append(("四模型参考均值（同数据集，非同成功样本）", (
+            "固定分类阈值 0.5，v1/v2 分开统计，仅选择所有模型均有可用质量结果的非 PII 数据集，"
+            "对数据集等权平均。各模型使用自身有效样本，未对齐共同 sample_id，不能当作公平排名。"
+            "耗时为四轮完整日志的每轮 elapsed/processed 等权平均，再按数据集等权平均；"
+            "任一所选数据集缺少完整四轮计时即不提供模型平均耗时，不用部分计时替代。\n\n"
+            + markdown_table(
+                ["模型", "提示词", "共同数据集", "Average Accuracy", "Avg Precision",
+                 "Avg Recall", "Avg F1", "Avg AUROC", "Avg latency ms"],
+                [[
+                    row["provider"], row["prompt"], "、".join(row["datasets"]) or "无",
+                    *(fmt(row[key]) for key in ("accuracy", "precision", "recall", "f1", "auroc")),
+                    fmt(row["mean_elapsed_ms"], False),
+                ] for row in external["overview"]],
+            )
+        )))
     if report["warnings"]:
         sections.append(("数据警告", "\n\n".join(report["warnings"])))
     return sections
@@ -663,10 +842,21 @@ def write_report(report, output_dir):
     (output_dir / "comparison.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8",
     )
-    for filename, records in (
+    exports = [
         ("runs.csv", report["runs"]), ("paired.csv", report["paired"]),
         ("pairwise.csv", report["pairwise"]),
-    ):
+        ("stability.csv", report["stability"]),
+        ("stability_paired.csv", report["stability_paired"]),
+        ("stability_overview.csv", report["stability_overview"]),
+    ]
+    if report.get("external_comparison"):
+        external = report["external_comparison"]
+        exports.extend([
+            ("openjev_summary.csv", external["source_rows"]),
+            ("external_comparison_runs.csv", external["runs"]),
+            ("external_comparison_overview.csv", external["overview"]),
+        ])
+    for filename, records in exports:
         columns = list(dict.fromkeys(key for record in records for key in record))
         with (output_dir / filename).open("w", encoding="utf-8-sig", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=columns)

@@ -1,0 +1,17 @@
+﻿provider,dataset,prompt,threshold,rows,valid,errors,source_kind,accuracy,precision,recall,f1,auroc,mean_elapsed_ms
+openjev,aegis2,v1,0.5,1964,,,user_supplied_aggregate,0.8015,0.8708,0.7412,0.8008,0.8898,883.25
+openjev,aegis2,v2,0.5,1964,,,user_supplied_aggregate,0.7748,0.9097,0.6468,0.7561,0.8881,907.94
+openjev,detect-jailbreak,v1,0.5,18258,,,user_supplied_aggregate,0.8993,0.5203,0.7979,0.6299,0.9285,1015.0
+openjev,detect-jailbreak,v2,0.5,18258,,,user_supplied_aggregate,0.8914,0.4965,0.7638,0.6018,0.9178,1013.58
+openjev,hatecheck,v1,0.5,3728,,,user_supplied_aggregate,0.8413,0.8341,0.9602,0.8927,0.878,861.9
+openjev,hatecheck,v2,0.5,3728,,,user_supplied_aggregate,0.8647,0.8746,0.9375,0.905,0.8994,915.34
+openjev,jailbreak-classification,v1,0.5,1044,,,user_supplied_aggregate,0.8973,0.9976,0.7981,0.8868,0.9889,990.77
+openjev,jailbreak-classification,v2,0.5,1044,,,user_supplied_aggregate,0.9204,0.9978,0.8441,0.9145,0.986,978.7
+openjev,jailbreakhub,v1,0.5,15140,,,user_supplied_aggregate,0.8694,0.3948,0.7687,0.5217,0.8898,1017.51
+openjev,jailbreakhub,v2,0.5,15140,,,user_supplied_aggregate,0.8666,0.3911,0.7929,0.5238,0.891,908.04
+openjev,pii_masking_mini_10k,v1,0.5,9000,,,user_supplied_aggregate,0.8992,1.0,0.8992,0.9469,,916.3
+openjev,pii_masking_mini_10k,v2,0.5,9000,,,user_supplied_aggregate,0.9428,1.0,0.9428,0.9706,,851.4
+openjev,pii_masking_nano_1k,v1,0.5,900,,,user_supplied_aggregate,0.9043,1.0,0.9043,0.9498,,1050.33
+openjev,pii_masking_nano_1k,v2,0.5,900,,,user_supplied_aggregate,0.9318,1.0,0.9318,0.9647,,953.69
+openjev,toxigen,v1,0.5,6789,,,user_supplied_aggregate,0.6891,0.8399,0.4619,0.596,0.8009,859.56
+openjev,toxigen,v2,0.5,6789,,,user_supplied_aggregate,0.7068,0.8676,0.4831,0.6206,0.8078,859.95
