@@ -1,0 +1,11 @@
+[
+  {
+    "provider": "laya-ai.com",
+    "http_status": 402,
+    "status": "blocked",
+    "configuration": "jailbreak-classification/v1",
+    "observed_at": "2026-10-29T04:25:10.283048+00:00",
+    "checkpointed_successes": 7,
+    "detail": "HTTP 402 Payment Required; runner stopped. Partial Laya scores are not published as a completed benchmark."
+  }
+]

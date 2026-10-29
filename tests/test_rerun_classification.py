@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from scripts.rerun_classification import export_results, infer, read_checkpoint
-from scripts.report_classification_rerun import paired_metrics
+from scripts.report_classification_rerun import build_report, paired_metrics
 
 
 def test_live_request_and_saved_probability_use_noul_not_confidence():
@@ -78,3 +78,40 @@ def test_comparison_uses_only_shared_successes_and_checks_labels_and_text():
     reference.loc[0, "text"] = "Different"
     with pytest.raises(ValueError, match="mismatch"):
         paired_metrics(fresh, reference)
+
+
+def test_known_legacy_nul_truncation_is_explicitly_excluded_from_pairing():
+    fresh = pd.DataFrame([
+        {"sample_id": "0", "text": "Same", "label": 1, "score": 0.7, "prediction": 1, "error": ""},
+        {"sample_id": "1", "text": "prefix\x00suffix", "label": 0, "score": 0.2, "prediction": 0, "error": ""},
+    ])
+    old = fresh.copy()
+    old.loc[1, "text"] = "prefix"
+    result = paired_metrics(fresh, old)
+    assert result["common_successful_rows"] == 1
+    assert result["excluded_legacy_nul_rows"] == ["1"]
+    assert result["rerun"]["n"] == 1
+    old.loc[1, "label"] = 1
+    with pytest.raises(ValueError, match="mismatch"):
+        paired_metrics(fresh, old)
+
+
+def test_report_excludes_blocked_partial_provider_and_records_access_restriction(tmp_path):
+    provider_dir = tmp_path / "fastino.ai"
+    provider_dir.mkdir()
+    result = export_results(
+        [{"sample_id": "0", "text": "example", "label": 1}],
+        {"0": {"sample_id": "0", "score": 0.9, "error": "", "resolved_model": "glide_v2", "latency_ms": 10}},
+        provider_dir / "hatecheck_v1.csv", "fastino.ai", "hatecheck", "v1", "fastino/GLiDE")
+    (provider_dir / "hatecheck_v1.manifest.json").write_text(json.dumps({
+        "provider": "fastino.ai", "dataset": "hatecheck", "prompt_version": "v1", "workers": 1, "result": result}))
+    blocked_dir = tmp_path / "laya-ai.com"
+    blocked_dir.mkdir()
+    (blocked_dir / "hatecheck_v1.manifest.json").write_text(json.dumps({"provider": "laya-ai.com"}))
+    (tmp_path / "access_restrictions.json").write_text(json.dumps([
+        {"provider": "laya-ai.com", "http_status": 402, "status": "blocked"}]))
+    report = build_report(tmp_path, historical_dir=tmp_path / "unavailable-reference")
+    assert report["completed_providers"] == ["fastino.ai"]
+    assert len(report["runs"]) == 1
+    assert report["access_restrictions"][0]["http_status"] == 402
+    assert "partial Laya scores are not published" in (tmp_path / "README.md").read_text()
