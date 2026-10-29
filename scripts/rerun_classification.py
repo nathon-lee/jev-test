@@ -33,6 +33,32 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def load_input(source, require_heldout=False):
+    frame = pd.read_csv(source, dtype={"sample_id": str})
+    provenance = {}
+    if require_heldout:
+        from benchmark.dataset_partitions import PROVENANCE_COLUMNS
+        manifest_path = source.with_suffix(".manifest.json")
+        if not manifest_path.exists() or not set(PROVENANCE_COLUMNS).issubset(frame.columns):
+            raise ValueError("Held-out evaluation requires source provenance and a sidecar manifest")
+        provenance = json.loads(manifest_path.read_text())
+        if provenance["csv_sha256"] != digest(source) or provenance["prepared_rows"] != len(frame):
+            raise ValueError("Held-out input digest/count does not match its manifest")
+        if provenance["partition_role"] != "held_out" or provenance["source_split"] not in ("test", "validation", "valid", "dev"):
+            raise ValueError("Training-reference input cannot be used for held-out evaluation")
+        for name in PROVENANCE_COLUMNS:
+            if name != "source_row" and not frame[name].eq(provenance[name]).all():
+                raise ValueError("Input provenance disagrees with its manifest")
+    if frame.empty or frame["sample_id"].isna().any() or frame["sample_id"].duplicated().any():
+        raise ValueError("Input requires nonempty unique sample IDs")
+    if not frame["label"].isin([0, 1]).all() or frame["text"].isna().any():
+        raise ValueError("Input requires text and binary labels")
+    extra = [name for name in ("source_repository", "source_config", "source_revision", "source_split", "partition_role", "source_row") if name in frame]
+    samples = [{"sample_id": str(row["sample_id"]), "text": str(row["text"]), "label": int(row["label"]),
+                **{name: row[name] for name in extra}} for _, row in frame.iterrows()]
+    return samples, provenance
+
+
 def read_checkpoint(path, expected):
     path = Path(path)
     if not path.exists():
@@ -129,13 +155,15 @@ def export_results(samples, cached, path, provider, dataset, version, model):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--provider", required=True, choices=["fastino.ai", "laya-ai.com"])
+    parser.add_argument("--provider", required=True, choices=["fastino.ai", "laya-ai.com", "typesafe.ai"])
     parser.add_argument("--datasets", default="jailbreak-classification,hatecheck,aegis2,toxigen,pii_masking_nano_1k,pii_masking_mini_10k,detect-jailbreak,jailbreakhub")
     parser.add_argument("--prompts", default="v1,v2")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=32)
     parser.add_argument("--retries", type=int, default=3)
     parser.add_argument("--env-file", type=Path)
+    parser.add_argument("--data-dir", type=Path, default=Path("data/prepared"))
+    parser.add_argument("--require-heldout", action="store_true", help="Reject unversioned/training-reference inputs before sending requests")
     args = parser.parse_args(argv)
     if args.env_file:
         load_dotenv(args.env_file)
@@ -147,18 +175,21 @@ def main(argv=None):
     if not key:
         parser.error(f"Missing {spec['api_key_env']}")
     url = resolve_base_url(provider).rstrip("/")
+    if provider == "typesafe.ai" and not url.endswith(("/v1", "/v1/systemone")):
+        url += "/v1"
     if not url.endswith("/systemone"):
         url += "/systemone"
     output_dir = args.output_dir / provider
     output_dir.mkdir(parents=True, exist_ok=True)
     configs = [(dataset, version) for dataset in args.datasets.split(",") for version in args.prompts.split(",")]
+    # Validate every selected partition before making any billable requests.
+    inputs = {dataset: load_input(args.data_dir / DATASET_SPECS[dataset]["path"], args.require_heldout)
+              for dataset, _ in configs}
     with httpx.Client(headers={"Authorization": f"Bearer {key}"}, timeout=90,
                       limits=httpx.Limits(max_connections=args.workers, max_keepalive_connections=args.workers)) as client:
         for dataset, version in configs:
-            source = Path("data/prepared") / DATASET_SPECS[dataset]["path"]
-            frame = pd.read_csv(source)
-            samples = [{"sample_id": str(row["sample_id"]), "text": str(row["text"]),
-                        "label": int(row["label"])} for _, row in frame.iterrows()]
+            source = args.data_dir / DATASET_SPECS[dataset]["path"]
+            samples, provenance = inputs[dataset]
             prompt = prompt_for_dataset(dataset, version)
             prefix = output_dir / f"{dataset}_{version}"
             manifest_path = prefix.with_suffix(".manifest.json")
@@ -170,6 +201,8 @@ def main(argv=None):
                         "expected_rows": len(samples), "score_field": "answers.score.noul",
                         "thresholds_derived_offline": True, "repeat_inferences": False,
                         "workers": args.workers, "endpoint": url}
+            if args.require_heldout:
+                identity.update(evaluation_partition=provenance, require_heldout=True)
             if manifest_path.exists():
                 previous = json.loads(manifest_path.read_text())
                 if any(previous.get(k) != value for k, value in identity.items() if k != "workers"):

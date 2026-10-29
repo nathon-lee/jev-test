@@ -1,0 +1,39 @@
+{
+  "input_sha256": "6973101c363d92af0d4b0ad0b271396f81eb29825ecf677306f4d490767d00f0",
+  "model": "fastino/gliner2.5-multi-v1",
+  "threshold": 0.5,
+  "base_url": "https://api.fastino.ai/v1",
+  "entity_schema": {
+    "TITLE": "personal honorific or title",
+    "GIVENNAME": "person's given name",
+    "SURNAME": "person's family name",
+    "DATE": "calendar date",
+    "STREET": "street address or street name",
+    "BUILDINGNUM": "building or house number",
+    "CITY": "city name",
+    "EMAIL": "email address",
+    "TELEPHONENUM": "telephone number",
+    "ZIPCODE": "postal or zip code",
+    "AGE": "person's age",
+    "SEX": "person's sex",
+    "GENDER": "person's gender",
+    "TAXNUM": "tax identification number",
+    "CREDITCARDNUMBER": "credit card number",
+    "SOCIALNUM": "social security or social insurance number",
+    "IDCARDNUM": "identity card number",
+    "PASSPORTNUM": "passport number",
+    "DRIVERLICENSENUM": "driver license number"
+  },
+  "expected_rows": 90,
+  "partitions": [
+    [
+      "ai4privacy/pii-masking-nano-1k",
+      "validation",
+      "ca0a26dffb2c1f35947fa6d8d71b0d61e3373985"
+    ]
+  ],
+  "started_at": "2026-10-29T05:56:58.280895+00:00",
+  "workers": 8,
+  "finished_at": "2026-10-29T05:57:18.939038+00:00",
+  "output_sha256": "4f31a926a7a9e464e6f51925b49d2e4a805537bd17568f91b60ca8599e98d4d2"
+}

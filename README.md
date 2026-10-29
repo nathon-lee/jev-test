@@ -1,3 +1,5 @@
+> **Official held-out rerun:** see [scope, credentials and reproduction](HELDOUT_RERUN.md) and [results/status](outputs/heldout_2026-10-28/README.md). This is separate from the historical-row comparison below.
+
 > **Current results:** [corrected comparison](outputs/comparison/comparison.md) · [updated charts](outputs/comparison/figures/index.html). Older comparison instructions and figures below are archived historical material; use `python -m scripts.publish_corrected_comparison` for the current presentation.
 
 # JEV Benchmark Suite

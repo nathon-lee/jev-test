@@ -4,7 +4,7 @@ import httpx
 import pandas as pd
 import pytest
 
-from scripts.rerun_classification import export_results, infer, read_checkpoint
+from scripts.rerun_classification import export_results, infer, read_checkpoint, load_input, digest
 from scripts.report_classification_rerun import build_report, paired_metrics
 
 
@@ -21,6 +21,37 @@ def test_live_request_and_saved_probability_use_noul_not_confidence():
     assert result["score"] == 0.06
     assert result["raw_confidence"] == 0.94
     assert result["resolved_model"] == "glide_v2"
+
+
+def test_heldout_loader_rejects_training_and_tampered_partitions(tmp_path):
+    path = tmp_path / "input.csv"
+    provenance = {"source_repository": "test/data", "source_config": "default", "source_revision": "pinned",
+                  "source_split": "test", "partition_role": "held_out"}
+    pd.DataFrame([{**provenance, "source_row": 17, "sample_id": "007", "text": "text", "label": 1}]).to_csv(path, index=False)
+    manifest = {**provenance, "csv_sha256": digest(path), "prepared_rows": 1}
+    sidecar = path.with_suffix(".manifest.json")
+    sidecar.write_text(json.dumps(manifest))
+    samples, metadata = load_input(path, True)
+    assert samples[0]["sample_id"] == "007"
+    assert samples[0]["source_row"] == 17
+    assert metadata["source_revision"] == "pinned"
+    manifest["partition_role"] = "training_reference"
+    sidecar.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="Training-reference"):
+        load_input(path, True)
+    manifest["partition_role"] = "held_out"
+    manifest["csv_sha256"] = "changed"
+    sidecar.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="digest/count"):
+        load_input(path, True)
+
+
+def test_typesafe_checkpointed_request_also_requires_noul():
+    with httpx.Client(transport=httpx.MockTransport(lambda request: httpx.Response(
+        200, json={"answers": {"score": {"noul": .2, "confidence": .99}}}))) as client:
+        result = infer(client, "https://example.test/v1/systemone", "typesafe.ai", "jev-latest",
+                       "unsafe?", {"sample_id": "0", "text": "example"}, 0)
+    assert result["score"] == .2
 
 
 def test_checkpoint_retries_errors_and_rejects_unknown_samples(tmp_path):
