@@ -57,6 +57,8 @@ def main() -> None:
     parser.add_argument("--thresholds", default="0.5,0.6,0.7,0.8", help="Comma-separated thresholds")
     parser.add_argument("--max-workers", type=int, default=1, help="Number of benchmark combinations to run in parallel")
     parser.add_argument("--limit", type=int, default=None, help="Optional limit for rows per dataset")
+    parser.add_argument("--data-dir", type=Path, help="Explicit prepared partition directory")
+    parser.add_argument("--output-dir", type=Path, help="Separate output directory for a new evaluation population")
     parser.add_argument("--api-key", default=None, help="Optional API key override for the selected provider")
     parser.add_argument("--base-url", default=None, help="Optional base URL override for the selected provider")
     parser.add_argument("--debug", action="store_true", help="Print the exact outgoing request URL, headers, and payload for each provider call")
@@ -94,8 +96,9 @@ def main() -> None:
             api_key=args.api_key,
             base_url=args.base_url,
             debug=args.debug,
+            data_dir=args.data_dir,
         )
-        saved_path = save_rows(rows, provider, dataset, prompt_version, threshold)
+        saved_path = save_rows(rows, provider, dataset, prompt_version, threshold, output_dir=args.output_dir)
         return saved_path, len(rows)
 
     failures: list[tuple[tuple[str, str, str, float], Exception]] = []
