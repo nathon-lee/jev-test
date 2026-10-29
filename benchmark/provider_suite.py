@@ -37,7 +37,7 @@ PROVIDER_SPECS = {
         "api_key_env": "TYPESAFE_API_KEY",
         "base_url_env": "TYPESAFE_BASE_URL",
         "default_base_url": "https://api.typesafe.ai",
-        "model": "typesafe-standard",
+        "model": "jev-latest",
         "auth": "bearer",
     },
     "fastino.ai": {
@@ -282,7 +282,13 @@ def _extract_systemone_noul(payload: Any, provider_name: str) -> float:
     return float(value)
 
 
-def _call_typesafe_sdk(prompt: str, text: str, api_key: str | None, timeout: float) -> float:
+def _call_typesafe_sdk(
+    prompt: str,
+    text: str,
+    api_key: str | None,
+    timeout: float,
+    model: str = "jev-latest",
+) -> float:
     if Noul is None or TypeSafeClient is None:
         raise RuntimeError(
             "typesafe_sdk is required for provider 'typesafe.ai' but is not installed. "
@@ -297,6 +303,7 @@ def _call_typesafe_sdk(prompt: str, text: str, api_key: str | None, timeout: flo
         http_client=http_client,
         timeout=timeout,
         api_key=api_key,
+        model=model,
     )
 
     response = client.system_one(
@@ -418,7 +425,13 @@ def call_provider(
     resolved_base_url = resolve_base_url(provider_name, base_url)
 
     if normalize_provider_name(provider_name) == "typesafe.ai":
-        return _call_typesafe_sdk(prompt=prompt, text=text, api_key=resolved_api_key, timeout=timeout)
+        return _call_typesafe_sdk(
+            prompt=prompt,
+            text=text,
+            api_key=resolved_api_key,
+            timeout=timeout,
+            model=provider.get("model", "jev-latest"),
+        )
 
     if normalize_provider_name(provider_name) == "fastino.ai":
         return _call_fastino_systemone(
