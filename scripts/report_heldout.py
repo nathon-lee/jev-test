@@ -66,7 +66,7 @@ def build(root, data_dir, datasets):
     text = ["# Official held-out evaluation rerun", "",
             "Separate from PR #20's historical-row parity benchmarks. Prepared with PR #19's explicit split/provenance policy. "
             "Official held-out membership does not establish absence of overlap with a model's training data; no training leak audit has been completed. "
-            "Detect Jailbreak and JailbreakHub are excluded pending an agreed joint held-out split. ToxiGen is excluded until its test-label rule is agreed.", "",
+            "Detect Jailbreak and JailbreakHub are excluded pending an agreed joint held-out split. ToxiGen is excluded by request because its official test rows do not match the legacy label lookup.", "",
             "## Provider coverage", "", table(coverage, ["provider", "status", "completed_configurations", "expected_configurations"]), "",
             "Only complete provider suites appear below. Pending/error rows are never counted as negatives. "
             "Error rates remain visible; future cross-provider comparisons require matching successful rows, not independent successful-subset rankings. "
