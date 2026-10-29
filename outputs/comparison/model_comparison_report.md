@@ -1,145 +1,125 @@
-# 安全分类模型横向比较报告
+# Corrected benchmark comparison
 
-**领导汇报版｜2026 年 10 月 26 日｜仅供内部参考**
+Historical prepared rows; not the new held-out split policy. v1 / threshold 0.5 unless stated. Jev is a saved historical reference, not a rerun.
 
-本报告合并**之前提供的内部及参考数据、本轮内部测试数据、API 评测结果**，以 **Three-dataset Model Reference Averages（三数据集模型参考均值）**为依据，仅对所有参评配置共有的数据集和已提供的共同指标进行横向展示。数据快照为 2026-10-26 08:37:04 UTC。
+Laya: resumed after billing was restored; full rerun pending. Partial scores are excluded.
 
-**评测配置固定为 v1、阈值 0.5，不比较 v1 与 v2，也不开展阈值横向比较。历史汇总中未标明配置的结果仅作参考，不宣称其已满足该配置。**
+Scores use `answers.score.noul`. Historical confidence-based GLiDE/Laya scores are excluded. The previous presentation is archived in `../comparison_historical_confidence/`. The old 11-model chart is superseded: supplied summaries are retained separately below, without a combined ranking.
 
-## 一、核心结论
+## Findings against historical Jev
 
-**历史内部结果与本轮内部结果一并保留，不以新结果覆盖旧模型。共同比较范围为 ToxiGen、HateCheck、AEGIS2 三个数据集，比较指标为 Accuracy、Precision、Recall 及参考耗时。**
+Positive deltas favor the corrected live provider. Higher AUROC with lower fixed-threshold F1 suggests threshold calibration deserves investigation; it does not establish better classification performance or justify choosing thresholds on these test rows.
 
-当前主要发现如下：
+| provider | dataset | prompt | f1_delta | auroc_delta |
+|---|---|---|---|---|
+| fastino.ai | aegis2 | v1 | 0.0241 | 0.0149 |
+| fastino.ai | aegis2 | v2 | 0.0382 | 0.0139 |
+| fastino.ai | detect-jailbreak | v1 | -0.1347 | 0.0134 |
+| fastino.ai | detect-jailbreak | v2 | -0.1022 | 0.0116 |
+| fastino.ai | hatecheck | v1 | 0.0200 | 0.0038 |
+| fastino.ai | hatecheck | v2 | 0.0315 | 0.0052 |
+| fastino.ai | jailbreak-classification | v1 | -0.0012 | -0.0012 |
+| fastino.ai | jailbreak-classification | v2 | 0.0065 | -0.0007 |
+| fastino.ai | jailbreakhub | v1 | -0.0891 | 0.0169 |
+| fastino.ai | jailbreakhub | v2 | -0.0579 | 0.0109 |
+| fastino.ai | toxigen | v1 | -0.1772 | -0.0352 |
+| fastino.ai | toxigen | v2 | -0.0626 | -0.0242 |
 
-| 关注方向 | 共同指标上的参考结果 | 建议 |
-| --- | --- | --- |
-| Dynamo 部署方案 | CPU、A100、L4 的 Accuracy 均约为 **89%**，Recall 约为 **91%**；GPU 配置提供的耗时记录较低 | 优先验证 GPU 方案能否在统一运行条件下复现这些结果 |
-| TypeSafe 与 Decision-1 | Accuracy 分别为 **83.23%**、**83.19%**；Decision-1 的 Precision 较高，TypeSafe 的 Recall 较高 | 作为两种查准与召回取舍的候选，进入业务数据验证 |
-| OpenJev 历史与本轮内部结果 | 32B 相比 4B 的 Accuracy 接近、Precision 提升，但 Recall 下降，记录耗时更长 | 暂不据参数规模决定扩容，先修复 32B 请求失败并复测 |
-| 其他候选 | Mistral 的 Accuracy 为 **83.33%**，Precision、Recall 参考值较接近；Warden 可作为补充对照 | 根据业务约束决定是否纳入统一复测 |
-| 当前配置核验 | Laya 的 Recall 为 **100.00%**，但 Accuracy、Precision 均为 **57.44%**；Fastino 的 Accuracy 为 **53.32%** | 高召回不能单独作为选型理由，先核对输出语义、类别映射及配置 |
+## Three-dataset macro averages
 
-**这些是已有结果的描述性对照，不是统一成功样本、统一硬件下的最终排名。建议本轮推进候选验证，而非直接批准采购、上线或大模型扩容。**
+Equal dataset weights, not pooled rows. AUPRC means average precision. v1 is the original figure's configuration; v2 is separate.
 
-## 二、纳入哪些数据，如何保证范围一致
+| provider | prompt | accuracy | precision | recall | f1 | auroc | auprc | paired_rows |
+|---|---|---|---|---|---|---|---|---|
+| fastino.ai | v1 | 0.8230 | 0.9389 | 0.7022 | 0.7683 | 0.9188 | 0.9289 | 12481 |
+| fastino.ai | v2 | 0.8494 | 0.9383 | 0.7544 | 0.8201 | 0.9231 | 0.9334 | 12481 |
+| historical_jev | v1 | 0.8323 | 0.9104 | 0.7595 | 0.8127 | 0.9243 | 0.9321 | 12481 |
+| historical_jev | v2 | 0.8355 | 0.9192 | 0.7544 | 0.8177 | 0.9248 | 0.9318 | 12481 |
 
-### 2.1 历史与本轮数据同时纳入
+![Corrected three-dataset averages](figures/fig13_three_dataset_averages.png)
 
-| 数据批次 / 来源 | 纳入配置 | 使用方式 |
-| --- | --- | --- |
-| 历史内部及参考汇总 | OpenJev 4B、Dynamo CPU、Dynamo GPU A100、Dynamo GPU L4、Mistral、Warden | 保留原配置身份及已提供的三数据集结果 |
-| 本轮新增内部汇总 | OpenJev 32B、Microsoft Decision-1 | 从本轮逐数据集汇总中提取相同三个数据集，等权平均 |
-| API 评测结果 | Fastino、Laya、TypeSafe | 从当前已整理的评测结果中提取相同三个数据集，等权平均 |
+## Classification by dataset
 
-共 **11 个模型或部署配置**。历史参考汇总不代表都已取得可复核的内部逐样本记录；来源不同这一限制仍需保留。OpenJev 4B 与 32B 分列，Dynamo 的 CPU、A100、L4 部署也分别展示，不合并、不互相覆盖。
+Quality excludes request errors and uses matching successful sample IDs, text and labels. The same common rows are required for all included providers. Detect Jailbreak excludes historical NUL-truncated sample 15837 from paired quality only. Historical Jev's requested model was `jev-latest`; its resolved model version is unknown.
 
-### 2.2 只比较大家共有的部分
+| provider | dataset | prompt | paired_rows | excluded_nul_rows | accuracy | precision | recall | f1 | auroc | auprc | fpr | fnr |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| fastino.ai | aegis2 | v1 | 1964 | 0 | 0.8371 | 0.8927 | 0.7932 | 0.8400 | 0.9198 | 0.9356 | 0.1116 | 0.2068 |
+| historical_jev | aegis2 | v1 | 1964 | 0 | 0.8096 | 0.8520 | 0.7828 | 0.8159 | 0.9049 | 0.9178 | 0.1591 | 0.2172 |
+| fastino.ai | aegis2 | v2 | 1964 | 0 | 0.8315 | 0.8848 | 0.7904 | 0.8349 | 0.9193 | 0.9335 | 0.1204 | 0.2096 |
+| historical_jev | aegis2 | v2 | 1964 | 0 | 0.8004 | 0.8838 | 0.7252 | 0.7967 | 0.9054 | 0.9166 | 0.1116 | 0.2748 |
+| fastino.ai | detect-jailbreak | v1 | 18257 | 1 | 0.6824 | 0.2493 | 0.9700 | 0.3966 | 0.9419 | 0.7009 | 0.3523 | 0.0300 |
+| historical_jev | detect-jailbreak | v1 | 18257 | 1 | 0.8331 | 0.3807 | 0.8789 | 0.5313 | 0.9285 | 0.6814 | 0.1724 | 0.1211 |
+| fastino.ai | detect-jailbreak | v2 | 18257 | 1 | 0.6909 | 0.2525 | 0.9547 | 0.3993 | 0.9311 | 0.6502 | 0.3410 | 0.0453 |
+| historical_jev | detect-jailbreak | v2 | 18257 | 1 | 0.8111 | 0.3502 | 0.8830 | 0.5015 | 0.9195 | 0.6243 | 0.1976 | 0.1170 |
+| fastino.ai | hatecheck | v1 | 3728 | 0 | 0.9769 | 0.9762 | 0.9906 | 0.9833 | 0.9966 | 0.9984 | 0.0532 | 0.0094 |
+| historical_jev | hatecheck | v1 | 3728 | 0 | 0.9482 | 0.9392 | 0.9887 | 0.9633 | 0.9928 | 0.9968 | 0.1408 | 0.0113 |
+| fastino.ai | hatecheck | v2 | 3728 | 0 | 0.9933 | 0.9919 | 0.9984 | 0.9951 | 0.9995 | 0.9998 | 0.0180 | 0.0016 |
+| historical_jev | hatecheck | v2 | 3728 | 0 | 0.9488 | 0.9415 | 0.9867 | 0.9636 | 0.9943 | 0.9975 | 0.1348 | 0.0133 |
+| fastino.ai | jailbreak-classification | v1 | 1044 | 0 | 0.9473 | 0.9214 | 0.9791 | 0.9494 | 0.9932 | 0.9942 | 0.0851 | 0.0209 |
+| historical_jev | jailbreak-classification | v1 | 1044 | 0 | 0.9521 | 0.9918 | 0.9127 | 0.9506 | 0.9943 | 0.9945 | 0.0077 | 0.0873 |
+| fastino.ai | jailbreak-classification | v2 | 1044 | 0 | 0.9569 | 0.9398 | 0.9772 | 0.9581 | 0.9941 | 0.9947 | 0.0638 | 0.0228 |
+| historical_jev | jailbreak-classification | v2 | 1044 | 0 | 0.9531 | 0.9918 | 0.9146 | 0.9516 | 0.9948 | 0.9949 | 0.0077 | 0.0854 |
+| fastino.ai | jailbreakhub | v1 | 15140 | 0 | 0.6546 | 0.2048 | 0.9445 | 0.3367 | 0.9142 | 0.5978 | 0.3750 | 0.0555 |
+| historical_jev | jailbreakhub | v1 | 15140 | 0 | 0.7819 | 0.2817 | 0.8712 | 0.4257 | 0.8973 | 0.5255 | 0.2272 | 0.1288 |
+| fastino.ai | jailbreakhub | v2 | 15140 | 0 | 0.6971 | 0.2268 | 0.9395 | 0.3653 | 0.9046 | 0.4835 | 0.3277 | 0.0605 |
+| historical_jev | jailbreakhub | v2 | 15140 | 0 | 0.7813 | 0.2802 | 0.8648 | 0.4233 | 0.8937 | 0.4887 | 0.2272 | 0.1352 |
+| fastino.ai | toxigen | v1 | 6789 | 0 | 0.6549 | 0.9477 | 0.3228 | 0.4815 | 0.8400 | 0.8527 | 0.0176 | 0.6772 |
+| historical_jev | toxigen | v1 | 6789 | 0 | 0.7391 | 0.9400 | 0.5070 | 0.6587 | 0.8752 | 0.8817 | 0.0319 | 0.4930 |
+| fastino.ai | toxigen | v2 | 6789 | 0 | 0.7235 | 0.9384 | 0.4743 | 0.6301 | 0.8504 | 0.8670 | 0.0307 | 0.5257 |
+| historical_jev | toxigen | v2 | 6789 | 0 | 0.7573 | 0.9323 | 0.5512 | 0.6928 | 0.8746 | 0.8814 | 0.0395 | 0.4488 |
 
-| 比较维度 | 本报告采用的范围 | 不纳入横向比较的内容 |
-| --- | --- | --- |
-| 评测配置 | **v1 / 阈值 0.5**；历史未标明配置的汇总单独注明为参考 | v2、其他阈值及跨配置均值 |
-| 数据集 | **ToxiGen、HateCheck、AEGIS2** | 越狱、PII 等并非所有配置都有结果的任务 |
-| 质量指标 | **Accuracy、Precision、Recall** | F1、AUROC 在部分历史配置中缺失，不作为全模型比较指标 |
-| 耗时 | 各配置已提供的三数据集平均耗时，**仅作参考** | 缺少统一条件的速度排名、硬件加速比、成本排名 |
-| 汇总方式 | 三个数据集各占 **三分之一权重** | 不混入其他数据集，不将三个数据集的样本直接合并后重算 |
+## Coverage and request timing
 
-Accuracy 为准确率；Precision 为查准率，表示判为危险的内容中有多少确实危险；Recall 为召回率，表示实际危险内容中有多少被检出。查准率不能直接替代正常内容的误报率。
+Missing/error rows are not counted as negatives. Latency includes retries under the listed concurrency. Historical serial timings and supplied aggregate timings are not comparable to these measurements and are omitted from quality charts.
 
-Fastino、Laya、TypeSafe、OpenJev 4B、OpenJev 32B、Decision-1 使用 v1 / 阈值 0.5 的质量结果；Dynamo、Mistral、Warden 的提示词和阈值未提供。**数据集范围一致，不代表测试协议或成功样本已经完全一致。**
+| provider | dataset | prompt | valid | errors | expected | workers | mean_ms | p50_ms | p95_ms |
+|---|---|---|---|---|---|---|---|---|---|
+| fastino.ai | aegis2 | v1 | 1964 | 0 | 1964 | 32 | 498.5629 | 447.8188 | 837.0714 |
+| fastino.ai | aegis2 | v2 | 1964 | 0 | 1964 | 32 | 491.8338 | 444.5702 | 799.5886 |
+| fastino.ai | detect-jailbreak | v1 | 18258 | 0 | 18258 | 32 | 504.6368 | 471.1110 | 765.7865 |
+| fastino.ai | detect-jailbreak | v2 | 18258 | 0 | 18258 | 32 | 549.4541 | 470.4219 | 829.2212 |
+| fastino.ai | hatecheck | v1 | 3728 | 0 | 3728 | 32 | 558.4088 | 490.7888 | 1088.8150 |
+| fastino.ai | hatecheck | v2 | 3728 | 0 | 3728 | 32 | 503.0429 | 448.5488 | 823.6389 |
+| fastino.ai | jailbreak-classification | v1 | 1044 | 0 | 1044 | 32 | 605.2778 | 531.5999 | 1221.1739 |
+| fastino.ai | jailbreak-classification | v2 | 1044 | 0 | 1044 | 32 | 568.5412 | 498.1759 | 1095.6176 |
+| fastino.ai | jailbreakhub | v1 | 15140 | 0 | 15140 | 32 | 509.4604 | 461.9128 | 858.4194 |
+| fastino.ai | jailbreakhub | v2 | 15140 | 0 | 15140 | 32 | 553.1703 | 469.8756 | 1041.7241 |
+| fastino.ai | pii_masking_mini_10k | v1 | 9000 | 0 | 9000 | 32 | 451.9370 | 425.3704 | 696.9498 |
+| fastino.ai | pii_masking_mini_10k | v2 | 9000 | 0 | 9000 | 32 | 500.1238 | 470.9615 | 756.0167 |
+| fastino.ai | pii_masking_nano_1k | v1 | 900 | 0 | 900 | 32 | 563.3786 | 512.0003 | 1082.9768 |
+| fastino.ai | pii_masking_nano_1k | v2 | 900 | 0 | 900 | 32 | 505.5566 | 455.7670 | 899.4038 |
+| fastino.ai | toxigen | v1 | 6789 | 0 | 6789 | 32 | 488.3889 | 447.1087 | 785.4195 |
+| fastino.ai | toxigen | v2 | 6789 | 0 | 6789 | 32 | 537.7799 | 477.3067 | 1040.6861 |
 
-## 三、v1 / 阈值 0.5 评测结果与历史参考横向对比
+## PII detection diagnostics
 
-下表仅保留 **11 个配置均已提供**的质量指标和参考耗时，不用缺失指标补零，也不从其他均值反推指标。
+All-positive document labels: detection rate alone cannot measure extraction, false positives, leakage or over-masking. Use the separate PII span-extraction workflow for extraction quality.
 
-本轮内部及 API 结果、历史 OpenJev 4B 取 v1 / 0.5；Dynamo、Mistral、Warden 因历史配置未提供，仅保留为参考，不混入其他已知配置的结果。
+| provider | dataset | prompt | valid | expected | detection_rate |
+|---|---|---|---|---|---|
+| fastino.ai | pii_masking_mini_10k | v1 | 9000 | 9000 | 0.9262 |
+| fastino.ai | pii_masking_mini_10k | v2 | 9000 | 9000 | 0.9530 |
+| fastino.ai | pii_masking_nano_1k | v1 | 900 | 900 | 0.9233 |
+| fastino.ai | pii_masking_nano_1k | v2 | 900 | 900 | 0.9456 |
 
-| 数据来源 | 模型 / 部署配置 | Accuracy | Precision | Recall | 参考平均耗时 ms/样本 |
-| --- | --- | ---: | ---: | ---: | ---: |
-| 历史内部及参考 | OpenJev 4B | 77.73% | 84.83% | 72.11% | 868.24 |
-| 历史内部及参考 | Dynamo CPU | 89.65% | 88.88% | 90.86% | 20,000.00 |
-| 历史内部及参考 | Dynamo GPU A100 | 89.41% | 88.69% | 91.06% | 55.00 |
-| 历史内部及参考 | Dynamo GPU L4 | 89.39% | 88.69% | 91.02% | 100.00 |
-| 历史内部及参考 | Mistral | 83.33% | 85.64% | 83.40% | 1,671.08 |
-| 历史内部及参考 | Warden | 77.73% | 82.03% | 76.11% | 328.53 |
-| 本轮内部 | OpenJev 32B | 77.99% | 90.63% | 65.78% | 1,818.55 |
-| 本轮内部 | Microsoft Decision-1 | 83.19% | 93.61% | 72.20% | 1,239.60 |
-| API 评测 | Fastino | 53.32% | 55.49% | 84.35% | 397.96 |
-| API 评测 | Laya | 57.44% | 57.44% | 100.00% | 446.44 |
-| API 评测 | TypeSafe | 83.23% | 91.04% | 75.95% | 226.59 |
+## Supplied aggregate references — unpaired
 
-**质量指标排除请求错误，按各配置自身成功样本计算。** 耗时来源和运行条件不同，表内数值不代表可直接比较的单请求延迟。完整六指标图表见文末来源链接；本报告不将其中缺失较多的指标用于全模型结论。
+Preserved source values, not a fresh evaluation. Dataset membership, labels, successful rows, prompt configuration and timing are not uniformly verified. No combined ranking or latency speedup is claimed. F1 remains missing where not supplied.
 
-## 四、主要发现与业务含义
+| provider | prompt | accuracy | precision | recall | f1 | auroc | mean_elapsed_ms |
+|---|---|---|---|---|---|---|---|
+| openjev | v1 | 0.7773 | 0.8482666666666666 | 0.7211 | 0.7631666666666667 | 0.8562333333333333 | 868.2366666666667 |
+| openjev-32b | v1 | 0.7799446666666666 | 0.9063463333333334 | 0.6577933333333333 | 0.737671 | 0.867307 | 1818.546583 |
+| microsoft-decision-1 | v1 | 0.8318953333333333 | 0.936145 | 0.72204 | 0.7990336666666666 | 0.918753 | 1239.601246 |
+| Dynamo CPU | not_supplied | 0.8965 | 0.8888 | 0.9086 |  | 0.9527 | 20000.0 |
+| Dynamo GPU (A100) | not_supplied | 0.8941 | 0.8869 | 0.9106 |  | 0.9524 | 55.0 |
+| Dynamo GPU (L4) | not_supplied | 0.8939 | 0.8869 | 0.9102 |  | 0.9524 | 100.0 |
+| Mistral | not_supplied | 0.8333 | 0.8564 | 0.834 |  |  | 1671.08 |
+| Warden | not_supplied | 0.7773 | 0.8203 | 0.7611 |  |  | 328.53 |
 
-### 4.1 历史 Dynamo 结果值得在当前环境中优先复现
+## Reproduction and limitations
 
-Dynamo CPU 的 Accuracy 为 **89.65%**，A100、L4 分别为 **89.41%**、**89.39%**，三种部署的 Recall 均约为 **91%**。在现有参考记录中，这组配置兼有较高的准确率与召回率。
+Run `python -m scripts.publish_corrected_comparison` after completing or resuming a provider suite. The publisher checks source hashes, revalidates paired text/labels and computes AUPRC from saved probabilities; it makes no API calls. Provider status declares the full expected dataset/prompt matrix, preventing partial-suite publication. Thresholds 0.5–0.8 use one probability per row/prompt, not independent repeat inferences. These are historical-row parity benchmarks; split-policy PR #19 requires a separate rerun. The Notion fine-tuning evaluation populations also differ.
 
-CPU 的耗时记录为 **20,000 ms/样本**，A100、L4 分别为 **55、100 ms/样本**。部署方式与运行条件值得重点调查，但不能在协议未对齐时，将其直接解释为 GPU 加速比或成本收益。
-
-**建议：把历史 Dynamo GPU 配置纳入当前统一复测，确认质量、成功率和耗时能否共同复现。**
-
-### 4.2 本轮 Decision-1 与 TypeSafe 的准确率接近，查准与召回取舍不同
-
-Microsoft Decision-1 的 Accuracy 为 **83.19%**，TypeSafe 为 **83.23%**，参考数值接近。Decision-1 的 Precision 为 **93.61%**，比 TypeSafe 高 **2.57 个百分点**；Recall 为 **72.20%**，比 TypeSafe 低 **3.75 个百分点**。
-
-这意味着当前结果呈现了不同的查准与召回取舍，不能仅看准确率选择。对危险内容漏检敏感的业务，应重点验证召回；对正常内容误拦敏感的业务，应单独测量误报率，不能只用 Precision 推断。
-
-**建议：两者在 v1 / 阈值 0.5 下并行进入独立业务集验证，再按业务损失确定候选优先级。**
-
-### 4.3 OpenJev 历史 4B 与本轮 32B：收益不全面
-
-| 三数据集共同指标 | 历史 OpenJev 4B | 本轮 OpenJev 32B | 32B 相比 4B |
-| --- | ---: | ---: | --- |
-| Accuracy | 77.73% | 77.99% | 高 0.26 个百分点 |
-| Precision | 84.83% | 90.63% | 高 5.81 个百分点 |
-| Recall | 72.11% | 65.78% | 低 6.33 个百分点 |
-| 参考平均耗时 ms/样本 | 868.24 | 1,818.55 | 记录耗时更长，非统一环境性能结论 |
-
-32B 的查准率有所提升，但准确率变化较小、召回下降。**当前结果不支持“参数规模更大，业务收益就全面更好”的判断。**
-
-还需注意：32B 在这三个数据集中共 **12,481** 行，其中 **1,351** 行请求失败，错误率 **10.82%**；ToxiGen 单项失败 **1,345** 行。这些错误未进入质量指标，可能影响成功样本的代表性。此处仅披露影响解读的已知风险，不将缺少全模型对应数据的失败率做横向排名。
-
-**建议：保留 4B 作为历史对照，32B 先定位失败原因并补跑，再判断扩参价值。** 当前不能将观察差异简单归因于模型大小，也不能据此认定 32B 模型能力更弱。
-
-### 4.4 Mistral、Warden 与其余 API 配置
-
-Mistral 的 Accuracy 为 **83.33%**，Precision、Recall 分别为 **85.64%**、**83.40%**，可作为查准与召回较均衡的参考候选；Warden 的 Accuracy 为 **77.73%**、Recall 为 **76.11%**，可按业务需求保留对照。
-
-Fastino 的 Accuracy 为 **53.32%**，虽有 **84.35%** 的 Recall，但 Precision 为 **55.49%**。Laya 当前 v1 / 0.5 输出全部为正类，虽然 Recall 达 **100.00%**，却不能有效区分正常与危险内容。
-
-**建议：Fastino、Laya 先完成输出分数语义、类别映射及配置核验，再评价其业务适用性。上述观察仅针对已记录配置，不泛化为供应商所有版本的能力。**
-
-## 五、决策建议与结论边界
-
-建议按 **“历史方案复现、本轮候选验证、内部模型修复”** 三条线推进：
-
-| 方向 | 建议动作 | 预期决策依据 |
-| --- | --- | --- |
-| 历史方案复现 | 优先复测 Dynamo GPU；保留 OpenJev 4B，按需纳入 Mistral、Warden | 历史结果在当前统一环境下是否仍然成立 |
-| 本轮候选验证 | 对 Decision-1、TypeSafe 等使用独立业务集验证；固定版本、v1 和阈值 0.5 | 真实业务中的误报、漏报与成功率 |
-| 内部模型修复 | 定位 OpenJev 32B 请求失败、补齐预测；核验 Fastino、Laya 输出语义 | 排除运行或解析因素后再评价质量 |
-| 统一性能与成本评估 | 固定输入、并发和计时方式，记录吞吐、单请求 P95、资源或调用成本 | 能支持部署、采购及扩容的完整材料 |
-
-正式选型前，还需统一逐样本输入、记录模型版本，并在共同成功样本上比较质量，同时单独披露全量请求成功率。**只有共同数据集，尚不能保证公平比较；不能靠剔除失败样本掩盖可用性问题。**
-
-本表已知的日志耗时为整轮 `elapsed / processed`，可能包含并发、失败等待、客户端及网络开销；三家 API 使用各数据集 v1 / 0.5 单轮日志后等权平均，4B 使用提供的对应汇总耗时，32B、Decision-1 使用提供的完整单轮耗时，其余配置完整协议未知。因此不据此反推单请求延迟、吞吐或性价比。
-
-本报告不作统计显著性、生产 SLA 或业务泛化保证，也不以这三个数据集的结果证明越狱防护、PII 检出或脱敏能力。相关任务需独立验收。
-
-**建议本轮批准候选验证与统一复测，不依据当前参考均值直接批准生产上线、采购或大模型扩容。**
-
-## 附：数据来源
-
-| 资料 | 用途 |
-| --- | --- |
-| [三数据集参考页面](figures/three_dataset_comparison.html) / [均值 CSV](figures/three_dataset_averages.csv) | 本报告 11 个配置的主要数值来源 |
-| [历史 OpenJev 汇总](openjev_summary.csv) | 历史 4B 结果追溯 |
-| [本轮内部模型汇总](internal_model_summary.csv) | 32B、Decision-1 的逐数据集结果 |
-| [数据快照](comparison.json) / [图表说明](figures/figure_manifest.json) | 历史参考配置、来源、统计口径与快照时间 |
-| [完整技术报告](comparison.md) | 其他任务与配置的补充材料，不与本报告共同范围混算 |
-
-OpenJev 4B、32B 为内部确认的显示名称；32B 原始文件标签为 `apus-openjev-35b-a3b`，不据文件名推断实际后端版本。TypeSafe 的 `jev-latest` 为请求名称，实际后端版本尚未确认。
-
-本报告为指定快照的人工汇报稿，不会随后续图表生成自动更新；补测后需同步复核表格及结论。
+[Figure gallery](figures/index.html) · [All figures PDF](figures/paper_figures.pdf) · [Machine-readable report](comparison.json) · [Three-dataset CSV](figures/three_dataset_averages.csv)

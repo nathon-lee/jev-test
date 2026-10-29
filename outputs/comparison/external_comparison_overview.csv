@@ -1,11 +1,5 @@
-﻿provider,prompt,datasets,accuracy,precision,recall,f1,auroc,mean_elapsed_ms
-fastino.ai,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.4484649879265724,0.40155817617550393,0.8806989339972715,0.5130851806630612,0.6271241421383617,
-laya-ai.com,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.4047108090340006,0.4047108090340006,1.0,0.535645126637889,0.40415832494877246,1416.4515626888767
-typesafe.ai,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8440104218085284,0.7309083258166845,0.8235397653411346,0.7242659719652291,0.9321767764246427,228.04778921625538
-openjev,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8329833333333333,0.7429166666666667,0.7546666666666667,0.7213166666666667,0.8959833333333334,937.9983333333333
-openjev-32b,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8150951666666666,0.87065,0.6782418333333333,0.7454875,0.8828516666666667,1568.9994911666668
-microsoft-decision-1,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8146538333333333,0.7131821666666667,0.8180203333333333,0.688979,0.924596,1242.8153255
-fastino.ai,v2,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.43814747606579946,0.39847435827101674,0.8885238042386406,0.5116589490596175,0.6267600545882743,
-laya-ai.com,v2,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.4046978014823088,0.4046978014823088,1.0,0.5356382990164746,0.43369740317704,
-typesafe.ai,v2,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8419828736915326,0.7299649853772254,0.8209083103948284,0.7215794665556226,0.9303780069371551,228.01373556530035
-openjev,v2,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.83745,0.7562166666666666,0.7447,0.7203,0.89835,930.5916666666667
+provider,prompt,datasets,paired_rows,accuracy,precision,recall,f1,auroc,auprc
+fastino.ai,v1,"toxigen,hatecheck,aegis2",12481,0.822960479684988,0.9388551936652554,0.7021966663099625,0.7682895679812356,0.9188082529884953,0.9289281491473264
+fastino.ai,v2,"toxigen,hatecheck,aegis2",12481,0.8494279110394658,0.9383395864971364,0.7543825197784677,0.8200665084572408,0.92307562477462,0.933411412164024
+historical_jev,v1,"toxigen,hatecheck,aegis2",12481,0.832312918054613,0.9104207827207893,0.759490111737386,0.8126536465001857,0.9243040104864543,0.9320637555985514
+historical_jev,v2,"toxigen,hatecheck,aegis2",12481,0.8354759361616113,0.9191953816742587,0.7543728398194429,0.8176864022047997,0.9247675651366318,0.9318257266421646

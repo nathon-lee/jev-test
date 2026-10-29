@@ -53,13 +53,16 @@ def build_report(root, historical_dir=Path("outputs/typesafe.ai")):
     records = []
     restriction_path = root / "access_restrictions.json"
     restrictions = json.loads(restriction_path.read_text()) if restriction_path.exists() else []
-    restricted_providers = {row["provider"] for row in restrictions}
+    status_path = root / "provider_status.json"
+    statuses = json.loads(status_path.read_text()) if status_path.exists() else {}
+    restricted_providers = {row["provider"] for row in restrictions if row.get("status") != "resolved"}
+    pending_providers = {provider for provider, status in statuses.items() if status["status"] in ("running", "pending", "blocked")}
     incomplete_restricted = set()
     for path in sorted(root.glob("*/*.manifest.json")):
         manifest = json.loads(path.read_text())
         result = manifest.get("result")
         if result is None or not result["complete"]:
-            if manifest["provider"] in restricted_providers:
+            if manifest["provider"] in restricted_providers | pending_providers:
                 incomplete_restricted.add(manifest["provider"])
                 continue
             raise ValueError(f"Incomplete rerun configuration: {path.name}")
@@ -74,13 +77,22 @@ def build_report(root, historical_dir=Path("outputs/typesafe.ai")):
             row["historical_jev_file_sha256"] = digest(baseline_path)
             row["paired_baseline"] = paired_metrics(new, historical)
         records.append(row)
+    # Do not publish a partially completed provider as a finished suite. The
+    # explicit matrix also prevents a three-dataset average from changing scope.
+    for provider, status in statuses.items():
+        expected = {tuple(config) for config in status.get("expected_configurations", [])}
+        available = {(row["dataset"], row["prompt_version"]) for row in records if row["provider"] == provider}
+        if expected and not expected.issubset(available):
+            records = [row for row in records if row["provider"] != provider]
     if not records:
         raise ValueError("No completed rerun configurations")
     completed_providers = {row["provider"] for row in records}
-    unresolved_restrictions = [row for row in restrictions if row["provider"] not in completed_providers
-                               or row["provider"] in incomplete_restricted]
+    unresolved_restrictions = [row for row in restrictions if row.get("status") != "resolved" and
+                              (row["provider"] not in completed_providers or row["provider"] in incomplete_restricted)]
     report = {
         "completed_providers": sorted(completed_providers),
+        "provider_status": {provider: {**status, "status": "complete" if provider in completed_providers else status["status"]}
+                            for provider, status in statuses.items()},
         "access_restrictions": unresolved_restrictions,
         "score_field": "answers.score.noul", "thresholds_derived_offline": True,
         "independent_repeat_inferences": False,

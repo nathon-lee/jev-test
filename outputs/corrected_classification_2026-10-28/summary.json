@@ -2,17 +2,148 @@
   "completed_providers": [
     "fastino.ai"
   ],
-  "access_restrictions": [
-    {
-      "provider": "laya-ai.com",
-      "http_status": 402,
-      "status": "blocked",
-      "configuration": "jailbreak-classification/v1",
-      "observed_at": "2026-10-29T04:25:10.283048+00:00",
-      "checkpointed_successes": 7,
-      "detail": "HTTP 402 Payment Required; runner stopped. Partial Laya scores are not published as a completed benchmark."
+  "provider_status": {
+    "fastino.ai": {
+      "status": "complete",
+      "expected_configurations": [
+        [
+          "toxigen",
+          "v1"
+        ],
+        [
+          "toxigen",
+          "v2"
+        ],
+        [
+          "hatecheck",
+          "v1"
+        ],
+        [
+          "hatecheck",
+          "v2"
+        ],
+        [
+          "aegis2",
+          "v1"
+        ],
+        [
+          "aegis2",
+          "v2"
+        ],
+        [
+          "detect-jailbreak",
+          "v1"
+        ],
+        [
+          "detect-jailbreak",
+          "v2"
+        ],
+        [
+          "jailbreak-classification",
+          "v1"
+        ],
+        [
+          "jailbreak-classification",
+          "v2"
+        ],
+        [
+          "jailbreakhub",
+          "v1"
+        ],
+        [
+          "jailbreakhub",
+          "v2"
+        ],
+        [
+          "pii_masking_nano_1k",
+          "v1"
+        ],
+        [
+          "pii_masking_nano_1k",
+          "v2"
+        ],
+        [
+          "pii_masking_mini_10k",
+          "v1"
+        ],
+        [
+          "pii_masking_mini_10k",
+          "v2"
+        ]
+      ]
+    },
+    "laya-ai.com": {
+      "status": "running",
+      "detail": "Billing restored; checkpointed rerun resumed. Full suite not yet published.",
+      "expected_configurations": [
+        [
+          "toxigen",
+          "v1"
+        ],
+        [
+          "toxigen",
+          "v2"
+        ],
+        [
+          "hatecheck",
+          "v1"
+        ],
+        [
+          "hatecheck",
+          "v2"
+        ],
+        [
+          "aegis2",
+          "v1"
+        ],
+        [
+          "aegis2",
+          "v2"
+        ],
+        [
+          "detect-jailbreak",
+          "v1"
+        ],
+        [
+          "detect-jailbreak",
+          "v2"
+        ],
+        [
+          "jailbreak-classification",
+          "v1"
+        ],
+        [
+          "jailbreak-classification",
+          "v2"
+        ],
+        [
+          "jailbreakhub",
+          "v1"
+        ],
+        [
+          "jailbreakhub",
+          "v2"
+        ],
+        [
+          "pii_masking_nano_1k",
+          "v1"
+        ],
+        [
+          "pii_masking_nano_1k",
+          "v2"
+        ],
+        [
+          "pii_masking_mini_10k",
+          "v1"
+        ],
+        [
+          "pii_masking_mini_10k",
+          "v2"
+        ]
+      ]
     }
-  ],
+  },
+  "access_restrictions": [],
   "score_field": "answers.score.noul",
   "thresholds_derived_offline": true,
   "independent_repeat_inferences": false,

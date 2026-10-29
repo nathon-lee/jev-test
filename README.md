@@ -1,3 +1,5 @@
+> **Current results:** [corrected comparison](outputs/comparison/comparison.md) · [updated charts](outputs/comparison/figures/index.html). Older comparison instructions and figures below are archived historical material; use `python -m scripts.publish_corrected_comparison` for the current presentation.
+
 # JEV Benchmark Suite
 
 This project benchmarks multiple providers against safety classification datasets, including prompt-version comparison (v1/v2) and threshold tuning.
@@ -336,7 +338,7 @@ v1 本地模型缺少四轮均值时，仅可使用与全量 CSV 行数一致的
 此时不需要推断完成记录与阈值的对应关系，也不回填各阈值的耗时。
 `index.html` 展示三组新增参考图，稳定性三组仍仅保留超链接；汇总 PDF 保留全部图。
 该次完整报告生成后，`python -m scripts.plot_model_comparison` 可从保存的 JSON 重绘全部图表。
-另有 `outputs/comparison/figures/three_dataset_comparison.html` 独立页面，仅对 ToxiGen、HateCheck、
+另有 `outputs/comparison_historical_confidence/figures/three_dataset_comparison.html` 独立页面，仅对 ToxiGen、HateCheck、
 AEGIS2 三个数据集等权平均，原四模型仅取 v1、阈值 0.5 的六项参考均值，并提供 PNG / SVG / PDF / CSV。
 该页本地模型耗时也只取对应 v1 / 0.5 运行的 elapsed/processed，不对四轮运行平均；
 OpenJev 取所提供汇总表中对应配置的耗时。其他参考图仍保留原有口径。
@@ -348,8 +350,8 @@ OpenJev 取所提供汇总表中对应配置的耗时。其他参考图仍保留
 新增配置的提示词、阈值与计时协议未知，仅作参考；耗时轴在 1 ms 以上使用对数刻度。
 该页由 `index.html` 超链接进入，不替换原有参考均值图；指定数据集缺失时标 N/A，不缩减范围。
 
-报告入口为 `outputs/comparison/comparison.html`，图表入口为
-`outputs/comparison/figures/index.html`。
+报告入口为 `outputs/comparison_historical_confidence/comparison.html`，图表入口为
+`outputs/comparison_historical_confidence/figures/index.html`。
 
 如果只需要生成对比报告，不绘图：
 
@@ -357,7 +359,7 @@ OpenJev 取所提供汇总表中对应配置的耗时。其他参考图仍保留
 python -m scripts.compare_models
 ```
 
-打开 `outputs/comparison/comparison.html` 查看中文结论、模型名称、固定配置排名、
+打开 `outputs/comparison_historical_confidence/comparison.html` 查看中文结论、模型名称、固定配置排名、
 分数据集指标、提示词/阈值探索、覆盖率和日志耗时，以及可搜索的全部配置明细。
 同时生成 `comparison.md`、`comparison.json`、`runs.csv`、`paired.csv` 和 `pairwise.csv`。
 Laya 后续测试完成后重新运行同一命令即可更新快照。
@@ -365,7 +367,7 @@ Laya 后续测试完成后重新运行同一命令即可更新快照。
 如果本地只补充了部分 CSV、历史逐样本文件已不在目录中，使用旧报告增量更新，避免丢失历史结果：
 
 ```bash
-python -m scripts.compare_models --previous-report outputs/comparison/comparison.json --paper-figures
+python -m scripts.compare_models --previous-report outputs/comparison_historical_confidence/comparison.json --paper-figures
 ```
 
 新 CSV 替换同配置旧结果；未提供的配置保留历史汇总，未测试配置仍然缺失。
@@ -381,7 +383,7 @@ python -m scripts.compare_models --previous-report outputs/comparison/comparison
 检查点，只扫描供应商目录下的 CSV 和日志。支持自定义路径或仅对比两家供应商：
 
 ```bash
-python -m scripts.compare_models --input-dir outputs --data-dir data/prepared --output-dir outputs/comparison
+python -m scripts.compare_models --input-dir outputs --data-dir data/prepared --output-dir outputs/comparison_historical_confidence
 python -m scripts.compare_models --providers fastino.ai,typesafe.ai --output-dir outputs/comparison_two
 ```
 
@@ -407,7 +409,7 @@ PII 目前只有全正样本分类输出，不能用于评价实际脱敏质量�
 python -m scripts.plot_model_comparison
 ```
 
-打开 `outputs/comparison/figures/index.html` 查看以下图表；页面说明、图注、链接及数据警告均使用英文：
+打开 `outputs/comparison_historical_confidence/figures/index.html` 查看以下图表；页面说明、图注、链接及数据警告均使用英文：
 首页概览保留 PDF 与完整报告入口、UTC 数据快照及简短可比性提示；
 CSV、LaTeX 与独立页入口收纳在默认折叠的 Data & Downloads，
 模型来源和协议限制收纳在默认折叠的 Methodology & Limitations。
@@ -482,7 +484,7 @@ python -m scripts.compare_models --paper-figures
 仅从已有报告重绘为 600 DPI PNG（同时保留矢量 SVG / PDF）：
 
 ```bash
-python -m scripts.plot_model_comparison --report outputs/comparison/comparison.json --output-dir outputs/comparison/figures --dpi 600
+python -m scripts.plot_model_comparison --report outputs/comparison_historical_confidence/comparison.json --output-dir outputs/comparison_historical_confidence/figures --dpi 600
 ```
 
 ## Important notes
@@ -567,8 +569,12 @@ This project is intended for internal benchmark and evaluation workflows.
 
 Corrected live reruns using `answers.score.noul` are published separately in
 [the corrected classification results](outputs/corrected_classification_2026-10-28/README.md).
-The original Fastino/Laya output directories and comparison figures are historical
-snapshots and must not be interpreted as results from the corrected parser.
+The original Fastino/Laya raw output directories remain historical snapshots.
+The active [comparison report](outputs/comparison/comparison.md) and
+[figure gallery](outputs/comparison/figures/index.html) now use corrected Noul scores.
+The previous report and figures are archived under
+`outputs/comparison_historical_confidence/`; the older comparison instructions
+above reproduce that historical workflow and are superseded for current results.
 
 To reproduce or resume the GLiDE rerun with the existing prepared rows:
 
@@ -588,3 +594,23 @@ directory for a new independent run. One live probability is requested per row a
 prompt; threshold metrics for 0.5–0.8 are derived offline, not repeated API calls.
 The new report compares against historical Jev outputs only after matching text,
 labels, and successful sample IDs. PII classification remains detection-only.
+
+Refresh the complete corrected presentation without additional API calls:
+
+```bash
+python -m scripts.publish_corrected_comparison
+```
+
+This refreshes reports, JSON/CSV data, PNG/SVG/PDF charts, the figure gallery,
+and `fig13_three_dataset_averages.png`. The original figure uses v1 / 0.5;
+v2 results are shown separately. The three datasets receive equal weight.
+Supplied aggregate results are retained in a separate reference table, not a
+combined ranking. Historical latency is not compared with concurrent request
+latency. All-positive PII document diagnostics remain outside classification
+quality averages. AUPRC is average precision computed from verified saved scores.
+
+`provider_status.json` in the corrected rerun directory declares the expected
+dataset/prompt matrix. A provider is published only after that matrix completes;
+Laya remains pending while its resumed run proceeds. Billing restrictions retain
+their history with a resolved status once successful calls resume. These reports
+use the historical prepared rows, not the new split policy from PR #19.

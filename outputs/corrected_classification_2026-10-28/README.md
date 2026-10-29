@@ -64,4 +64,4 @@ Timing measures wall-clock request latency including retries under the recorded 
 
 Per-configuration manifests record exact source-file and submitted-input hashes, prompt text, requested/returned model IDs, timestamps, coverage, and threshold metrics. CSVs retain corrected scores, diagnostic raw confidence, response status, attempts, and per-call latency. JSONL checkpoints support resuming and retain token usage where returned. Missing or failed rows are not counted as correct predictions.
 
-Laya is blocked by HTTP 402 (Payment Required); partial Laya scores are not published as a completed benchmark. These results use Nathan's existing prepared rows and label mappings, not the Notion experiment's separately sampled evaluation sets.
+Laya is not included in this snapshot; its results will be added after its run completes. These results use Nathan's existing prepared rows and label mappings, not the Notion experiment's separately sampled evaluation sets.
