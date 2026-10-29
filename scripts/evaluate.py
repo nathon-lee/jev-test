@@ -11,6 +11,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 from benchmark.pii_metrics import compute_pii_metrics
+from benchmark.pii_extraction import parse_annotation_list
 
 OUTPUT_DIR = Path("outputs")
 
@@ -259,7 +260,14 @@ def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str 
     path = resolve_prediction_path(dataset, provider=provider, prompt_version=prompt_version, threshold=threshold)
     if debug:
         print(f"DEBUG selected path: {path}")
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, keep_default_na=False)
+    # A binary prediction contains no PII strings and used to receive perfect
+    # masking scores. Require actual redacted text instead.
+    prediction_column = "predicted_text" if "predicted_text" in df.columns else "prediction"
+    if prediction_column not in df.columns or pd.to_numeric(df[prediction_column], errors="coerce").notna().any():
+        raise ValueError("PII privacy evaluation requires redacted predicted_text, not binary predictions. "
+                         "Use python -m scripts.pii_extraction for span/entity evaluation, "
+                         "or --task classification for legacy detection classification.")
     print("\n" + "=" * 70)
     print(dataset.upper())
     print("=" * 70)
@@ -276,15 +284,13 @@ def evaluate_pii(dataset: str, provider: str | None = None, prompt_version: str 
     rows = []
     for _, row in df.iterrows():
         source_text = str(row.get("source_text") or row.get("text") or "")
-        predicted_text = str(row.get("prediction") or row.get("text") or "")
+        predicted_text = row.get("predicted_text", row.get("prediction"))
+        if not isinstance(predicted_text, str) or not predicted_text.strip():
+            raise ValueError("Missing redacted text; cannot compute privacy metrics")
         target_text = str(row.get("target_text") or row.get("text") or "")
-        privacy_mask = row.get("privacy_mask")
-        if isinstance(privacy_mask, str):
-            try:
-                import ast
-                privacy_mask = ast.literal_eval(privacy_mask)
-            except Exception:
-                privacy_mask = []
+        privacy_mask = parse_annotation_list(row.get("privacy_mask"))
+        if not privacy_mask and source_text != target_text:
+            raise ValueError("Empty PII annotations with a changed target; regenerate the dataset")
         metrics = compute_pii_metrics(
             source_text=source_text,
             predicted_text=predicted_text,
@@ -324,9 +330,11 @@ def main():
     parser.add_argument("--prompt-version", default=None)
     parser.add_argument("--threshold", type=float, default=None)
     parser.add_argument("--debug-path", action="store_true", help="Print the exact CSV candidate list and selected file before evaluation.")
+    parser.add_argument("--task", choices=["auto", "classification", "pii-masking"], default="auto",
+                        help="Select classification explicitly for legacy binary PII detection outputs")
     args = parser.parse_args()
 
-    if "pii" in args.dataset.lower():
+    if args.task == "pii-masking" or (args.task == "auto" and "pii" in args.dataset.lower()):
         evaluate_pii(args.dataset, provider=args.provider, prompt_version=args.prompt_version, threshold=args.threshold, debug=args.debug_path)
     else:
         evaluate(args.dataset, provider=args.provider, prompt_version=args.prompt_version, threshold=args.threshold, debug=args.debug_path)
