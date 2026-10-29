@@ -26,7 +26,7 @@ def test_report_requires_full_provider_matrix_and_rejects_legacy_runs(tmp_path):
                   for i in range(2)}
         csv_path = folder / f"hatecheck_{version}.csv"
         result = export_results(samples, cached, csv_path, "fastino.ai", "hatecheck", version, "model")
-        manifest = {"dataset": "hatecheck", "prompt_version": version, "require_heldout": True,
+        manifest = {"dataset": "hatecheck", "prompt_version": version, "require_heldout": True, "workers": 1,
                     "evaluation_partition": metadata, "result": result}
         sidecar = csv_path.with_suffix(".manifest.json")
         sidecar.write_text(json.dumps(manifest))
@@ -35,6 +35,14 @@ def test_report_requires_full_provider_matrix_and_rejects_legacy_runs(tmp_path):
     manifest["require_heldout"] = False
     sidecar.write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="declared held-out source"):
+        build(root, data, ["hatecheck"])
+    manifest["require_heldout"] = True
+    changed = pd.read_csv(csv_path)
+    changed.loc[0, "text"] = "different evaluation input"
+    changed.to_csv(csv_path, index=False)
+    manifest["result"]["file_sha256"] = digest(csv_path)
+    sidecar.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="IDs/text/labels"):
         build(root, data, ["hatecheck"])
 
 

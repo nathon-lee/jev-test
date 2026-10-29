@@ -108,3 +108,20 @@ The shared cap applies to retries as well as initial requests, and is recorded i
 the manifests. Timing includes rate-limit waits and must not be interpreted as
 unconstrained model throughput. Foundry deployment instructions:
 https://learn.microsoft.com/en-us/azure/foundry/foundry-models/how-to/use-foundry-models-microsoft-decision
+
+## HTML and figure publication
+
+`python -m scripts.report_heldout` now rebuilds the Markdown/JSON report, HTML
+comparison, gallery, standalone three-dataset page, machine-readable metric CSVs,
+and eight PNG/SVG/PDF figures with a combined PDF. No hosted inference calls are
+made. The report checks prediction sample IDs/text/labels against the pinned source
+files and requires identical successful rows across complete providers before
+publishing comparable quality charts. Metrics are recomputed from saved scores.
+
+The v1 summary retains the familiar `fig13_three_dataset_averages.png` filename in
+this **held-out** directory. Its scope is HateCheck, AEGIS2 and Jailbreak
+Classification, equally weighted; it is not the ToxiGen/HateCheck/AEGIS2 scope in
+PR #20. v2 is a separate chart. Timing includes retries/pacing and is shown
+separately with worker counts and rate caps, not as a deployment-speed ranking.
+PII extraction remains a separate GLiNER chart. Each figure's files and SHA-256
+hashes are recorded in `figures/figure_manifest.json`, tied to the source summary.

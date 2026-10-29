@@ -2,6 +2,23 @@
 
 Separate from PR #20's historical-row parity benchmarks. Prepared with PR #19's explicit split/provenance policy. Official held-out membership does not establish absence of overlap with a model's training data; no training leak audit has been completed. Detect Jailbreak and JailbreakHub are excluded pending an agreed joint held-out split. ToxiGen is excluded by request because its official test rows do not match the legacy label lookup.
 
+
+## Equal-weight held-out averages
+
+![Held-out v1 summary](figures/fig13_three_dataset_averages.png)
+
+| provider | prompt | accuracy | precision | recall | f1 | auroc | auprc |
+|---|---|---|---|---|---|---|---|
+| fastino.ai | v1 | 0.9176 | 0.9291 | 0.9184 | 0.9225 | 0.9660 | 0.9743 |
+| fastino.ai | v2 | 0.9250 | 0.9360 | 0.9224 | 0.9281 | 0.9668 | 0.9740 |
+| laya-ai.com | v1 | 0.7278 | 0.8749 | 0.5963 | 0.6335 | 0.8112 | 0.8485 |
+| laya-ai.com | v2 | 0.7654 | 0.9140 | 0.6498 | 0.7094 | 0.8449 | 0.8847 |
+| microsoft-decision-1 | v1 | 0.9272 | 0.9346 | 0.9303 | 0.9324 | 0.9648 | 0.9720 |
+| microsoft-decision-1 | v2 | 0.9161 | 0.9280 | 0.9128 | 0.9200 | 0.9629 | 0.9690 |
+| typesafe.ai | v1 | 0.9048 | 0.9240 | 0.9054 | 0.9139 | 0.9629 | 0.9688 |
+| typesafe.ai | v2 | 0.9017 | 0.9400 | 0.8771 | 0.9060 | 0.9637 | 0.9688 |
+
+
 ## Provider coverage
 
 | provider | status | completed_configurations | expected_configurations |
@@ -11,7 +28,7 @@ Separate from PR #20's historical-row parity benchmarks. Prepared with PR #19's 
 | typesafe.ai | complete | 6 | 6 |
 | microsoft-decision-1 | complete | 6 | 6 |
 
-Only complete provider suites appear below. Pending/error rows are never counted as negatives. Error rates remain visible; future cross-provider comparisons require matching successful rows, not independent successful-subset rankings. Primary threshold is 0.5 and scores use Noul. Threshold variants share the same inference probabilities.
+Only complete provider suites appear below. Pending/error rows are never counted as negatives. Successful sample IDs, text and labels have been verified against the source files and matched across all included providers. Primary threshold is 0.5 and scores use Noul. Threshold variants share the same inference probabilities.
 
 ## Classification
 
@@ -58,3 +75,9 @@ GLiNER extraction is a separate model/task from GLiDE classification. Typed span
 | hatecheck | Paul/hatecheck | 9d2ac89df04254e5c427bcc8d61b6d6c83a1f59b | test | 3728 | c2a5c8928ae38b9e2150517291df3f5460029544aff4a057b8f4e01a4282c36c |
 | aegis2 | nvidia/Aegis-AI-Content-Safety-Dataset-2.0 | d86bb8bedff51d25ac834ab7838f1cc61acb7a2c | test | 1964 | 8b37befa9221dcb4bb1d2f6c1ec418e121931dda00c67c94763ee141149aa4b9 |
 | jailbreak-classification | jackhhao/jailbreak-classification | 2f2ceeb39658696fd3f462403562b6eea5306287 | test | 262 | c6eb3a7e4e566f27011e300fad471b09cfd6ed177eaef4c6569b5c4c2707d2c8 |
+
+## Presentation
+
+[HTML comparison](comparison.html) · [Figure gallery](figures/index.html) · [Combined PDF](figures/heldout_figures.pdf) · [v1 summary PNG](figures/fig13_three_dataset_averages.png)
+
+The summary chart equally weights HateCheck, AEGIS2 and Jailbreak Classification. It is a different three-dataset scope from PR #20 (which includes ToxiGen). v1 and v2 stay separate; PII extraction and differently throttled request timing are separate figures.
