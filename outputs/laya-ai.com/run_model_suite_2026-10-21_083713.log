@@ -1,0 +1,30 @@
+nohup: ignoring input
+Providers: ['laya-ai.com']
+Datasets: ['detect-jailbreak', 'jailbreak-classification', 'jailbreakhub', 'pii_masking_nano_1k', 'pii_masking_mini_10k']
+Prompt versions: ['v1', 'v2']
+Thresholds: [0.5, 0.6, 0.7, 0.8]
+Max workers: 8
+
+=== laya-ai.com | detect-jailbreak | v1 | threshold=0.5 ===
+=== laya-ai.com | detect-jailbreak | v1 | threshold=0.6 ===
+
+
+=== laya-ai.com | detect-jailbreak | v1 | threshold=0.7 ===
+
+=== laya-ai.com | detect-jailbreak | v1 | threshold=0.8 ===
+
+=== laya-ai.com | detect-jailbreak | v2 | threshold=0.5 ===
+
+=== laya-ai.com | detect-jailbreak | v2 | threshold=0.6 ===
+=== laya-ai.com | detect-jailbreak | v2 | threshold=0.7 ===
+
+=== laya-ai.com | detect-jailbreak | v2 | threshold=0.8 ===
+
+Running benchmark for laya-ai.com | detect-jailbreak | v2 | threshold=0.8 | total_rows=18258
+Running benchmark for laya-ai.com | detect-jailbreak | v1 | threshold=0.5 | total_rows=18258Running benchmark for laya-ai.com | detect-jailbreak | v1 | threshold=0.7 | total_rows=18258
+
+Running benchmark for laya-ai.com | detect-jailbreak | v1 | threshold=0.6 | total_rows=18258
+Running benchmark for laya-ai.com | detect-jailbreak | v2 | threshold=0.6 | total_rows=18258
+Running benchmark for laya-ai.com | detect-jailbreak | v2 | threshold=0.7 | total_rows=18258
+Running benchmark for laya-ai.com | detect-jailbreak | v2 | threshold=0.5 | total_rows=18258
+Running benchmark for laya-ai.com | detect-jailbreak | v1 | threshold=0.8 | total_rows=18258

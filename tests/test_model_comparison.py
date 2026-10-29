@@ -1,5 +1,7 @@
 import csv
 import json
+import os
+from hashlib import sha256
 
 import pytest
 
@@ -11,6 +13,7 @@ from benchmark.comparison import (
     collect_report,
     fingerprint,
     parse_logs,
+    parse_repeat_log_timings,
     read_predictions,
     read_reference,
     stability_metrics,
@@ -23,6 +26,7 @@ from benchmark.external_summary import (
     METRICS,
     attach_openjev_summary,
     read_openjev_summary,
+    read_internal_summary,
     reference_averages,
 )
 
@@ -71,6 +75,83 @@ def save_repeat_runs(outputs, provider, dataset, prompt, scores, failed=()):
             if (repeat, sample) in failed:
                 row.update(error="TimeoutError('do not export repeat details')", score="", prediction="")
         save_csv(outputs / provider / f"{dataset}_{prompt}_t{THRESHOLDS[repeat]}.csv", rows)
+
+
+def test_incremental_preserves_history_and_fills_full_sample_comparisons(tmp_path):
+    data, outputs = prepare(tmp_path)
+    providers = ["fastino.ai", "laya-ai.com"]
+    rows = prediction_rows("fastino.ai")
+    for row in rows:
+        row["dataset"] = "hatecheck"
+    save_csv(outputs / "fastino.ai/hatecheck_v1_t0.5.csv", rows)
+    previous = collect_report(outputs, data, providers)
+    for path in outputs.glob("*/*.csv"):
+        path.unlink()
+    for row in rows:
+        row["provider"] = "laya-ai.com"
+    save_csv(outputs / "laya-ai.com/hatecheck_v1_t0.5.csv", rows)
+    updated = collect_report(outputs, data, providers, previous_report=previous)
+    assert updated["previous_generated_at"] == previous["generated_at"]
+    assert updated["baseline_datasets"] == ["hatecheck", "toxigen"]
+    assert len(updated["runs"]) == len(previous["runs"])
+    old = next(r for r in previous["runs"] if r["file"] and r["dataset"] == "toxigen")
+    retained = next(r for r in updated["runs"] if r["file"] == old["file"])
+    assert retained == {**old, "source_kind": "historical_summary"}
+    assert [r for r in updated["paired"] if r["dataset"] == "toxigen"] == previous["paired"]
+    added = [r for r in updated["paired"] if r["dataset"] == "hatecheck"]
+    assert len(added) == 2 and all(r["n"] == 3 and r["f1"] == 1 for r in added)
+    assert all(r["complete"] == 2 for r in updated["overview"])
+    assert any("增量更新" in warning for warning in updated["warnings"])
+    write_report(updated, tmp_path / "report")
+    assert "增量更新" in (tmp_path / "report/comparison.md").read_text()
+
+
+def test_incremental_replacement_invalidates_stale_intersections_and_timing(tmp_path):
+    data, outputs = prepare(tmp_path)
+    providers = ["fastino.ai", "laya-ai.com"]
+    for provider in providers:
+        save_repeat_runs(outputs, provider, "toxigen", "v1", [[0.2, 0.8, 0.8]] * 4)
+    previous = collect_report(outputs, data, providers)
+    for row in previous["runs"]:
+        if row["file"]:
+            row.update(mean_elapsed_ms=123, elapsed_s=0.369)
+    for path in outputs.glob("*/*.csv"):
+        path.unlink()
+    rows = prediction_rows("laya-ai.com")
+    rows[0].update(error="TimeoutError('private details')", score="", prediction="")
+    save_csv(outputs / "laya-ai.com/toxigen_v1_t0.5.csv", rows)
+    updated = collect_report(outputs, data, providers, previous_report=previous)
+    assert updated["baseline_datasets"] == []
+    assert not any(r["threshold"] == 0.5 for r in updated["paired"])
+    assert updated["pairwise"] == []
+    fresh = next(r for r in updated["runs"] if r.get("source_kind") == "local_predictions")
+    assert fresh["valid"] == 2 and fresh["errors"] == 1
+    assert fresh["mean_elapsed_ms"] is fresh["elapsed_s"] is None
+    assert updated["stability_paired"] == []
+    stability = next(r for r in updated["stability"] if r["provider"] == "laya-ai.com"
+                     and r["dataset"] == "toxigen" and r["prompt"] == "v1")
+    assert stability["complete_repeats"] == 4
+    assert stability["status"] == "unavailable_raw"
+    assert stability["mean_score_std"] is stability["coverage"] is None
+    assert stability["errors"] == 1
+    assert any("无法重新对齐" in warning for warning in updated["warnings"])
+    assert "private details" not in json.dumps(updated)
+
+
+def test_incremental_uses_raw_intersections_when_all_predictions_are_available(tmp_path):
+    data, outputs = prepare(tmp_path)
+    providers = ["fastino.ai", "laya-ai.com"]
+    previous = collect_report(outputs, data, providers)
+    rows = prediction_rows("laya-ai.com")
+    rows[0].update(error="TimeoutError", score="", prediction="")
+    save_csv(outputs / "laya-ai.com/toxigen_v1_t0.5.csv", rows)
+    updated = collect_report(outputs, data, providers, previous_report=previous)
+    assert updated["baseline_datasets"] == ["toxigen"]
+    assert all(r["n"] == 2 for r in updated["paired"])
+    assert all(r["common_coverage"] == pytest.approx(2 / 3) for r in updated["paired"])
+    previous["providers"] = list(reversed(providers))
+    with pytest.raises(ValueError, match="providers/model identities"):
+        collect_report(outputs, data, providers, previous_report=previous)
 
 
 def test_stability_compares_scores_and_uses_one_inclusive_decision_threshold():
@@ -207,6 +288,105 @@ def external_row(dataset="toxigen", prompt="v1", **metrics):
         "accuracy": 0.8, "precision": 0.7, "recall": 0.6, "f1": 0.6462,
         "auroc": 0.9, "mean_elapsed_ms": 1000, **metrics,
     }
+
+
+def internal_row(provider="openjev-32b", **values):
+    return {
+        **external_row(), "provider": provider, "valid": 2, "errors": 1, **values,
+    }
+
+
+def test_internal_summaries_preserve_missing_metrics_counts_and_original_v2(tmp_path):
+    data, outputs = prepare(tmp_path)
+    providers = ["fastino.ai", "laya-ai.com"]
+    for provider in providers:
+        save_repeat_runs(outputs, provider, "toxigen", "v2", [[0.2, 0.8, 0.8]] * 4)
+    report = collect_report(outputs, data, providers)
+    summary = tmp_path / "summary.csv"
+    save_csv(summary, [external_row(), external_row(prompt="v2")])
+    attach_openjev_summary(report, summary)
+    original = json.dumps({k: v for k, v in report.items() if k != "external_comparison"}, sort_keys=True)
+    original_v2 = [row for row in report["external_comparison"]["overview"] if row["prompt"] == "v2"]
+    source = tmp_path / "internal_model_summary.csv"
+    save_csv(source, [
+        internal_row(accuracy=""),
+        internal_row("microsoft-decision-1", mean_elapsed_ms=1200),
+    ])
+    attach_openjev_summary(report, summary)
+    assert json.dumps({k: v for k, v in report.items() if k != "external_comparison"}, sort_keys=True) == original
+    comparison = report["external_comparison"]
+    assert [row for row in comparison["overview"] if row["prompt"] == "v2"] == original_v2
+    assert comparison["providers"] == [*providers, "openjev", "openjev-32b", "microsoft-decision-1"]
+    row = next(row for row in comparison["runs"] if row["provider"] == "openjev-32b")
+    assert row["valid"] == 2 and row["errors"] == 1
+    assert row["accuracy"] is None
+    assert row["f1"] == 0.6462 and row["auroc"] == 0.9
+    assert row["mean_elapsed_ms"] == 1000
+    assert row["latency_source_kind"] == "single_complete_run"
+    average = next(row for row in comparison["overview"] if row["provider"] == "openjev-32b")
+    assert average["datasets"] == ["toxigen"] and average["accuracy"] is None
+    assert average["f1"] == 0.6462 and average["auroc"] == 0.9
+    assert average["mean_elapsed_ms"] == 1000
+    write_report(report, tmp_path / "report")
+    assert (tmp_path / "report/internal_model_summary.csv").exists()
+    assert "Microsoft Decision-1" in (tmp_path / "report/comparison.md").read_text()
+
+
+@pytest.mark.parametrize("values", [
+    {"valid": 3, "errors": 1}, {"valid": -1, "errors": 4},
+    {"provider": "unknown"}, {"precision": 1.1},
+])
+def test_internal_summary_rejects_inconsistent_counts_or_metrics(tmp_path, values):
+    source = tmp_path / "internal.csv"
+    save_csv(source, [internal_row(**values)])
+    with pytest.raises(ValueError):
+        read_internal_summary(source)
+
+
+@pytest.mark.parametrize("case", [
+    "complete", "partial_log", "partial_csv", "wrong_threshold", "v2_only", "unverified_counts",
+])
+def test_v1_reference_single_run_timing_requires_complete_matched_half_threshold_log(tmp_path, case):
+    data, outputs = prepare(tmp_path)
+    prompt = "v2" if case == "v2_only" else "v1"
+    threshold = 0.6 if case == "wrong_threshold" else 0.5
+    processed = 2 if case in ("partial_log", "partial_csv") else 3
+    if case == "v2_only":
+        save_csv(outputs / "laya-ai.com/toxigen_v2_t0.5.csv", [
+            {**row, "prompt_version": "v2"} for row in prediction_rows("laya-ai.com")
+        ])
+    elif case == "partial_csv":
+        save_csv(outputs / "laya-ai.com/toxigen_v1_t0.5.csv", prediction_rows("laya-ai.com")[:2])
+    log = outputs / "laya-ai.com/single.log"
+    log.write_text(
+        f"Running benchmark for laya-ai.com | toxigen | {prompt} | threshold={threshold} | total_rows=3\n"
+        f"Progress: {processed}/3 | provider=laya-ai.com | dataset=toxigen | prompt={prompt} | elapsed=2.4s\n",
+    )
+    report = collect_report(outputs, data, ["fastino.ai", "laya-ai.com"])
+    if case == "unverified_counts":
+        next(row for row in report["runs"] if (
+            row["provider"] == "laya-ai.com" and row["dataset"] == "toxigen"
+            and row["prompt"] == "v1" and row["threshold"] == 0.5
+        )).pop("log_total")
+    original = json.dumps(report, sort_keys=True)
+    summary = tmp_path / "summary.csv"
+    save_csv(summary, [external_row(), external_row(prompt="v2")])
+    attach_openjev_summary(report, summary)
+    row = next(row for row in report["external_comparison"]["runs"] if (
+        row["provider"] == "laya-ai.com" and row["dataset"] == "toxigen" and row["prompt"] == "v1"
+    ))
+    if case == "complete":
+        assert row["mean_elapsed_ms"] == 800
+        assert row["latency_source_kind"] == "single_complete_run"
+        assert row["latency_log_file"] == str(log)
+    else:
+        assert row["mean_elapsed_ms"] is None
+        assert "latency_source_kind" not in row
+    if case == "v2_only":
+        assert next(row for row in report["external_comparison"]["runs"] if (
+            row["provider"] == "laya-ai.com" and row["dataset"] == "toxigen" and row["prompt"] == "v2"
+        ))["mean_elapsed_ms"] is None
+    assert json.dumps({key: value for key, value in report.items() if key != "external_comparison"}, sort_keys=True) == original
 
 
 def test_external_summary_keeps_raw_baselines_separate_and_matches_timing_method(tmp_path):
@@ -378,6 +558,170 @@ def test_log_threshold_alignment_partial_progress_and_timestamps(tmp_path):
     )
     with pytest.raises(ValueError, match="interleaved"):
         parse_logs([path])
+
+
+def test_ambiguous_log_is_excluded_without_losing_valid_logs(tmp_path):
+    path = tmp_path / "parallel.log"
+    start = "Running benchmark for laya-ai.com | toxigen | v1 | threshold=0.5 | total_rows=3\n"
+    progress = "Progress: 3/3 | provider=laya-ai.com | dataset=toxigen | prompt=v1 | elapsed=1.2s\n"
+    path.write_text(start + progress + start.replace("0.5", "0.6") +
+                    progress.replace("dataset=toxigen", "dataset=hatecheck"))
+    valid = tmp_path / "valid.log"
+    valid.write_text(start + progress)
+    warnings = []
+    result = parse_logs([path, valid], warnings=warnings)
+    assert set(result) == {("laya-ai.com", "toxigen", "v1", 0.5)}
+    assert result[("laya-ai.com", "toxigen", "v1", 0.5)]["log_file"] == str(valid)
+    assert len(warnings) == 1 and "整份日志" in warnings[0]
+    path.write_text(start.strip() + start.replace("0.5", "0.6") + progress)
+    with pytest.raises(ValueError, match="interleaved task starts"):
+        parse_logs([path])
+
+
+def test_incremental_update_attaches_new_logs_without_changing_quality(tmp_path):
+    data, outputs = prepare(tmp_path)
+    providers = ["fastino.ai", "laya-ai.com"]
+    previous = collect_report(outputs, data, providers)
+    (outputs / "laya-ai.com/run.log").write_text(
+        "Running benchmark for laya-ai.com | toxigen | v1 | threshold=0.5 | total_rows=3\n"
+        "Progress: 3/3 | provider=laya-ai.com | dataset=toxigen | prompt=v1 | elapsed=1.2s\n"
+    )
+    updated = collect_report(outputs, data, providers, previous_report=previous)
+    row = next(r for r in updated["runs"] if r["provider"] == "laya-ai.com" and r["file"])
+    assert row["mean_elapsed_ms"] == 400
+    assert row["elapsed_s"] == 1.2
+    assert updated["paired"] == previous["paired"]
+    assert updated["pairwise"] == previous["pairwise"]
+    assert row["valid"] == 3 and row["f1"] == 1
+
+
+def parallel_timing_log(outputs):
+    starts = [
+        f"Running benchmark for laya-ai.com | toxigen | v1 | threshold={threshold} | total_rows=3"
+        for threshold in THRESHOLDS
+    ]
+    completions = [
+        f"Progress: 3/3 | provider=laya-ai.com | dataset=toxigen | prompt=v1 | elapsed={elapsed}s"
+        for elapsed in (1, 4, 2, 3)
+    ]
+    saved = [
+        f"Saved: {outputs}/laya-ai.com/toxigen_v1_t{threshold}.csv (rows=3)"
+        for threshold in THRESHOLDS
+    ]
+    return "".join(starts) + "\n" + "\n".join(completions + saved) + "\n"
+
+
+def test_parallel_complete_repeats_supply_only_reference_average_timing(tmp_path):
+    data, outputs = prepare(tmp_path)
+    for provider in ("fastino.ai", "laya-ai.com"):
+        save_repeat_runs(outputs, provider, "toxigen", "v1", [[0.2, 0.8, 0.8]] * 4)
+    (outputs / "laya-ai.com/parallel.log").write_text(parallel_timing_log(outputs))
+    report = collect_report(outputs, data, ["fastino.ai", "laya-ai.com"])
+    timing = report["repeat_log_timings"][0]
+    assert timing["mean_elapsed_ms"] == pytest.approx(2500 / 3)
+    assert timing["rows_per_run"] == 3
+    assert all(r["mean_elapsed_ms"] is None for r in report["runs"])
+    path = tmp_path / "summary.csv"
+    save_csv(path, [external_row()])
+    attach_openjev_summary(report, path)
+    row = next(r for r in report["external_comparison"]["runs"]
+               if r["provider"] == "laya-ai.com" and r["dataset"] == "toxigen" and r["prompt"] == "v1")
+    assert row["mean_elapsed_ms"] == pytest.approx(2500 / 3)
+    assert row["latency_source_kind"] == "four_run_log_aggregate"
+    assert row["f1"] == 1
+    report["runs"] = [
+        {**r, "status": "missing"} if r["provider"] == "laya-ai.com" and r["threshold"] == 0.8 else r
+        for r in report["runs"]
+    ]
+    attach_openjev_summary(report, path)
+    row = next(r for r in report["external_comparison"]["runs"]
+               if r["provider"] == "laya-ai.com" and r["dataset"] == "toxigen" and r["prompt"] == "v1")
+    assert row["mean_elapsed_ms"] is None
+
+
+@pytest.mark.parametrize("invalid", ["missing_completion", "duplicate_completion", "duplicate_start", "missing_save"])
+def test_parallel_average_requires_exactly_four_verifiable_runs(tmp_path, invalid):
+    path = tmp_path / "parallel.log"
+    text = parallel_timing_log(tmp_path)
+    if invalid == "missing_completion":
+        text = text.replace("Progress: 3/3", "Progress: 2/3", 1)
+    elif invalid == "duplicate_completion":
+        text += "Progress: 3/3 | provider=laya-ai.com | dataset=toxigen | prompt=v1 | elapsed=5s\n"
+    elif invalid == "duplicate_start":
+        text += "Running benchmark for laya-ai.com | toxigen | v1 | threshold=0.5 | total_rows=3\n"
+    else:
+        text = text.replace("t0.5.csv", "t0.6.csv")
+    path.write_text(text)
+    assert parse_repeat_log_timings([path]) == []
+
+
+def test_later_rerun_invalidates_older_parallel_average(tmp_path):
+    old, new = tmp_path / "old.log", tmp_path / "new.log"
+    old.write_text(parallel_timing_log(tmp_path))
+    new.write_text("Running benchmark for laya-ai.com | toxigen | v1 | threshold=0.5 | total_rows=3\n")
+    timestamp = old.stat().st_mtime_ns + 1
+    os.utime(new, ns=(timestamp, timestamp))
+    assert parse_repeat_log_timings([new, old]) == []
+
+
+def test_replaced_csv_cannot_reuse_historical_log_or_repeat_timing(tmp_path):
+    data, outputs = prepare(tmp_path)
+    for provider in ("fastino.ai", "laya-ai.com"):
+        save_repeat_runs(outputs, provider, "toxigen", "v1", [[0.2, 0.8, 0.8]] * 4)
+    csv_path = outputs / "laya-ai.com/toxigen_v1_t0.5.csv"
+    (outputs / "log_input_hashes.json").write_text(json.dumps({
+        "laya-ai.com/history.log": {csv_path.name: sha256(csv_path.read_bytes()).hexdigest()},
+    }))
+    lines = []
+    for threshold in THRESHOLDS:
+        lines.extend([
+            f"Running benchmark for laya-ai.com | toxigen | v1 | threshold={threshold} | total_rows=3",
+            "Progress: 3/3 | provider=laya-ai.com | dataset=toxigen | prompt=v1 | elapsed=1.2s",
+            f"Saved: {outputs}/laya-ai.com/toxigen_v1_t{threshold}.csv (rows=3)",
+        ])
+    (outputs / "laya-ai.com/history.log").write_text("\n".join(lines))
+    matched = collect_report(outputs, data, ["fastino.ai", "laya-ai.com"])
+    assert matched["repeat_log_timings"][0]["mean_elapsed_ms"] == 400
+    rows = prediction_rows("laya-ai.com")
+    rows[0].update(score=0.9, prediction=1)
+    save_csv(csv_path, rows)
+    updated = collect_report(outputs, data, ["fastino.ai", "laya-ai.com"])
+    row = next(r for r in updated["runs"] if r["file"] == str(csv_path))
+    assert row["rows"] == row["expected"] == 3
+    assert row["mean_elapsed_ms"] is row["log_file"] is None
+    assert updated["repeat_log_timings"] == []
+    assert any("已被新结果替换" in warning for warning in updated["warnings"])
+    assert updated["baseline_datasets"] == ["toxigen"]
+    source = tmp_path / "summary.csv"
+    save_csv(source, [external_row()])
+    attach_openjev_summary(updated, source)
+    row = next(r for r in updated["external_comparison"]["runs"]
+               if r["provider"] == "laya-ai.com" and r["dataset"] == "toxigen" and r["prompt"] == "v1")
+    assert row["mean_elapsed_ms"] is None
+
+
+def test_provider_own_log_takes_priority_over_newer_cross_provider_log(tmp_path):
+    _, outputs = prepare(tmp_path)
+    own = outputs / "laya-ai.com/own.log"
+    cross = outputs / "fastino.ai/combined.log"
+    lines = []
+    for threshold in THRESHOLDS:
+        lines.extend([
+            f"Running benchmark for laya-ai.com | toxigen | v1 | threshold={threshold} | total_rows=3",
+            "Progress: 3/3 | provider=laya-ai.com | dataset=toxigen | prompt=v1 | elapsed=1.2s",
+            f"Saved: {outputs}/laya-ai.com/toxigen_v1_t{threshold}.csv (rows=3)",
+        ])
+    own.write_text("\n".join(lines))
+    cross.write_text("\n".join(lines).replace("elapsed=1.2s", "elapsed=0.001s"))
+    timestamp = own.stat().st_mtime_ns + 100
+    os.utime(cross, ns=(timestamp, timestamp))
+    records = parse_logs([own, cross])
+    assert all(row["log_file"] == str(own) and row["elapsed_s"] == 1.2 for row in records.values())
+    aggregate = parse_repeat_log_timings([own, cross])
+    assert len(aggregate) == 1 and aggregate[0]["mean_elapsed_ms"] == 400
+    own.write_text(lines[0])
+    os.utime(own, ns=(timestamp - 1, timestamp - 1))
+    assert parse_repeat_log_timings([own, cross]) == []
 
 
 def test_fair_intersection_missing_progress_and_output(tmp_path):

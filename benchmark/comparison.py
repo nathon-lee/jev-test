@@ -86,38 +86,115 @@ def read_reference(path):
     return rows
 
 
-def parse_logs(paths):
-    """Threshold comes from task starts, not progress lines (which omit it)."""
+def parse_logs(paths, warnings=None):
     runs = {}
     for path in sorted(paths, key=lambda p: (p.stat().st_mtime_ns, p.name)):
-        active = None
+        try:
+            records = _parse_log(path)
+        except ValueError as error:
+            if warnings is None:
+                raise
+            warnings.append(
+                f"{path}: {error}；整份日志不用于逐配置耗时比较，不猜测并发进度的阈值归属。"
+                "可核验的完整四轮均值仅用于四模型参考图。"
+            )
+            continue
+        for key, record in records.items():
+            own_log = path.parent.name == key[0]
+            previous = runs.get(key)
+            previous_own_log = previous and Path(previous["log_file"]).parent.name == key[0]
+            if own_log or not previous_own_log:
+                runs[key] = record
+    return runs
+
+
+def _parse_log(path):
+    """Threshold comes from task starts, not progress lines (which omit it)."""
+    runs = {}
+    active = None
+    with path.open(encoding="utf-8", errors="replace") as stream:
+        for line in stream:
+            starts = list(START.finditer(line))
+            if len(starts) > 1:
+                raise ValueError("interleaved task starts cannot be assigned to progress")
+            if starts:
+                provider, dataset, prompt, threshold, total = starts[0].groups()
+                active = (provider, dataset, prompt, float(threshold))
+                runs[active] = {
+                    "total": int(total), "processed": 0, "elapsed_s": None,
+                    "log_file": str(path),
+                }
+                continue
+            progress = PROGRESS.search(line)
+            if not progress or active is None:
+                continue
+            count, total, provider, dataset, prompt, elapsed = progress.groups()
+            if (provider, dataset, prompt) != active[:3]:
+                raise ValueError("interleaved progress cannot be assigned to a threshold")
+            record = runs[active]
+            count, total, elapsed = int(count), int(total), float(elapsed)
+            if total != record["total"] or not 0 < count <= total:
+                raise ValueError("invalid progress counts")
+            if count < record["processed"] or (
+                record["elapsed_s"] is not None and elapsed < record["elapsed_s"]
+            ):
+                raise ValueError("non-monotonic progress")
+            record.update(processed=count, elapsed_s=elapsed)
+    return runs
+
+
+def parse_repeat_log_timings(paths):
+    """A four-run mean does not require assigning parallel completions to thresholds."""
+    latest, origins = {}, {}
+    for path in sorted(paths, key=lambda p: (p.stat().st_mtime_ns, p.name)):
+        starts, progress, saved = defaultdict(list), defaultdict(list), defaultdict(list)
         with path.open(encoding="utf-8", errors="replace") as stream:
             for line in stream:
-                start = START.search(line)
-                if start:
-                    provider, dataset, prompt, threshold, total = start.groups()
-                    active = (provider, dataset, prompt, float(threshold))
-                    runs[active] = {
-                        "total": int(total), "processed": 0, "elapsed_s": None,
-                        "log_file": str(path),
-                    }
-                    continue
-                progress = PROGRESS.search(line)
-                if not progress or active is None:
-                    continue
-                count, total, provider, dataset, prompt, elapsed = progress.groups()
-                if (provider, dataset, prompt) != active[:3]:
-                    raise ValueError(f"{path}: interleaved progress cannot be assigned to a threshold")
-                record = runs[active]
-                count, total, elapsed = int(count), int(total), float(elapsed)
-                if total != record["total"] or not 0 < count <= total:
-                    raise ValueError(f"{path}: invalid progress counts")
-                if count < record["processed"] or (
-                    record["elapsed_s"] is not None and elapsed < record["elapsed_s"]
-                ):
-                    raise ValueError(f"{path}: non-monotonic progress")
-                record.update(processed=count, elapsed_s=elapsed)
-    return runs
+                for match in START.finditer(line):
+                    provider, dataset, prompt, threshold, total = match.groups()
+                    starts[(provider, dataset, prompt)].append((float(threshold), int(total)))
+                for match in PROGRESS.finditer(line):
+                    count, total, provider, dataset, prompt, elapsed = match.groups()
+                    progress[(provider, dataset, prompt)].append((int(count), int(total), float(elapsed)))
+                for match in re.finditer(r"Saved:\s+(\S+\.csv).*?\brows=(\d+)", line):
+                    filename, count = match.groups()
+                    output = Path(filename.replace("\\", "/"))
+                    config = FILENAME.fullmatch(output.name)
+                    if config:
+                        dataset, prompt, threshold = config.groups()
+                        saved[(output.parent.name, dataset, prompt)].append((float(threshold), int(count)))
+        for key, tasks in starts.items():
+            previous = origins.get(key)
+            if (
+                previous and previous.parent.name == key[0]
+                and path.parent.name != key[0]
+            ):
+                continue
+            origins[key] = path
+            # Even an incomplete later rerun invalidates the older four-run mean.
+            latest[key] = None
+            thresholds = [threshold for threshold, _ in tasks]
+            totals = {total for _, total in tasks}
+            if len(tasks) != len(THRESHOLDS) or set(thresholds) != set(THRESHOLDS) or len(totals) != 1:
+                continue
+            total = next(iter(totals))
+            events = progress[key]
+            if total <= 0 or not events or any(
+                expected != total or not 0 < count <= total or not math.isfinite(elapsed) or elapsed < 0
+                for count, expected, elapsed in events
+            ):
+                continue
+            finished = [elapsed for count, _, elapsed in events if count == total]
+            if len(finished) != len(THRESHOLDS) or Counter(saved[key]) != Counter(tasks):
+                continue
+            provider, dataset, prompt = key
+            latest[key] = {
+                "provider": provider, "dataset": dataset, "prompt": prompt,
+                "repeat_thresholds": list(THRESHOLDS), "rows_per_run": total,
+                "elapsed_s": finished, "mean_elapsed_ms": mean(finished) * 1000 / total,
+                "log_file": str(path),
+            }
+    return [record for record in latest.values() if record is not None]
 
 
 @dataclass(frozen=True)
@@ -195,18 +272,34 @@ def read_predictions(path, reference, provider, dataset, prompt, threshold):
     return valid, len(seen), dict(errors)
 
 
-def collect_report(input_dir, data_dir, providers):
+def collect_report(input_dir, data_dir, providers, previous_report=None):
     if len(providers) < 2 or len(set(providers)) != len(providers):
         raise ValueError("Select at least two distinct providers")
     for provider in providers:
         if provider not in MODELS:
             raise ValueError(f"Unsupported provider: {provider}")
-        if not (input_dir / provider).is_dir():
+        if not (input_dir / provider).is_dir() and previous_report is None:
             raise FileNotFoundError(input_dir / provider)
     references = {name: read_reference(data_dir / filename) for name, filename in DATASETS.items()}
-    logs = parse_logs([
+    previous = previous_report or {}
+    if previous_report is not None and (
+        previous["providers"] != providers
+        or previous["model_identities"] != {p: MODEL_IDENTITIES[p] for p in providers}
+    ):
+        raise ValueError("Previous report providers/model identities must match")
+    cached_runs = {
+        (r["provider"], r["dataset"], r["prompt"], r["threshold"]): r
+        for r in previous.get("runs", [])
+    }
+    for row in cached_runs.values():
+        if row["expected"] != len(references[row["dataset"]]):
+            raise ValueError("Previous report reference size does not match current data")
+    warnings = []
+    log_paths = [
         path for provider in providers for path in (input_dir / provider).glob("*.log")
-    ])
+    ]
+    logs = parse_logs(log_paths, warnings=warnings)
+    repeat_log_timings = parse_repeat_log_timings(log_paths)
     paths = {}
     for provider in providers:
         for path in sorted((input_dir / provider).glob("*.csv")):
@@ -221,8 +314,69 @@ def collect_report(input_dir, data_dir, providers):
             if key in paths:
                 raise ValueError(f"Duplicate configuration: {path}")
             paths[key] = path
-    runs, paired, pairwise, warnings = [], [], [], []
+    mismatched_timings = set()
+    bindings_path = input_dir / "log_input_hashes.json"
+    if bindings_path.exists():
+        bindings = json.loads(bindings_path.read_text(encoding="utf-8"))
+        for log_name, files in bindings.items():
+            log = Path(log_name)
+            if len(log.parts) != 2 or log.parts[0] not in MODELS or log.suffix != ".log":
+                raise ValueError(f"{bindings_path}: invalid log path")
+            provider = log.parts[0]
+            for filename, expected_hash in files.items():
+                match = FILENAME.fullmatch(filename)
+                if not match or "/" in filename or "\\" in filename or not re.fullmatch(r"[0-9a-f]{64}", expected_hash):
+                    raise ValueError(f"{bindings_path}: invalid prediction binding")
+                dataset, prompt, threshold = match.groups()
+                key = (provider, dataset, prompt, float(threshold))
+                path = paths.get(key)
+                if path and hashlib.sha256(path.read_bytes()).hexdigest() != expected_hash:
+                    mismatched_timings.add((*key, str(input_dir / log)))
+    repeat_log_timings = [
+        row for row in repeat_log_timings
+        if not any(
+            (row["provider"], row["dataset"], row["prompt"], threshold, row["log_file"]) in mismatched_timings
+            for threshold in THRESHOLDS
+        )
+    ]
+    runs, paired, pairwise = [], [], []
+    if previous_report is not None:
+        warnings.extend(
+            warning for warning in previous.get("warnings", [])
+            if not any(warning.startswith(f"{path}:") for path in log_paths)
+        )
+        warnings.append(
+            "本次为增量更新：未提供历史逐样本 CSV 的配置保留旧报告汇总，不代表重新测试。"
+            "新 CSV 替换同配置旧结果，缺少新日志时不沿用旧耗时。"
+            "只有配置均未变更、原始预测可对齐，或各模型均在全量参考样本上成功时，"
+            "才保留或补充共同样本指标；无法核验的交集不参与公平均值。"
+        )
     stability, stability_paired = [], []
+
+    def common_metrics(selected, records, frames, historical, context):
+        if all(provider in frames for provider in selected):
+            common = sorted(set.intersection(*(set(frames[p]) for p in selected)))
+            return [
+                (provider, len(common) / records[provider]["expected"],
+                 classification_metrics(frames[provider][sample] for sample in common))
+                for provider in selected
+            ]
+        if all(records[p].get("source_kind") == "historical_summary" for p in selected):
+            return [
+                (row["provider"], row["common_coverage"],
+                 {key: row[key] for key in classification_metrics([])})
+                for row in historical
+            ]
+        if all(records[p]["valid"] == records[p]["expected"] for p in selected):
+            return [
+                (provider, 1.0, {
+                    key: records[provider][key] for key in classification_metrics([])
+                })
+                for provider in selected
+            ]
+        warnings.append(f"{context}：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。")
+        return []
+
     for dataset, reference in references.items():
         for prompt in PROMPTS:
             repeat_frames = {provider: [] for provider in providers}
@@ -232,6 +386,12 @@ def collect_report(input_dir, data_dir, providers):
                 for provider in providers:
                     key = (provider, dataset, prompt, threshold)
                     path, timing = paths.get(key), logs.get(key)
+                    if timing and (*key, timing["log_file"]) in mismatched_timings:
+                        warnings.append(
+                            f"{provider}/{path.name}：历史日志对应的预测文件已被新结果替换，"
+                            "不沿用该旧日志的耗时；质量指标仍使用新 CSV。"
+                        )
+                        timing = None
                     record = {
                         "provider": provider, "model": MODELS[provider], "dataset": dataset,
                         "prompt": prompt, "threshold": threshold, "expected": len(reference),
@@ -244,6 +404,8 @@ def collect_report(input_dir, data_dir, providers):
                         "log_elapsed_s": timing["elapsed_s"] if timing else None,
                         "log_file": timing["log_file"] if timing else None,
                     }
+                    if path is None and key in cached_runs:
+                        record = {**cached_runs[key], "source_kind": "historical_summary"}
                     if path:
                         frame, count, errors = read_predictions(
                             path, reference, provider, dataset, prompt, threshold,
@@ -256,6 +418,8 @@ def collect_report(input_dir, data_dir, providers):
                             coverage=len(frame) / len(reference), error_categories=errors,
                             **classification_metrics(frame.values()),
                         )
+                        if previous_report is not None:
+                            record["source_kind"] = "local_predictions"
                         if timing and timing["processed"] == count == timing["total"] and count:
                             record.update(
                                 mean_elapsed_ms=timing["elapsed_s"] * 1000 / count,
@@ -263,39 +427,60 @@ def collect_report(input_dir, data_dir, providers):
                             )
                         elif timing:
                             warnings.append(f"{provider}/{path.name}: 日志未与完整 CSV 对齐，不用于完成轮次耗时比较。")
-                    if timing and not path:
+                    if timing and not path and key not in cached_runs:
                         record["status"] = "in_progress"
                     records[provider] = record
                     runs.append(record)
                     repeat_frames[provider].append(frames.get(provider, {}))
                     repeat_records[provider].append(record)
                 if all(records[p]["status"] == "complete" for p in providers):
-                    common = set.intersection(*(set(frames[p]) for p in providers))
-                    for provider in providers:
+                    historical = [
+                        row for row in previous.get("paired", [])
+                        if (row["dataset"], row["prompt"], row["threshold"]) == (dataset, prompt, threshold)
+                    ]
+                    for provider, coverage, metrics in common_metrics(
+                        providers, records, frames, historical, f"{dataset}/{prompt}/{threshold}",
+                    ):
                         paired.append({
                             "provider": provider, "model": MODELS[provider], "dataset": dataset,
                             "prompt": prompt, "threshold": threshold,
-                            "common_coverage": len(common) / len(reference),
-                            **classification_metrics(frames[provider][sample] for sample in sorted(common)),
+                            "common_coverage": coverage, **metrics,
                         })
                 if prompt == "v1" and threshold == 0.5 and not dataset.startswith("pii_"):
                     for left, right in combinations(providers, 2):
                         if any(records[p]["status"] != "complete" for p in (left, right)):
                             continue
-                        common = sorted(set(frames[left]) & set(frames[right]))
-                        for provider in (left, right):
+                        pair = f"{left} vs {right}"
+                        historical = [
+                            row for row in previous.get("pairwise", [])
+                            if row["dataset"] == dataset and row["pair"] == pair
+                        ]
+                        for provider, coverage, metrics in common_metrics(
+                            (left, right), records, frames, historical, f"{pair}/{dataset}",
+                        ):
                             pairwise.append({
-                                "pair": f"{left} vs {right}", "provider": provider,
+                                "pair": pair, "provider": provider,
                                 "model": MODELS[provider], "dataset": dataset,
-                                "common_coverage": len(common) / len(reference),
-                                **classification_metrics(frames[provider][sample] for sample in common),
+                                "common_coverage": coverage, **metrics,
                             })
             for provider in providers:
                 records = repeat_records[provider]
+                historical = next((
+                    row for row in previous.get("stability", [])
+                    if (row["provider"], row["dataset"], row["prompt"]) == (provider, dataset, prompt)
+                ), None)
+                if historical and all(
+                    row.get("source_kind") == "historical_summary" for row in records
+                ):
+                    stability.append(historical.copy())
+                    continue
                 complete = all(row["status"] == "complete" for row in records)
+                raw_available = all(
+                    (provider, dataset, prompt, threshold) in paths for threshold in THRESHOLDS
+                )
                 common = (
                     set.intersection(*(set(frame) for frame in repeat_frames[provider]))
-                    if complete else set()
+                    if complete and raw_available else set()
                 )
                 rows = sum(row["rows"] for row in records)
                 errors = sum(row["errors"] for row in records)
@@ -305,14 +490,23 @@ def collect_report(input_dir, data_dir, providers):
                     "available_repeats": sum(row["file"] is not None for row in records),
                     "complete_repeats": sum(row["status"] == "complete" for row in records),
                     "status": (
-                        ("complete" if common else "no_common_success")
+                        (("complete" if common else "no_common_success") if raw_available else "unavailable_raw")
                         if complete else "incomplete_repeats"
                     ),
-                    "coverage": len(common) / len(reference) if complete else None,
+                    "coverage": len(common) / len(reference) if complete and raw_available else None,
                     "rows": rows, "errors": errors, "error_rate": errors / rows if rows else None,
                     **stability_metrics(repeat_frames[provider], common),
                 })
-            if all(row["status"] == "complete" for records in repeat_records.values() for row in records):
+            all_records = [row for records in repeat_records.values() for row in records]
+            if all(row.get("source_kind") == "historical_summary" for row in all_records):
+                stability_paired.extend(
+                    row.copy() for row in previous.get("stability_paired", [])
+                    if (row["dataset"], row["prompt"]) == (dataset, prompt)
+                )
+            elif all(row["status"] == "complete" for row in all_records) and all(
+                (provider, dataset, prompt, threshold) in paths
+                for provider in providers for threshold in THRESHOLDS
+            ):
                 common = set.intersection(*(
                     set(frame) for frames in repeat_frames.values() for frame in frames
                 ))
@@ -381,11 +575,13 @@ def collect_report(input_dir, data_dir, providers):
             })
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        **({"previous_generated_at": previous["generated_at"]} if previous_report is not None else {}),
         "input_dir": str(input_dir), "data_dir": str(data_dir),
         "providers": providers, "baseline_datasets": baseline_datasets,
         "model_identities": {provider: MODEL_IDENTITIES[provider] for provider in providers},
         "overview": overview, "runs": runs, "paired": paired,
-        "pairwise": pairwise, "warnings": warnings,
+        "pairwise": pairwise, "warnings": list(dict.fromkeys(warnings)),
+        "repeat_log_timings": repeat_log_timings,
         "stability_settings": {
             "repeat_thresholds": list(THRESHOLDS), "decision_threshold": STABILITY_THRESHOLD,
             "std_ddof": 0, "required_repeats": len(THRESHOLDS),
@@ -538,7 +734,7 @@ def conclusions(report):
     )
     if report.get("external_comparison"):
         notes.append(
-            "OpenJev 为用户提供的内部汇总结果，仅加入独立参考图表，"
+            "OpenJev 4B 及其他内部模型为用户提供的汇总结果，仅加入独立参考图表，"
             "未提供逐样本输出，不参与上述共同成功样本基线、排名或重复调用一致性分析。"
         )
     return notes
@@ -681,6 +877,8 @@ def report_sections(report):
         "v1、v2 分开统计，按 sample_id 对齐，四轮均完整落盘后仅使用四次均成功的样本。"
         "少一轮或存在部分落盘即标 incomplete_repeats，不以较少轮次替代；"
         "四轮完整但无共同成功样本标 no_common_success，稳定性无定义而不是零波动。\n\n"
+        "增量更新中，四轮汇总齐全但缺少重新计算所需的历史逐样本预测时标 unavailable_raw；"
+        "不从汇总分数推算稳定性，也不沿用已被新 CSV 替换的旧一致性指标。\n\n"
         "每个样本计算四个 score 的总体标准差（ddof=0）与极差，再对样本取平均；"
         "分数保持原始 0–1 单位。判定统一使用 score >= 0.5，"
         "翻转率为四次判定中至少出现一次正类、一次负类的样本比例，不是相邻轮次翻转次数。"
@@ -759,7 +957,7 @@ def report_sections(report):
     )))
     external = report.get("external_comparison")
     if external:
-        sections.append(("OpenJev 内部汇总结果（非共同样本基线）", (
+        sections.append(("OpenJev 内部汇总结果（4B，非共同样本基线）", (
             external["notes"] + "\n\n"
             + markdown_table(
                 ["数据集", "提示词", "阈值", "Rows（总行数）", "有效样本数", "错误数",
@@ -772,16 +970,31 @@ def report_sections(report):
                 ] for row in external["source_rows"]],
             )
         )))
-        sections.append(("四模型参考均值（同数据集，非同成功样本）", (
-            "固定分类阈值 0.5，v1/v2 分开统计，仅选择所有模型均有可用质量结果的非 PII 数据集，"
+        if external.get("internal_source_rows"):
+            sections.append(("新增内部模型汇总（非共同样本基线）", markdown_table(
+                ["模型", "数据集", "提示词", "总行数", "有效样本数", "错误数", "有效覆盖率",
+                 "Accuracy", "Precision", "Recall", "F1", "AUROC", "单轮平均耗时 ms"],
+                [[
+                    external["display_names"][row["provider"]], row["dataset"], row["prompt"],
+                    row["rows"], row["valid"], row["errors"], fmt(row["valid"] / row["rows"]),
+                    *(fmt(row[key]) for key in ("accuracy", "precision", "recall", "f1", "auroc")),
+                    fmt(row["mean_elapsed_ms"], False),
+                ] for row in external["internal_source_rows"]],
+            )))
+        sections.append(("多模型参考均值（同数据集，非同成功样本）", (
+            "固定分类阈值 0.5，v1/v2 分开统计，按各提示词共同测试的非 PII 数据集，"
             "对数据集等权平均。各模型使用自身有效样本，未对齐共同 sample_id，不能当作公平排名。"
-            "耗时为四轮完整日志的每轮 elapsed/processed 等权平均，再按数据集等权平均；"
-            "任一所选数据集缺少完整四轮计时即不提供模型平均耗时，不用部分计时替代。\n\n"
+            "新增模型仅参与已有提示词的参考均值，不缩减原有模型的 v2 范围。"
+            "任一所选数据集的指标缺失则该指标均值保持 N/A，不缩减数据集范围。"
+            "原四模型优先使用四轮完整日志均值；v1 缺失四轮均值时，可使用与全量 CSV 对齐的完整阈值 0.5 单轮计时。"
+            "新增模型为用户提供的单轮计时，协议不同，仅作参考；各数据集耗时再等权平均。"
+            "任一所选数据集缺少所需计时即不提供模型平均耗时，不用部分计时替代。\n\n"
             + markdown_table(
                 ["模型", "提示词", "共同数据集", "Average Accuracy", "Avg Precision",
                  "Avg Recall", "Avg F1", "Avg AUROC", "Avg latency ms"],
                 [[
-                    row["provider"], row["prompt"], "、".join(row["datasets"]) or "无",
+                    external.get("display_names", {}).get(row["provider"], row["provider"]),
+                    row["prompt"], "、".join(row["datasets"]) or "无",
                     *(fmt(row[key]) for key in ("accuracy", "precision", "recall", "f1", "auroc")),
                     fmt(row["mean_elapsed_ms"], False),
                 ] for row in external["overview"]],
@@ -856,6 +1069,8 @@ def write_report(report, output_dir):
             ("external_comparison_runs.csv", external["runs"]),
             ("external_comparison_overview.csv", external["overview"]),
         ])
+        if external.get("internal_source_rows"):
+            exports.append(("internal_model_summary.csv", external["internal_source_rows"]))
     for filename, records in exports:
         columns = list(dict.fromkeys(key for record in records for key in record))
         with (output_dir / filename).open("w", encoding="utf-8-sig", newline="") as stream:
