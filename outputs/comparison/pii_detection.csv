@@ -1,0 +1,5 @@
+provider,dataset,prompt,detection_rate,valid,expected
+fastino.ai,pii_masking_mini_10k,v1,0.9262222222222222,9000,9000
+fastino.ai,pii_masking_mini_10k,v2,0.953,9000,9000
+fastino.ai,pii_masking_nano_1k,v1,0.9233333333333333,900,900
+fastino.ai,pii_masking_nano_1k,v2,0.9455555555555556,900,900

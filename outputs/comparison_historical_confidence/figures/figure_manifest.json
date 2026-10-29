@@ -1,0 +1,399 @@
+{
+  "source_generated_at": "2026-10-26T08:37:04.730338+00:00",
+  "model_identities": {
+    "fastino.ai": {
+      "request_model": "fastino/GLiDE",
+      "resolved_model": "glide_v2"
+    },
+    "laya-ai.com": {
+      "request_model": "typed-decisions",
+      "serving_model": "laya-rl-agent",
+      "routed_model": "typed-decisions"
+    },
+    "typesafe.ai": {
+      "request_model": "jev-latest",
+      "resolved_model": null
+    }
+  },
+  "baseline_datasets": [
+    "aegis2",
+    "detect-jailbreak",
+    "hatecheck",
+    "jailbreak-classification",
+    "jailbreakhub",
+    "toxigen"
+  ],
+  "stability_settings": {
+    "repeat_thresholds": [
+      0.5,
+      0.6,
+      0.7,
+      0.8
+    ],
+    "decision_threshold": 0.5,
+    "std_ddof": 0,
+    "required_repeats": 4
+  },
+  "dpi": 300,
+  "figures": [
+    {
+      "name": "fig01_paired_quality",
+      "title": "Sample-Aligned Classification Comparison",
+      "caption": "Fixed prompt v1 and threshold 0.5; F1 and AUROC are shown per dataset. Within each dataset, all models use exactly the same successful sample IDs, unlike the multi-model reference pages, which use each model's own successful samples. The dotted 50% line in the AUROC panel is the random-ranking baseline. No confidence intervals are shown.",
+      "files": {
+        "png": "fig01_paired_quality.png",
+        "svg": "fig01_paired_quality.svg",
+        "pdf": "fig01_paired_quality.pdf"
+      }
+    },
+    {
+      "name": "fig02_quality_cost_tradeoff",
+      "title": "Error Rates and Latency Trade-offs",
+      "caption": "Lower-left is better in the left panel, which uses all shared baseline datasets. Upper-left is better in the right panel, which uses only shared datasets with complete v1 / 0.5 timing for every model; both macro AUROC and sample-weighted elapsed time are recomputed on that same subset. The dataset scopes may differ between panels and are stated in the figure. Four-run average timing never substitutes for missing single-run timing. Elapsed time includes network overhead and waits for failed requests; it is not pure inference latency or P95. Timing is N/A when no shared fully timed subset exists.",
+      "files": {
+        "png": "fig02_quality_cost_tradeoff.png",
+        "svg": "fig02_quality_cost_tradeoff.svg",
+        "pdf": "fig02_quality_cost_tradeoff.pdf"
+      }
+    },
+    {
+      "name": "fig03_threshold_sensitivity",
+      "title": "Prompt and Threshold Sensitivity (Fastino, Laya, TypeSafe)",
+      "caption": "Colors identify models; solid lines with circles indicate v1, and dashed lines with triangles indicate v2. Filled markers use shared successful samples at the same configuration. When paired metrics are unavailable, hollow markers show the model's own successful samples, so missing results from another model do not hide available measurements. Missing or all-failed configurations remain gaps, without zero-filling or interpolation. Sample sets may differ across points; this is not a fair ranking. Each threshold requires a new model call, so the curves mix threshold effects with repeat-call variation rather than isolating threshold effects on fixed scores. This is exploration on the same test set, not an independently validated performance improvement.",
+      "files": {
+        "png": "fig03_threshold_sensitivity.png",
+        "svg": "fig03_threshold_sensitivity.svg",
+        "pdf": "fig03_threshold_sensitivity.pdf"
+      }
+    },
+    {
+      "name": "fig04_evaluation_coverage",
+      "title": "Evaluation Coverage and Request Failures",
+      "caption": "Coverage is successful samples / reference samples. Gray indicates an unavailable prediction file; hatching indicates a fully saved run in which every request failed. PII rows show evaluation coverage only, not masking quality. Missing Laya results are not scored as zero.",
+      "files": {
+        "png": "fig04_evaluation_coverage.png",
+        "svg": "fig04_evaluation_coverage.svg",
+        "pdf": "fig04_evaluation_coverage.pdf"
+      }
+    },
+    {
+      "name": "fig05_dataset_metrics",
+      "title": "Per-Dataset Performance Metrics (Fastino, Laya, TypeSafe)",
+      "caption": "Fixed prompt v1 and threshold 0.5; Accuracy, Precision, Recall, F1, AUROC and average latency (ms) are shown for all datasets. Quality metrics use each model's own successful samples, not a fair sample-aligned ranking; request errors are excluded from quality scores. PII results measure presence detection, not masking quality; single-class AUROC is undefined. Elapsed time is elapsed / processed from complete, matched logs, including network overhead and failure waits. Missing results, no successful predictions, undefined metrics or incomplete timing are N/A, never zero-filled. A run with all requests failed may still have recorded elapsed time.",
+      "files": {
+        "png": "fig05_dataset_metrics.png",
+        "svg": "fig05_dataset_metrics.svg",
+        "pdf": "fig05_dataset_metrics.pdf"
+      }
+    },
+    {
+      "name": "fig06_model_averages",
+      "title": "Sample-Aligned Model Averages (Fastino, Laya, TypeSafe)",
+      "caption": "Fixed prompt v1 and threshold 0.5; average Accuracy, Precision, Recall, AUROC and latency (ms) are reported for jointly completed non-PII datasets with shared successful samples. Classification metrics are computed on shared successful samples, then averaged equally across datasets. Latency also gives equal weight to each dataset's full-run average, but uses only the shared baseline subset with complete v1 / 0.5 timing for every model. All models use exactly the same timing dataset scope. Quality and timing scopes may differ; actual counts and timing datasets are stated in the figure. Four-run averages never substitute for missing single-run timing. This differs from the sample-weighted timing in Figure 2. Latency is N/A only when there is no shared fully timed subset.",
+      "files": {
+        "png": "fig06_model_averages.png",
+        "svg": "fig06_model_averages.svg",
+        "pdf": "fig06_model_averages.pdf"
+      }
+    },
+    {
+      "name": "fig07_repeat_consistency_v1",
+      "title": "Repeat-Call Consistency: v1 (Fastino, Laya, TypeSafe)",
+      "caption": "Only datasets with all four rounds complete for every model and shared successful samples are shown. Within each dataset, every model uses the same samples that succeeded in all four calls for all models. Lower mean population standard deviation of scores, mean score range and decision-flip rate at a fixed threshold of 0.5 indicate greater consistency. The first two metrics are multiplied by 100 in the figure; original scores range from 0 to 1. Shared four-round success coverage and each model's request failure rate are also shown. Datasets with missing rounds or no shared successful samples are excluded. Measured zeros use baseline markers; they are not missing or imputed values. Consistency does not imply correctness, and historical service changes may also affect results.",
+      "files": {
+        "png": "fig07_repeat_consistency_v1.png",
+        "svg": "fig07_repeat_consistency_v1.svg",
+        "pdf": "fig07_repeat_consistency_v1.pdf"
+      }
+    },
+    {
+      "name": "fig08_repeat_consistency_v2",
+      "title": "Repeat-Call Consistency: v2 (Fastino, Laya, TypeSafe)",
+      "caption": "As for v1, only datasets with four complete rounds for every model and shared successful samples are shown. Metrics use samples shared by all models; v2 is analyzed separately. The four raw scores are compared directly, with decisions uniformly defined as score >= 0.5, rather than comparing prediction columns produced at different CSV thresholds. Four calls provide exploratory evidence only; differences cannot be attributed entirely to model randomness. Zero values use baseline markers and mean measured stability, not missing data. Coverage uses samples successful across all models and all four rounds; failure rates use each model's complete saved requests for those datasets.",
+      "files": {
+        "png": "fig08_repeat_consistency_v2.png",
+        "svg": "fig08_repeat_consistency_v2.svg",
+        "pdf": "fig08_repeat_consistency_v2.pdf"
+      }
+    },
+    {
+      "name": "fig09_repeat_consistency_averages",
+      "title": "Repeat-Call Consistency Averages (Fastino, Laya, TypeSafe)",
+      "caption": "v1 and v2 are analyzed separately. Each dataset requires four complete rounds for every model and uses the same samples that succeeded for all models in all four calls. Metrics are then averaged equally across non-PII datasets with shared successful samples. Lower values indicate greater consistency for all three metrics. Shared datasets or samples may differ between prompts. If no shared dataset is available, the result is N/A. Measured zeros use baseline markers and are neither missing nor imputed. See the full report and CSV files for raw metrics, shared sample counts, coverage and failure rates.",
+      "files": {
+        "png": "fig09_repeat_consistency_averages.png",
+        "svg": "fig09_repeat_consistency_averages.svg",
+        "pdf": "fig09_repeat_consistency_averages.pdf"
+      }
+    },
+    {
+      "name": "fig10_openjev_reference_v1",
+      "title": "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5)",
+      "caption": "Fixed threshold 0.5. The original OpenJev is labeled 4B; OpenJev 32B and Microsoft Decision-1 have v1 summaries only. Internal models use user-supplied aggregate results; other models use their own successful samples. Sample-level alignment with OpenJev is unavailable, so this is not a fair ranking. The Rows field counts total rows, not valid samples. PII measures presence detection only; single-class AUROC is N/A. The original four models prefer complete four-run averages for timing. For local APIs in v1, when no complete four-run mean is available, elapsed/processed from a complete threshold-0.5 run is used only if log counts match the full CSV. The two added models use supplied single-run timing. Asterisks mark single-run timings, not four-run means; protocols differ. Timing includes failure waits, client and network overhead; unverifiable timing is N/A. All five ToxiGen quality metrics for 32B are now supplied; tasks with many errors reflect successful samples only. The original sample-aligned baseline and stability analyses are unchanged and exclude aggregate-only internal models. One enlarged metric chart is shown per row, with a shared model legend at the top. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details. Latency uses a logarithmic vertical axis with actual ms/sample labels. The complete six-metric figure and each individual metric are available for download.",
+      "files": {
+        "png": "fig10_openjev_reference_v1.png",
+        "svg": "fig10_openjev_reference_v1.svg",
+        "pdf": "fig10_openjev_reference_v1.pdf"
+      },
+      "panels": [
+        {
+          "metric": "accuracy",
+          "title": "Accuracy",
+          "files": {
+            "png": "fig10_openjev_reference_v1_accuracy.png",
+            "svg": "fig10_openjev_reference_v1_accuracy.svg",
+            "pdf": "fig10_openjev_reference_v1_accuracy.pdf"
+          }
+        },
+        {
+          "metric": "precision",
+          "title": "Precision",
+          "files": {
+            "png": "fig10_openjev_reference_v1_precision.png",
+            "svg": "fig10_openjev_reference_v1_precision.svg",
+            "pdf": "fig10_openjev_reference_v1_precision.pdf"
+          }
+        },
+        {
+          "metric": "recall",
+          "title": "Recall",
+          "files": {
+            "png": "fig10_openjev_reference_v1_recall.png",
+            "svg": "fig10_openjev_reference_v1_recall.svg",
+            "pdf": "fig10_openjev_reference_v1_recall.pdf"
+          }
+        },
+        {
+          "metric": "f1",
+          "title": "F1",
+          "files": {
+            "png": "fig10_openjev_reference_v1_f1.png",
+            "svg": "fig10_openjev_reference_v1_f1.svg",
+            "pdf": "fig10_openjev_reference_v1_f1.pdf"
+          }
+        },
+        {
+          "metric": "auroc",
+          "title": "AUROC",
+          "files": {
+            "png": "fig10_openjev_reference_v1_auroc.png",
+            "svg": "fig10_openjev_reference_v1_auroc.svg",
+            "pdf": "fig10_openjev_reference_v1_auroc.pdf"
+          }
+        },
+        {
+          "metric": "mean_elapsed_ms",
+          "title": "AVG latency (ms)",
+          "files": {
+            "png": "fig10_openjev_reference_v1_mean_elapsed_ms.png",
+            "svg": "fig10_openjev_reference_v1_mean_elapsed_ms.svg",
+            "pdf": "fig10_openjev_reference_v1_mean_elapsed_ms.pdf"
+          }
+        }
+      ]
+    },
+    {
+      "name": "fig11_openjev_reference_v2",
+      "title": "Per-Dataset Reference Comparison: v2 / Threshold 0.5 (Fastino, Laya, TypeSafe, OpenJev 4B)",
+      "caption": "v2 is analyzed separately, retaining only the original four models with v2 records; v1 results from the two added models are not copied into v2. Classification metrics use threshold 0.5; quality scores are not averaged across the four thresholds. Timing is the average elapsed/processed across four complete runs for the same dataset and prompt. OpenJev valid and error counts are not inferred from text containing OCR errors. Original values come from the initial legible table and are not arbitrarily corrected.",
+      "files": {
+        "png": "fig11_openjev_reference_v2.png",
+        "svg": "fig11_openjev_reference_v2.svg",
+        "pdf": "fig11_openjev_reference_v2.pdf"
+      }
+    },
+    {
+      "name": "fig12_openjev_reference_averages",
+      "title": "Multi-Model Reference Averages (v1 / Threshold 0.5)",
+      "caption": "Fixed prompt v1 and threshold 0.5; only v1 is shown. The main charts give equal weight to six jointly tested non-PII datasets. The two PII datasets are summarized separately, and the eight-dataset averages are supplementary only. AUROC is undefined for both the PII and all-eight-dataset scopes and remains N/A. Average Accuracy, Precision, Recall, F1, AUROC and latency are shown. Only dataset names are shared; successful samples are not aligned across models, so these results must not be ranked together with the original sample-aligned model averages. Quality averages retain the full shared dataset scope; a missing metric on any dataset makes that average N/A. Latency gives equal weight to the shared subset with available timing for every model; the figure states its scope and count. Latency is N/A only when no shared timing subset exists; datasets are never dropped separately for individual models. The three APIs use single-run v1 / 0.5 logs, without substituting other thresholds or four-run averages. OpenJev 4B retains supplied summary timing; 32B and Decision-1 use supplied single-run timing. Protocols differ, so timing is reference-only. 32B's ToxiGen metrics are now complete and included normally in quality averages. All six metrics are visible in two columns and three rows: Accuracy / F1, Precision / Recall, AUROC / Latency. Narrow screens use one column; the shared model color legend appears at the top.",
+      "files": {
+        "png": "fig12_openjev_reference_averages.png",
+        "svg": "fig12_openjev_reference_averages.svg",
+        "pdf": "fig12_openjev_reference_averages.pdf"
+      },
+      "panels": [
+        {
+          "metric": "accuracy",
+          "title": "Accuracy",
+          "files": {
+            "png": "fig12_openjev_reference_averages_accuracy.png",
+            "svg": "fig12_openjev_reference_averages_accuracy.svg",
+            "pdf": "fig12_openjev_reference_averages_accuracy.pdf"
+          }
+        },
+        {
+          "metric": "f1",
+          "title": "F1",
+          "files": {
+            "png": "fig12_openjev_reference_averages_f1.png",
+            "svg": "fig12_openjev_reference_averages_f1.svg",
+            "pdf": "fig12_openjev_reference_averages_f1.pdf"
+          }
+        },
+        {
+          "metric": "precision",
+          "title": "Precision",
+          "files": {
+            "png": "fig12_openjev_reference_averages_precision.png",
+            "svg": "fig12_openjev_reference_averages_precision.svg",
+            "pdf": "fig12_openjev_reference_averages_precision.pdf"
+          }
+        },
+        {
+          "metric": "recall",
+          "title": "Recall",
+          "files": {
+            "png": "fig12_openjev_reference_averages_recall.png",
+            "svg": "fig12_openjev_reference_averages_recall.svg",
+            "pdf": "fig12_openjev_reference_averages_recall.pdf"
+          }
+        },
+        {
+          "metric": "auroc",
+          "title": "AUROC",
+          "files": {
+            "png": "fig12_openjev_reference_averages_auroc.png",
+            "svg": "fig12_openjev_reference_averages_auroc.svg",
+            "pdf": "fig12_openjev_reference_averages_auroc.pdf"
+          }
+        },
+        {
+          "metric": "mean_elapsed_ms",
+          "title": "AVG latency (ms)",
+          "files": {
+            "png": "fig12_openjev_reference_averages_mean_elapsed_ms.png",
+            "svg": "fig12_openjev_reference_averages_mean_elapsed_ms.svg",
+            "pdf": "fig12_openjev_reference_averages_mean_elapsed_ms.pdf"
+          }
+        }
+      ]
+    },
+    {
+      "name": "fig13_three_dataset_averages",
+      "title": "ToxiGen, HateCheck, AEGIS2: Multi-model Reference Averages",
+      "caption": "For Fastino, Laya, TypeSafe, OpenJev 4B, OpenJev 32B and Microsoft Decision-1, Accuracy, Precision, Recall, F1, AUROC and average latency are reported for ToxiGen, HateCheck and AEGIS2, with equal weights of one third per dataset; Detect-Jailbreak and all other datasets are excluded from these means. These six models use prompt v1 at threshold 0.5, each with its own successful samples; OpenJev 4B, OpenJev 32B and Microsoft Decision-1 results are supplied internal summaries. Local model latency is elapsed/processed from each dataset's v1 / 0.5 run, averaged equally across datasets; OpenJev latency comes from the corresponding supplied summary entries. Missing quality results or complete timing for any required dataset make the corresponding mean N/A; the dataset scope is not reduced. Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied averages retained as provided. These means are not averaged again; their prompts, thresholds and timing protocols were not supplied. Unreported F1 or AUROC values are N/A; F1 is not inferred from average Precision/Recall. The latency axis uses a logarithmic scale above 1 ms. Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking. All six metrics are visible together in a two-column grid (one column on narrow screens). Model order is fixed across panels, with light group separators; methodology can be expanded separately. Additional dataset-scope limitation: no internal dataset was available when the six models above were evaluated, so their averages use only the three shared datasets. Other model evaluations may also have included an additional internal dataset. Whether that dataset contributed to their supplied averages has not been confirmed; their dataset coverage must not be assumed identical to the six-model three-dataset scope.",
+      "files": {
+        "png": "fig13_three_dataset_averages.png",
+        "svg": "fig13_three_dataset_averages.svg",
+        "pdf": "fig13_three_dataset_averages.pdf"
+      },
+      "panels": [
+        {
+          "metric": "accuracy",
+          "title": "Accuracy",
+          "files": {
+            "png": "fig13_three_dataset_averages_accuracy.png",
+            "svg": "fig13_three_dataset_averages_accuracy.svg",
+            "pdf": "fig13_three_dataset_averages_accuracy.pdf"
+          }
+        },
+        {
+          "metric": "precision",
+          "title": "Precision",
+          "files": {
+            "png": "fig13_three_dataset_averages_precision.png",
+            "svg": "fig13_three_dataset_averages_precision.svg",
+            "pdf": "fig13_three_dataset_averages_precision.pdf"
+          }
+        },
+        {
+          "metric": "recall",
+          "title": "Recall",
+          "files": {
+            "png": "fig13_three_dataset_averages_recall.png",
+            "svg": "fig13_three_dataset_averages_recall.svg",
+            "pdf": "fig13_three_dataset_averages_recall.pdf"
+          }
+        },
+        {
+          "metric": "f1",
+          "title": "F1",
+          "files": {
+            "png": "fig13_three_dataset_averages_f1.png",
+            "svg": "fig13_three_dataset_averages_f1.svg",
+            "pdf": "fig13_three_dataset_averages_f1.pdf"
+          }
+        },
+        {
+          "metric": "auroc",
+          "title": "AUROC",
+          "files": {
+            "png": "fig13_three_dataset_averages_auroc.png",
+            "svg": "fig13_three_dataset_averages_auroc.svg",
+            "pdf": "fig13_three_dataset_averages_auroc.pdf"
+          }
+        },
+        {
+          "metric": "mean_elapsed_ms",
+          "title": "AVG latency (ms)",
+          "files": {
+            "png": "fig13_three_dataset_averages_mean_elapsed_ms.png",
+            "svg": "fig13_three_dataset_averages_mean_elapsed_ms.svg",
+            "pdf": "fig13_three_dataset_averages_mean_elapsed_ms.pdf"
+          }
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
+    "outputs/laya-ai.com/run_model_suite_2026-10-21_084817.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
+    "fastino.ai/jailbreak-classification_v1_t0.5.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
+    "fastino.ai/jailbreak-classification_v1_t0.8.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
+    "fastino.ai/jailbreak-classification_v2_t0.5.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
+    "fastino.ai/jailbreak-classification_v2_t0.8.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV."
+  ],
+  "external_comparison": {
+    "source": "data/external/openjev_summary.csv",
+    "source_kind": "user_supplied_aggregate",
+    "notes": "OpenJev 4B 数值取自用户最初提供的清晰汇总表，分类阈值均为 0.5；补充 OCR 文本有错字，不据此修正数值或推断混淆矩阵。Rows 为总测试行数，有效样本数和错误数未可靠录入，保持未知，不将 Rows 当作有效样本数。OpenJev 只提供汇总指标，未提供逐样本 score、预测或模型版本；不能核验相同输入、共同成功样本或计算重复调用稳定性，不加入原有公平基线与排名。参考图按各模型自身成功样本统计，仅作描述性对照。原四模型优先使用每个数据集/提示词四轮完整运行的 elapsed/processed 算术平均。v1 缺少完整四轮计时时，仅在阈值 0.5 的完整单轮日志与全量 CSV 行数一致时，使用该单轮的 elapsed/processed，并标记为 single_complete_run；v2 不使用该回退。包含失败请求、等待、客户端及网络开销，不是纯推理时间；无可核验的完整计时标 N/A。并发日志无法逐阈值归属时，仅在四个阈值各启动一次、四次全量完成及保存均可核验，且无后续重跑时使用四轮耗时均值；不据此回填任一阈值的耗时。新增 OpenJev 32B、Microsoft Decision-1 为用户提供的内部 v1 / 0.5 汇总，耗时来自每个数据集一次完整运行的 elapsed/processed（max workers=8），不是原四模型的四轮均值，计时协议不同，仅作参考。OpenJev 32B 的原文件标记为 apus-openjev-35b-a3b，显示名称按用户确认使用 32B，不从文件名推断实际模型版本。其 ToxiGen 五项质量指标均已由用户补全，Accuracy 为 0.693975；按完整数据集范围计算均值，不缩减范围或反推指标。新增模型质量指标排除错误行，尤其 OpenJev 32B 的部分任务请求错误较多，不能将成功样本分数当作全量表现。Microsoft 日志在八个完整任务后中断，提供的耗时仅取已完成任务；均无单请求 P95。没有逐样本预测，不加入共同成功样本排名或重复调用一致性。",
+    "providers": [
+      "fastino.ai",
+      "laya-ai.com",
+      "typesafe.ai",
+      "openjev",
+      "openjev-32b",
+      "microsoft-decision-1"
+    ],
+    "model_identities": {
+      "fastino.ai": {
+        "request_model": "fastino/GLiDE",
+        "resolved_model": "glide_v2"
+      },
+      "laya-ai.com": {
+        "request_model": "typed-decisions",
+        "serving_model": "laya-rl-agent",
+        "routed_model": "typed-decisions"
+      },
+      "typesafe.ai": {
+        "request_model": "jev-latest",
+        "resolved_model": null
+      },
+      "openjev": {
+        "request_model": "not supplied",
+        "resolved_model": null
+      },
+      "openjev-32b": {
+        "request_model": "not supplied",
+        "resolved_model": null,
+        "display_name": "OpenJev 32B",
+        "source_tag": "apus-openjev-35b-a3b"
+      },
+      "microsoft-decision-1": {
+        "request_model": "not supplied",
+        "resolved_model": null,
+        "display_name": "Microsoft Decision-1"
+      }
+    },
+    "classification_threshold": 0.5,
+    "latency_method": "per_model_four_run_mean_or_single_complete_run",
+    "repeat_thresholds": [
+      0.5,
+      0.6,
+      0.7,
+      0.8
+    ],
+    "internal_source": "data/external/internal_model_summary.csv",
+    "v1_scope_averages_csv": "v1_reference_scope_averages.csv"
+  }
+}
