@@ -7,8 +7,9 @@ Separate from PR #20's historical-row parity benchmarks. Prepared with PR #19's 
 | provider | status | completed_configurations | expected_configurations |
 |---|---|---|---|
 | fastino.ai | complete | 6 | 6 |
-| laya-ai.com | pending | 2 | 6 |
-| typesafe.ai | pending | 0 | 6 |
+| laya-ai.com | pending | 3 | 6 |
+| typesafe.ai | complete | 6 | 6 |
+| microsoft-decision-1 | pending | 1 | 6 |
 
 Only complete provider suites appear below. Pending/error rows are never counted as negatives. Error rates remain visible; future cross-provider comparisons require matching successful rows, not independent successful-subset rankings. Primary threshold is 0.5 and scores use Noul. Threshold variants share the same inference probabilities.
 
@@ -22,6 +23,12 @@ Only complete provider suites appear below. Pending/error rows are never counted
 | fastino.ai | hatecheck | v2 | 3728 | 0 | 3728 | 0.9933 | 0.9919 | 0.9984 | 0.9951 | 0.9995 | 0.9998 | 0.0180 | 0.0016 | glide_v2 |
 | fastino.ai | jailbreak-classification | v1 | 262 | 0 | 262 | 0.9389 | 0.9184 | 0.9712 | 0.9441 | 0.9814 | 0.9888 | 0.0976 | 0.0288 | glide_v2 |
 | fastino.ai | jailbreak-classification | v2 | 262 | 0 | 262 | 0.9504 | 0.9315 | 0.9784 | 0.9544 | 0.9817 | 0.9889 | 0.0813 | 0.0216 | glide_v2 |
+| typesafe.ai | aegis2 | v1 | 1964 | 0 | 1964 | 0.8172 | 0.8452 | 0.8093 | 0.8268 | 0.9077 | 0.9185 | 0.1735 | 0.1907 | jev-1.14.0 |
+| typesafe.ai | aegis2 | v2 | 1964 | 0 | 1964 | 0.8035 | 0.8751 | 0.7413 | 0.8027 | 0.9061 | 0.9164 | 0.1238 | 0.2587 | jev-1.14.0 |
+| typesafe.ai | hatecheck | v1 | 3728 | 0 | 3728 | 0.9429 | 0.9345 | 0.9860 | 0.9596 | 0.9911 | 0.9958 | 0.1519 | 0.0140 | jev-1.14.0 |
+| typesafe.ai | hatecheck | v2 | 3728 | 0 | 3728 | 0.9552 | 0.9528 | 0.9836 | 0.9679 | 0.9946 | 0.9977 | 0.1073 | 0.0164 | jev-1.14.0 |
+| typesafe.ai | jailbreak-classification | v1 | 262 | 0 | 262 | 0.9542 | 0.9922 | 0.9209 | 0.9552 | 0.9901 | 0.9921 | 0.0081 | 0.0791 | jev-1.14.0 |
+| typesafe.ai | jailbreak-classification | v2 | 262 | 0 | 262 | 0.9466 | 0.9921 | 0.9065 | 0.9474 | 0.9904 | 0.9924 | 0.0081 | 0.0935 | jev-1.14.0 |
 
 ## PII extraction
 

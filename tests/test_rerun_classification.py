@@ -54,6 +54,32 @@ def test_typesafe_checkpointed_request_also_requires_noul():
     assert result["score"] == .2
 
 
+def test_microsoft_uses_foundry_decision_route_deployment_and_api_key(tmp_path, monkeypatch):
+    from scripts import rerun_classification as runner
+    for name, value in {"MICROSOFT_DECISION_1_API_KEY": "test-key",
+                        "MICROSOFT_DECISION_1_BASE_URL": "https://test.services.ai.azure.com",
+                        "MICROSOFT_DECISION_1_MODEL": "test-deployment"}.items():
+        monkeypatch.setenv(name, value)
+    pd.DataFrame([{"sample_id": "0", "text": "example", "label": 1}]).to_csv(tmp_path / "hatecheck.csv", index=False)
+    calls = []
+    def handle(request):
+        calls.append(request)
+        assert str(request.url) == "https://test.services.ai.azure.com/providers/microsoft/v1/systemone"
+        assert request.headers["api-key"] == "test-key"
+        assert "Authorization" not in request.headers
+        assert json.loads(request.content)["model"] == "test-deployment"
+        return httpx.Response(200, json={"model": "microsoft-decision-1", "answers": {"score": {"noul": .8, "confidence": .99}}})
+    client = httpx.Client
+    monkeypatch.setattr(runner.httpx, "Client", lambda **kwargs: client(transport=httpx.MockTransport(handle), **kwargs))
+    runner.main(["--provider", "microsoft-decision-1", "--datasets", "hatecheck", "--prompts", "v1",
+                 "--data-dir", str(tmp_path), "--output-dir", str(tmp_path / "out"), "--workers", "1", "--requests-per-second", "4"])
+    assert len(calls) == 1
+    manifest = json.loads((tmp_path / "out/microsoft-decision-1/hatecheck_v1.manifest.json").read_text())
+    assert manifest["model"] == "test-deployment"
+    assert manifest["requests_per_second"] == 4
+    assert manifest["result"]["resolved_models"] == ["microsoft-decision-1"]
+
+
 def test_checkpoint_retries_errors_and_rejects_unknown_samples(tmp_path):
     path = tmp_path / "checkpoint.jsonl"
     path.write_text(json.dumps({"sample_id": "0", "score": 0.2, "error": ""}) + "\n" +

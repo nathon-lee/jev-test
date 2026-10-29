@@ -29,9 +29,9 @@ The repo registry identifies these additional services without needing a new pro
 | TypeSafe/Jev | jev-latest | TYPESAFE_API_KEY | Hosted API; checkpointed held-out runner ready |
 | OpenJev | openjev | OPENJEV_API_KEY, OPENJEV_BASE_URL | Local/self-hosted; repo default is localhost:8000 |
 | Galileo | galileo-standard | GALILEO_API_KEY, GALILEO_BASE_URL | Repo contains an example.com placeholder, not a real deployment |
-| Microsoft Decision-1 | microsoft-decision-1 | MICROSOFT_DECISION_1_API_KEY, MICROSOFT_DECISION_1_BASE_URL | Repo contains an example.com placeholder, not a real deployment |
+| Microsoft Decision-1 | deployment alias from MICROSOFT_DECISION_1_MODEL | MICROSOFT_DECISION_1_API_KEY, MICROSOFT_DECISION_1_BASE_URL, MICROSOFT_DECISION_1_MODEL | Foundry decision API configured; strict checkpointed runner ready |
 
-Fastino and Laya are already configured. Local/internal providers have generic
+Fastino, Laya, Jev and Microsoft are configured locally. OpenJev/Galileo have generic
 chat-completion adapters in the legacy suite, but need reachable deployments and a
 validated numeric score contract before inclusion in this strict checkpointed run.
 Keys alone cannot identify a private deployment. The local .env has every registry
@@ -80,3 +80,31 @@ Rerun reporting as provider suites complete. A provider must finish all declared
 configurations before inclusion. No historical predictions or supplied aggregate
 reference scores enter this report. Cross-provider ranking additionally requires
 matching successful input rows; per-provider error rates and coverage are retained.
+
+## Access follow-up
+
+Galileo is excluded from this rerun: its placeholder entry does not identify a
+deployed classifier, and an observability/evaluation account is not required for
+this harness. OpenJev's published hosted site and API landing page both currently
+show "This deployment is temporarily paused"; signup could not be completed.
+The repo's localhost entry alone does not identify the hosted model or establish
+equivalence with the old 4B/32B aggregate references.
+
+Microsoft Decision-1 uses the actual Foundry decision contract, not the legacy
+generic chat adapter: `api-key` authentication, deployment name in `model`, and
+`<resource>/providers/microsoft/v1/systemone`. Existing credentials are kept only
+in the ignored .env. A test deployment was created in an existing non-production
+resource, model version 1 / GlobalStandard. Initial live requests succeeded.
+
+```bash
+python -m scripts.rerun_classification --provider microsoft-decision-1 \
+  --datasets jailbreak-classification,hatecheck,aegis2 \
+  --data-dir data/heldout_2026-10-28 --require-heldout \
+  --output-dir outputs/heldout_2026-10-28/classification --env-file .env \
+  --workers 4 --requests-per-second 4
+```
+
+The shared cap applies to retries as well as initial requests, and is recorded in
+the manifests. Timing includes rate-limit waits and must not be interpreted as
+unconstrained model throughput. Foundry deployment instructions:
+https://learn.microsoft.com/en-us/azure/foundry/foundry-models/how-to/use-foundry-models-microsoft-decision

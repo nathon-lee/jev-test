@@ -10,6 +10,7 @@ import json
 import math
 import os
 import time
+import threading
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from datetime import datetime, timezone
 from pathlib import Path
@@ -155,7 +156,7 @@ def export_results(samples, cached, path, provider, dataset, version, model):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--provider", required=True, choices=["fastino.ai", "laya-ai.com", "typesafe.ai"])
+    parser.add_argument("--provider", required=True, choices=["fastino.ai", "laya-ai.com", "typesafe.ai", "microsoft-decision-1"])
     parser.add_argument("--datasets", default="jailbreak-classification,hatecheck,aegis2,toxigen,pii_masking_nano_1k,pii_masking_mini_10k,detect-jailbreak,jailbreakhub")
     parser.add_argument("--prompts", default="v1,v2")
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -164,17 +165,26 @@ def main(argv=None):
     parser.add_argument("--env-file", type=Path)
     parser.add_argument("--data-dir", type=Path, default=Path("data/prepared"))
     parser.add_argument("--require-heldout", action="store_true", help="Reject unversioned/training-reference inputs before sending requests")
+    parser.add_argument("--requests-per-second", type=float, help="Optional shared request cap, including retries")
     args = parser.parse_args(argv)
     if args.env_file:
         load_dotenv(args.env_file)
     if args.workers < 1 or args.retries < 0:
         parser.error("Workers must be positive and retries nonnegative")
+    if args.requests_per_second is not None and (not math.isfinite(args.requests_per_second) or args.requests_per_second <= 0):
+        parser.error("Request cap must be finite and positive")
     provider = normalize_provider_name(args.provider)
-    spec = PROVIDER_SPECS[provider]
+    spec = dict(PROVIDER_SPECS[provider])
     key = os.getenv(spec["api_key_env"])
     if not key:
         parser.error(f"Missing {spec['api_key_env']}")
     url = resolve_base_url(provider).rstrip("/")
+    if provider == "microsoft-decision-1":
+        spec["model"] = os.getenv("MICROSOFT_DECISION_1_MODEL")
+        if not spec["model"] or not os.getenv("MICROSOFT_DECISION_1_BASE_URL") or ".example.com" in url:
+            parser.error("Microsoft requires an actual Foundry endpoint and MICROSOFT_DECISION_1_MODEL deployment name")
+        if not url.endswith("/systemone"):
+            url += "/providers/microsoft/v1/systemone"
     if provider == "typesafe.ai" and not url.endswith(("/v1", "/v1/systemone")):
         url += "/v1"
     if not url.endswith("/systemone"):
@@ -185,7 +195,16 @@ def main(argv=None):
     # Validate every selected partition before making any billable requests.
     inputs = {dataset: load_input(args.data_dir / DATASET_SPECS[dataset]["path"], args.require_heldout)
               for dataset, _ in configs}
-    with httpx.Client(headers={"Authorization": f"Bearer {key}"}, timeout=90,
+    headers = {"api-key": key} if provider == "microsoft-decision-1" else {"Authorization": f"Bearer {key}"}
+    pace_lock = threading.Lock()
+    next_request = [0.0]
+    def pace(request):
+        with pace_lock:
+            now = time.monotonic()
+            time.sleep(max(0, next_request[0] - now))
+            next_request[0] = time.monotonic() + 1 / args.requests_per_second
+    with httpx.Client(headers=headers, timeout=90,
+                      event_hooks={"request": [pace]} if args.requests_per_second else None,
                       limits=httpx.Limits(max_connections=args.workers, max_keepalive_connections=args.workers)) as client:
         for dataset, version in configs:
             source = args.data_dir / DATASET_SPECS[dataset]["path"]
@@ -203,6 +222,8 @@ def main(argv=None):
                         "workers": args.workers, "endpoint": url}
             if args.require_heldout:
                 identity.update(evaluation_partition=provenance, require_heldout=True)
+            if args.requests_per_second:
+                identity["requests_per_second"] = args.requests_per_second
             if manifest_path.exists():
                 previous = json.loads(manifest_path.read_text())
                 if any(previous.get(k) != value for k, value in identity.items() if k != "workers"):

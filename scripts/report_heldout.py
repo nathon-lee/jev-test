@@ -19,7 +19,7 @@ def build(root, data_dir, datasets):
         sources[dataset] = {**provenance, "rows": len(samples)}
     configurations = {(d, v) for d in datasets for v in ("v1", "v2")}
     records, coverage = [], []
-    for provider in ("fastino.ai", "laya-ai.com", "typesafe.ai"):
+    for provider in ("fastino.ai", "laya-ai.com", "typesafe.ai", "microsoft-decision-1"):
         found = {}
         for path in sorted((root / "classification" / provider).glob("*.manifest.json")):
             run = json.loads(path.read_text())
