@@ -73,8 +73,8 @@
       ]
     },
     "laya-ai.com": {
-      "status": "running",
-      "detail": "Billing restored; checkpointed rerun resumed. Full suite not yet published.",
+      "status": "pending",
+      "detail": "Billing restored. Historical-row rerun paused with checkpoints preserved to prioritize the separate official held-out rerun.",
       "expected_configurations": [
         [
           "toxigen",
