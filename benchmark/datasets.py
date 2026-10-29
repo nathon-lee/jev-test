@@ -205,6 +205,8 @@ def prepare_toxigen(**partition_options) -> pd.DataFrame:
         "Match rate      :",
         f"{len(matched) / len(merged):.2%}"
     )
+    if matched.empty:
+        raise ValueError("ToxiGen partition has no generated prompt_label matches; agree an explicit test-label rule before evaluation")
     # --------------------------------------------------------
     # 7. Standardize ground truth
     #

@@ -86,6 +86,16 @@ def test_toxigen_uses_one_annotated_split_and_retains_label_lookup_semantics(mon
     assert frame.attrs["evaluation_partition"]["label_reference"]["role"] == "label_lookup_only"
 
 
+def test_toxigen_refuses_empty_generated_label_mapping(monkeypatch):
+    annotated = pd.DataFrame({"text": ["official held-out text"], "toxicity_human": [4.0], "toxicity_ai": [4.0]})
+    monkeypatch.setattr(datasets, "load_evaluation_partition", lambda *a, **k: (
+        SimpleNamespace(to_pandas=lambda: annotated.copy()), provenance("annotated")))
+    monkeypatch.setattr(datasets, "load_dataset", lambda *a, **k: SimpleNamespace(to_pandas=lambda: pd.DataFrame({
+        "generation": ["different training text"], "prompt_label": [1]})))
+    with pytest.raises(ValueError, match="no generated prompt_label matches"):
+        datasets.prepare_toxigen()
+
+
 def test_saved_data_has_partition_columns_and_matching_csv_digest(tmp_path):
     frame = attach_provenance(pd.DataFrame({"sample_id": [0], "text": ["example"], "label": [1]}, index=[17]), provenance())
     path = tmp_path / "prepared.csv"
