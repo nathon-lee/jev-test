@@ -1,6 +1,6 @@
 {
   "rerun": "outputs/corrected_classification_2026-10-28",
-  "source_summary_sha256": "9b670a50c579e2ee08a780568d3a9568733c0c822a93db3f56d9886a5d113dda",
+  "source_summary_sha256": "ea25eff0c8c2ce746ee513ee3e0f8691585526af73555b269cbd50fc774b1cc5",
   "score_field": "answers.score.noul",
   "scope": "Historical prepared rows; not the new held-out split policy. v1 / threshold 0.5 unless stated. Jev is a saved historical reference, not a rerun.",
   "provider_status": {
@@ -74,8 +74,8 @@
       ]
     },
     "laya-ai.com": {
-      "status": "pending",
-      "detail": "Billing restored. Historical-row rerun paused with checkpoints preserved to prioritize the separate official held-out rerun.",
+      "status": "running",
+      "detail": "Historical-row Laya rerun resumed from its saved checkpoints and runs in parallel with the separate official held-out evaluation.",
       "expected_configurations": [
         [
           "toxigen",
