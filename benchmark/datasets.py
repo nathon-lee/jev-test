@@ -326,6 +326,23 @@ def prepare_aegis2(**partition_options) -> pd.DataFrame:
         raise ValueError(
             f"Unknown AEGIS labels: {unknown}"
         )
+    # Source row indices survive exclusions so the provenance remains auditable.
+    normalized = normalize_text(df["prompt"])
+    redacted = normalized.eq("redacted")
+    usable = pd.DataFrame({"normalized": normalized[~redacted], "label": labels[~redacted]})
+    conflict_groups = usable.groupby("normalized")["label"].nunique().gt(1)
+    conflicting = usable["normalized"].isin(conflict_groups.index[conflict_groups])
+    conflict_hashes = sorted(hashlib.sha256(text.encode()).hexdigest()
+                             for text in usable.loc[conflicting, "normalized"].unique())
+    usable = usable.loc[~conflicting]
+    duplicates = usable["normalized"].duplicated()
+    keep = usable.index[~duplicates]
+    provenance["cleanup"] = {"redacted_rows": int(redacted.sum()),
+                             "duplicate_prompt_rows": int(duplicates.sum()),
+                             "conflicting_prompt_rows": int(conflicting.sum()),
+                             "conflicting_prompt_hashes": conflict_hashes}
+    df = df.loc[keep]
+    labels = labels.loc[keep]
     result = pd.DataFrame({
         "dataset": "aegis2",
         "sample_id": range(len(df)),

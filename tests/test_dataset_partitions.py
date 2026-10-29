@@ -188,3 +188,45 @@ def test_comparison_cannot_silently_mix_new_partitions_and_legacy_files(tmp_path
         (outputs / provider).mkdir(parents=True)
     with pytest.raises(ValueError, match="unversioned legacy"):
         collect_report(outputs, data, ["fastino.ai", "typesafe.ai"], datasets=["toxigen", "hatecheck"])
+
+
+def test_default_source_revision_uses_committed_pin(monkeypatch):
+    seen = []
+    sha = 'ca0a26dffb2c1f35947fa6d8d71b0d61e3373985'
+    monkeypatch.setattr(dataset_partitions, 'HfApi', lambda: SimpleNamespace(
+        dataset_info=lambda repo, revision: (seen.append(revision) or SimpleNamespace(sha=sha))))
+    monkeypatch.setattr(dataset_partitions, 'get_dataset_split_names', lambda *a, **k: ['validation'])
+    monkeypatch.setattr(dataset_partitions, 'load_dataset', lambda *a, **k: [1])
+    _, metadata = load_evaluation_partition('ai4privacy/pii-masking-nano-1k')
+    assert seen == [sha]
+    assert metadata['source_revision'] == sha
+
+
+def test_unpinned_source_requires_explicit_revision(monkeypatch):
+    with pytest.raises(ValueError, match='committed revision'):
+        dataset_partitions.resolve_source_revision('unregistered/dataset')
+
+
+def test_aegis_excludes_redaction_and_deduplicates_prompts(monkeypatch):
+    source = pd.DataFrame({'prompt': ['first', 'REDACTED', ' first  ', 'second'],
+                           'prompt_label': ['safe', 'safe', 'safe', 'unsafe']})
+    monkeypatch.setattr(datasets, 'load_evaluation_partition', lambda *a, **k: (
+        SimpleNamespace(to_pandas=lambda: source.copy()), {**provenance(), 'source_rows': 4}))
+    frame = datasets.prepare_aegis2()
+    assert frame['text'].tolist() == ['first', 'second']
+    assert frame['source_row'].tolist() == [0, 3]
+    cleanup = frame.attrs['evaluation_partition']['cleanup']
+    assert cleanup == {'redacted_rows': 1, 'duplicate_prompt_rows': 1,
+                       'conflicting_prompt_rows': 0, 'conflicting_prompt_hashes': []}
+
+
+def test_aegis_quarantines_conflicting_duplicate_prompt_labels(monkeypatch):
+    source = pd.DataFrame({'prompt': ['same', ' same ', 'retained'], 'prompt_label': ['safe', 'unsafe', 'safe']})
+    monkeypatch.setattr(datasets, 'load_evaluation_partition', lambda *a, **k: (
+        SimpleNamespace(to_pandas=lambda: source.copy()), provenance()))
+    frame = datasets.prepare_aegis2()
+    assert frame['text'].tolist() == ['retained']
+    assert frame['source_row'].tolist() == [2]
+    cleanup = frame.attrs['evaluation_partition']['cleanup']
+    assert cleanup['conflicting_prompt_rows'] == 2
+    assert len(cleanup['conflicting_prompt_hashes']) == 1

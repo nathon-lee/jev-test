@@ -1,5 +1,8 @@
 """Explicit, revision-pinned evaluation partitions shared by all datasets."""
 
+import json
+from pathlib import Path
+
 from datasets import get_dataset_split_names, load_dataset
 from huggingface_hub import HfApi
 
@@ -31,8 +34,18 @@ def select_split(available, requested=None, allow_train_eval=False):
     return requested, "held_out"
 
 
+def resolve_source_revision(repository, revision=None):
+    """Resolve an explicit override or the version-controlled benchmark source pin."""
+    if revision is None:
+        pins = json.loads((Path(__file__).resolve().parents[1] / "data/source-revisions.json").read_text())
+        revision = pins.get(repository)
+        if revision is None:
+            raise ValueError(f"No committed revision for {repository}; provide --revision explicitly")
+    return HfApi().dataset_info(repository, revision=revision).sha
+
+
 def load_evaluation_partition(repository, config=None, *, split=None, revision=None, allow_train_eval=False):
-    resolved = HfApi().dataset_info(repository, revision=revision or "main").sha
+    resolved = resolve_source_revision(repository, revision)
     available = get_dataset_split_names(repository, config_name=config, revision=resolved)
     selected, role = select_split(available, split, allow_train_eval)
     dataset = load_dataset(repository, config, split=selected, revision=resolved)

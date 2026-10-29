@@ -65,7 +65,7 @@ def main(argv=None):
     prepare.add_argument("--dataset", choices=["ai4privacy/pii-masking-nano-1k", "ai4privacy/pii-masking-mini-10k"], required=True)
     prepare.add_argument("--split", default="validation", choices=["train", "validation"])
     prepare.add_argument("--allow-train-eval", action="store_true", help="Explicitly permit training-reference PII data")
-    prepare.add_argument("--revision", default="main", help="HF revision; resolved to a commit SHA before download")
+    prepare.add_argument("--revision", help="Override the committed source pin; resolved to a commit SHA")
     prepare.add_argument("--limit", type=positive_int)
     prepare.add_argument("--output", type=Path, required=True)
 
@@ -94,8 +94,8 @@ def main(argv=None):
         if args.split == "train" and not args.allow_train_eval:
             parser.error("Training-reference PII preparation requires --allow-train-eval")
         from datasets import load_dataset
-        from huggingface_hub import HfApi
-        revision = HfApi().dataset_info(args.dataset, revision=args.revision).sha
+        from benchmark.dataset_partitions import resolve_source_revision
+        revision = resolve_source_revision(args.dataset, args.revision)
         records = load_dataset(args.dataset, split=args.split, revision=revision)
         if args.limit:
             records = records.select(range(min(args.limit, len(records))))

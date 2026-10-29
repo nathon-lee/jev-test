@@ -32,7 +32,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Prepare explicit, revision-pinned evaluation partitions")
     parser.add_argument("--datasets", default="all", help="Comma-separated suite dataset names or all")
     parser.add_argument("--split", help="Exact split override; unions/slices are not accepted")
-    parser.add_argument("--revision", default="main", help="Resolved to a commit SHA for each source dataset")
+    parser.add_argument("--revision", help="Override the committed source pin; resolved to a commit SHA")
     parser.add_argument("--allow-train-eval", action="store_true", help="Explicitly permit labelled training-reference data")
     parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
     args = parser.parse_args(argv)

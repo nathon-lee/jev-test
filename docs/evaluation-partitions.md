@@ -3,7 +3,7 @@
 Dataset families are not interchangeable evaluation sets. The suite previously
 combined ToxiGen annotated train and test, used train for the jailbreak loaders
 and PII, and used test for HateCheck/AEGIS. The policy now selects **test first,
-then validation/valid/dev**, from the dataset's declared splits at a resolved
+then validation/valid/dev**, from the dataset's declared splits at a committed
 Hugging Face commit SHA. It never concatenates partitions or accepts split slices
 or unions as an implicit evaluation set.
 
@@ -33,9 +33,10 @@ python -m scripts.prepare_datasets \
   --output-dir data/evaluation
 ```
 
-The CLI resolves `--revision main` to an immutable SHA for each source before
-inspecting/loading the split. Use a specific `--revision SHA` for a single source
-to reproduce it. `--split validation` is an explicit override for selected
+The default source SHAs are committed in `data/source-revisions.json` and shared
+by both preparation commands. Upstream changes to `main` do not change default
+benchmark membership. `--revision SHA` explicitly overrides that pin; such a run
+is a different population and its manifest records the resolved revision. `--split validation` is an explicit override for selected
 datasets that actually expose that partition. Missing requested partitions fail;
 the loader does not fall back to train. Preparing all datasets without an opt-in
 will fail on train-only sources. All selected frames must prepare successfully
@@ -111,3 +112,29 @@ should be compared to historical train-partition scores or to a separately sampl
 1,000-row evaluation set without matching the exact rows and metric definition.
 
 Offline regression coverage: `python -m pytest tests/test_dataset_partitions.py -q`.
+
+## Review scope and remaining work (ENG-10199)
+
+This PR is the evaluation-partition/provenance prerequisite, not completion of
+ENG-10199. It targets `dev_autotest`, the integration branch already used for
+PRs #17 and #18; merging this work into another branch is a separate repo-owner
+decision. Historical comparisons and prepared files are not rewritten.
+
+AEGIS removes `REDACTED` prompts and merges normalized duplicate prompts only
+when their labels agree; all rows in a conflicting-label group are quarantined,
+never resolved by choosing a label. The manifest records the conflicting normalized
+text hashes as well as counts. The manifest
+records exclusion counts and retained rows preserve original source-row IDs.
+
+Follow-up PRs own the frozen joint jailbreak 80/20 membership and conflict
+ledger, disjoint training exports and exact/3-gram Jaccard leakage checks,
+clean Jailbreak Classification reporting, and a Fastino fine-tune provider.
+HateCheck is final-report-only: never use its rows, templates or close
+paraphrases for training, threshold tuning, selection or stopping. A future
+template-based selection partition requires explicit agreement and separate
+frozen membership.
+
+ToxiGen remains blocked pending an agreed label rule; the command refuses
+the empty legacy generated-label mapping. The proposed published
+`toxicity_ai + toxicity_human > 5.5` rule is not silently enabled. Henry's
+joint jailbreak split is a reuse candidate, not an agreed official HSBC split.
