@@ -30,7 +30,7 @@ From the repository root:
 ```bash
 python -m scripts.prepare_datasets \
   --datasets toxigen,hatecheck,aegis2,jailbreak-classification,pii_masking_nano_1k,pii_masking_mini_10k \
-  --output-dir data/prepared
+  --output-dir data/evaluation
 ```
 
 The CLI resolves `--revision main` to an immutable SHA for each source before
@@ -40,6 +40,17 @@ datasets that actually expose that partition. Missing requested partitions fail;
 the loader does not fall back to train. Preparing all datasets without an opt-in
 will fail on train-only sources. All selected frames must prepare successfully
 before any existing output CSV is replaced.
+
+Run providers against the new population in a separate output directory:
+
+```bash
+python -m scripts.run_model_suite --providers fastino.ai,typesafe.ai \
+  --datasets toxigen,hatecheck,aegis2,jailbreak-classification \
+  --data-dir data/evaluation --output-dir outputs/held_out_evaluation
+```
+
+Both directory options preserve their historical defaults when omitted. Use fresh
+directories when migrating so an active historical-parity run remains unchanged.
 
 For a diagnostic run on a train-only source, opt in explicitly and keep it separate:
 
@@ -67,14 +78,15 @@ need not exist in the held-out data directory:
 
 ```bash
 python -m scripts.compare_models --datasets toxigen,hatecheck,aegis2,jailbreak-classification \
-  --data-dir data/prepared --input-dir outputs --output-dir outputs/held_out_comparison
+  --data-dir data/evaluation --input-dir outputs/held_out_evaluation --output-dir outputs/held_out_comparison
 ```
 
 The comparison reader rejects explicitly marked training-reference data. Dataset
 selection does not reuse historical aggregate reports, because their evaluation
 population may differ. Existing legacy files without provenance remain readable
 for historical reproduction; that compatibility is not certification of their
-split or held-out status.
+split or held-out status. A single comparison cannot mix newly partitioned files
+with unversioned legacy files; select a consistent dataset population explicitly.
 
 Regenerate predictions for **every provider** after changing partitions. Historical
 predictions must not be paired with the new data: row membership, IDs, counts,

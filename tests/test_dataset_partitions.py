@@ -136,6 +136,19 @@ def test_comparison_refuses_training_reference_as_held_out(tmp_path):
         read_reference(path)
 
 
+def test_explicit_data_and_output_directories_do_not_use_historical_defaults(tmp_path, monkeypatch):
+    data = tmp_path / "evaluation"
+    data.mkdir()
+    pd.DataFrame({"sample_id": [0], "text": ["example"], "label": [1]}).to_csv(data / "hatecheck.csv", index=False)
+    monkeypatch.setattr(provider_suite, "DATA_DIR", tmp_path / "unavailable-historical-data")
+    monkeypatch.setattr(provider_suite, "OUTPUT_DIR", tmp_path / "historical-outputs")
+    monkeypatch.setattr(provider_suite, "call_provider", lambda **kwargs: 0.9)
+    rows = provider_suite.run_single_benchmark("fastino.ai", "hatecheck", "v1", 0.5, data_dir=data)
+    path = provider_suite.save_rows(rows, "fastino.ai", "hatecheck", "v1", 0.5, output_dir=tmp_path / "new-outputs")
+    assert path == tmp_path / "new-outputs" / "fastino.ai" / "hatecheck_v1_t0.5.csv"
+    assert not (tmp_path / "historical-outputs").exists()
+
+
 def test_comparison_can_select_held_out_datasets_without_loading_train_only_files(tmp_path):
     data, outputs = tmp_path / "data", tmp_path / "outputs"
     data.mkdir()
@@ -153,3 +166,15 @@ def test_comparison_can_select_held_out_datasets_without_loading_train_only_file
     report = collect_report(outputs, data, ["fastino.ai", "typesafe.ai"], datasets=["hatecheck"])
     assert report["baseline_datasets"] == ["hatecheck"]
     assert report["selected_datasets"] == ["hatecheck"]
+
+
+def test_comparison_cannot_silently_mix_new_partitions_and_legacy_files(tmp_path):
+    data, outputs = tmp_path / "data", tmp_path / "outputs"
+    data.mkdir()
+    frame = pd.DataFrame({"sample_id": [0], "text": ["example"], "label": [1]})
+    frame.to_csv(data / "toxigen.csv", index=False)
+    frame.assign(partition_role="held_out").to_csv(data / "hatecheck.csv", index=False)
+    for provider in ("fastino.ai", "typesafe.ai"):
+        (outputs / provider).mkdir(parents=True)
+    with pytest.raises(ValueError, match="unversioned legacy"):
+        collect_report(outputs, data, ["fastino.ai", "typesafe.ai"], datasets=["toxigen", "hatecheck"])

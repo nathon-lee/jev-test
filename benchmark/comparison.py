@@ -70,11 +70,13 @@ def fingerprint(text):
     return hashlib.sha256(normalized.encode("utf-8")).digest()
 
 
-def read_reference(path):
+def read_reference(path, provenance=None):
     rows = {}
     frame = pd.read_csv(path)
     if "partition_role" in frame.columns and set(frame["partition_role"]) != {"held_out"}:
         raise ValueError(f"{path}: training/reference partitions cannot enter a held-out comparison; select held-out datasets explicitly")
+    if provenance is not None:
+        provenance["declared_partition"] = "partition_role" in frame.columns
     # Match run_single_benchmark's pandas parser, including NA and NUL handling.
     for _, row in frame.iterrows():
         sample = str(row["sample_id"])
@@ -288,7 +290,11 @@ def collect_report(input_dir, data_dir, providers, previous_report=None, dataset
         raise ValueError("Select distinct known datasets")
     if datasets is not None and previous_report is not None:
         raise ValueError("Dataset selection cannot reuse a historical aggregate report")
-    references = {name: read_reference(data_dir / DATASETS[name]) for name in selected}
+    provenance = {name: {} for name in selected}
+    references = {name: read_reference(data_dir / DATASETS[name], provenance[name]) for name in selected}
+    declared = [info["declared_partition"] for info in provenance.values()]
+    if any(declared) and not all(declared):
+        raise ValueError("Do not mix explicitly partitioned datasets with unversioned legacy datasets; select held-out datasets explicitly")
     previous = previous_report or {}
     if previous_report is not None and (
         previous["providers"] != providers
