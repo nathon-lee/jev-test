@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from scripts.evaluate import evaluate, evaluate_pii, resolve_prediction_path
 
@@ -107,6 +108,7 @@ def test_evaluate_pii_prints_classification_and_privacy_metrics(tmp_path, monkey
             "prediction": [1],
             "error": [""],
             "source_text": ["Alice email alice@example.com"],
+            "predicted_text": ["Alice email [EMAIL]"],
             "target_text": ["Alice email [EMAIL]"],
             "privacy_mask": ["[{\"value\":\"alice@example.com\"}]"],
         }
@@ -128,3 +130,12 @@ def test_evaluate_pii_prints_classification_and_privacy_metrics(tmp_path, monkey
     assert "masking_success_rate" in captured.out
     assert "span_precision" in captured.out
     assert "span_f1" in captured.out
+
+
+def test_evaluate_pii_rejects_binary_classification(tmp_path, monkeypatch):
+    path = tmp_path / "outputs" / "pii_predictions.csv"
+    path.parent.mkdir()
+    pd.DataFrame({"prediction": [1], "text": ["Alice"], "label": [1]}).to_csv(path, index=False)
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(ValueError, match="not binary predictions"):
+        evaluate_pii("pii")

@@ -2,6 +2,15 @@
 
 This project benchmarks multiple providers against safety classification datasets, including prompt-version comparison (v1/v2) and threshold tuning.
 
+PII **extraction** has a separate [span/entity benchmark](docs/pii-extraction.md):
+`python -m scripts.pii_extraction {prepare,run,evaluate}`. It preserves gold
+annotations and reports exact typed entity precision/recall/F1, per-type results,
+boundary metrics, and request coverage. The existing model suite remains a
+classification runner; its binary PII outputs do not measure extraction quality.
+Regenerate the checked-in PII data before extraction: older prepared CSVs lost
+their annotations. Fastino extraction uses GLiNER with an explicit model identity,
+while existing Fastino classification continues to use GLiDE.
+
 ## Overview
 
 Supported providers:

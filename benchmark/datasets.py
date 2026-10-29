@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 import pandas as pd
 from datasets import load_dataset
@@ -409,30 +408,13 @@ def prepare_jailbreakhub() -> pd.DataFrame:
 # PII Masking benchmarks
 # ============================================================
 def _parse_privacy_mask(mask_value):
-    if mask_value is None or (isinstance(mask_value, float) and pd.isna(mask_value)):
-        return []
+    from benchmark.pii_extraction import parse_annotation_list
 
-    if isinstance(mask_value, list):
-        return mask_value
-
-    if isinstance(mask_value, str):
-        text = mask_value.strip()
-        if not text:
-            return []
-        try:
-            parsed = json.loads(text)
-        except json.JSONDecodeError:
-            return []
-        if isinstance(parsed, list):
-            return parsed
-        if isinstance(parsed, dict):
-            return [parsed]
-        return []
-
+    # Arrow list columns become numpy arrays through to_pandas(). Silently
+    # replacing those with [] erased every gold span in the prepared PII CSVs.
     if isinstance(mask_value, dict):
-        return [mask_value]
-
-    return []
+        mask_value = [mask_value]
+    return parse_annotation_list(mask_value)
 
 
 def prepare_pii_masking(dataset_name: str, limit: int | None = None) -> pd.DataFrame:

@@ -483,6 +483,9 @@ def run_single_benchmark(
     base_url: str | None = None,
     debug: bool = False,
 ) -> list[dict[str, Any]]:
+    if dataset_name.startswith("pii_"):
+        print("PII detection classification only: these scores do not measure extraction. "
+              "Use python -m scripts.pii_extraction for entity precision/recall/F1.")
     dataset_path = DATA_DIR / DATASET_SPECS[dataset_name]["path"]
     if not dataset_path.exists():
         raise FileNotFoundError(
