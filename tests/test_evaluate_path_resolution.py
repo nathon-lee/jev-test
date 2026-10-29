@@ -23,7 +23,7 @@ def test_resolve_prediction_path_prefers_provider_threshold_file(tmp_path, monke
         threshold=0.5,
     )
 
-    assert result == target
+    assert result.resolve() == target.resolve()
 
 
 def test_resolve_prediction_path_uses_prompt_version_without_threshold(tmp_path, monkeypatch):
@@ -41,7 +41,7 @@ def test_resolve_prediction_path_uses_prompt_version_without_threshold(tmp_path,
         prompt_version="v1",
     )
 
-    assert result == target
+    assert result.resolve() == target.resolve()
 
 
 def test_resolve_prediction_path_falls_back_to_root_outputs_for_provider(tmp_path, monkeypatch):
@@ -58,7 +58,7 @@ def test_resolve_prediction_path_falls_back_to_root_outputs_for_provider(tmp_pat
         prompt_version="v1",
     )
 
-    assert result == target
+    assert result.resolve() == target.resolve()
 
 
 def test_evaluate_handles_missing_latency_column(tmp_path, monkeypatch, capsys):

@@ -33,6 +33,7 @@ def test_typesafe_provider_uses_sdk(monkeypatch):
     )
 
     assert score == 0.91
+    assert calls["client_init"]["model"] == "jev-latest"
     assert "system_one" in calls
     assert calls["system_one"]["state"] == {"user_input": "This is a test"}
     assert "score" in calls["system_one"]["questions"]

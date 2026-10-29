@@ -21,6 +21,7 @@ from benchmark.comparison import (
 )
 from scripts.evaluate_model_suite import summarize_file
 from scripts import evaluate_model_suite
+from benchmark import provider_suite
 from benchmark.external_summary import (
     FOCUSED_DATASETS,
     METRICS,
@@ -837,15 +838,30 @@ def test_model_averages_use_common_samples_and_equal_dataset_weights(tmp_path):
     assert incomplete["overview"][0]["macro_elapsed_ms"] is None
 
 
-def test_reference_matches_original_runner_parser_and_platform_newlines(tmp_path):
-    path = tmp_path / "reference.csv"
+def test_reference_matches_original_runner_parser_and_platform_newlines(tmp_path, monkeypatch):
+    path = tmp_path / "hatecheck.csv"
     save_csv(path, [
         {"sample_id": 0, "text": "prefix\x00truncated", "label": 1},
         {"sample_id": 1, "text": "", "label": 0},
+        {"sample_id": 2, "text": "one\r\ntwo\rthree", "label": 0},
+        {"sample_id": 3, "text": "李明 😀", "label": 1},
     ])
+    submitted = []
+
+    def capture_provider_input(**kwargs):
+        submitted.append(kwargs["text"])
+        return 0.5
+
+    monkeypatch.setattr(provider_suite, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(provider_suite, "call_provider", capture_provider_input)
+    predictions = provider_suite.run_single_benchmark("fastino.ai", "hatecheck", "v1", 0.5)
     reference = read_reference(path)
-    assert reference["0"][1] == fingerprint("prefix")
-    assert reference["1"][1] == fingerprint("nan")
+    assert len(submitted) == len(reference) == 4
+    assert all(row["error"] == "" for row in predictions)
+    # Match the actual model input rather than hard-coding pandas-version-specific
+    # NUL truncation or the string representation of missing text.
+    for row, text in zip(predictions, submitted):
+        assert reference[str(row["sample_id"])] == (row["label"], fingerprint(text))
     assert fingerprint("one\r\ntwo\rthree") == fingerprint("one\ntwo\nthree")
 
 

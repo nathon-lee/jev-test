@@ -159,6 +159,17 @@ python scripts/run_model_suite.py --providers all --datasets all --prompt-versio
 `--limit` controls the maximum number of rows processed for each dataset in each benchmark task.
 - Example: `--limit 100` means each dataset run uses at most 100 samples.
 
+Fastino and Laya classification scores are read strictly from `answers.score.noul`,
+not `confidence`. The value must be a finite JSON number in `[0, 1]`; missing or
+invalid values are recorded as error rows with no score or prediction, without
+falling back to confidence or other numeric fields.
+
+Historical Fastino/Laya CSVs produced by the previous generic score parser may
+contain confidence values instead of Noul scores. They do not retain both response
+fields, so they cannot be reliably repaired in place. Preserve old outputs separately,
+rerun affected benchmarks, and regenerate comparison reports and figures before
+using their metrics.
+
 Only one provider:
 
 ```bash

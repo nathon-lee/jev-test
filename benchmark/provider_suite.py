@@ -1,3 +1,4 @@
+import math
 import os
 import re
 from pathlib import Path
@@ -263,6 +264,24 @@ def _extract_score(payload: Any) -> float:
     raise ValueError(f"Cannot extract numeric score from response payload: {payload}")
 
 
+def _extract_systemone_noul(payload: Any, provider_name: str) -> float:
+    error = f"Invalid {provider_name} response: answers.score.noul must be a finite number in [0, 1]."
+    if not isinstance(payload, dict):
+        raise ValueError(error)
+    answers = payload.get("answers")
+    if not isinstance(answers, dict):
+        raise ValueError(error)
+    answer = answers.get("score")
+    if not isinstance(answer, dict):
+        raise ValueError(error)
+    value = answer.get("noul")
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(error)
+    if not 0 <= value <= 1 or not math.isfinite(value):
+        raise ValueError(error)
+    return float(value)
+
+
 def _call_typesafe_sdk(
     prompt: str,
     text: str,
@@ -342,7 +361,7 @@ def _call_fastino_systemone(
     )
     response.raise_for_status()
     response_json = response.json()
-    return _extract_score(response_json)
+    return _extract_systemone_noul(response_json, "fastino.ai")
 
 
 def _call_laya_systemone(
@@ -389,7 +408,7 @@ def _call_laya_systemone(
     )
     response.raise_for_status()
     response_json = response.json()
-    return _extract_score(response_json)
+    return _extract_systemone_noul(response_json, "laya-ai.com")
 
 
 def call_provider(

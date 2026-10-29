@@ -1,4 +1,7 @@
+import csv
+
 import httpx
+import pytest
 
 from benchmark.provider_suite import (
     DEFAULT_THRESHOLDS,
@@ -7,6 +10,8 @@ from benchmark.provider_suite import (
     prompt_for_dataset,
     resolve_provider,
     normalize_provider_name,
+    run_single_benchmark,
+    save_rows,
 )
 
 
@@ -140,3 +145,121 @@ def test_laya_uses_systemone_endpoint(monkeypatch):
     assert "state" in captured["json"]
     assert "questions" in captured["json"]
     assert "messages" not in captured["json"]
+
+
+@pytest.mark.parametrize("provider", ["fastino.ai", "laya-ai.com"])
+@pytest.mark.parametrize(
+    "noul,confidence", [(0.06, 0.94), (0.94, 0.06), (0.5, 0.1), (0, 1), (1, 0)]
+)
+def test_systemone_predictions_use_noul(monkeypatch, tmp_path, provider, noul, confidence):
+    def fake_post(*args, **kwargs):
+        return httpx.Response(
+            200,
+            request=httpx.Request("POST", "https://example.test/systemone"),
+            json={
+                "score": confidence,
+                "confidence": confidence,
+                "answers": {"score": {"noul": noul, "confidence": confidence}},
+                "usage": {"input_tokens": 385},
+            },
+        )
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    monkeypatch.setattr("benchmark.provider_suite.DATA_DIR", tmp_path)
+    (tmp_path / "hatecheck.csv").write_text(
+        "sample_id,text,label\n0,Example text,0\n", encoding="utf-8"
+    )
+
+    rows = run_single_benchmark(provider, "hatecheck", "v1", 0.5, api_key="test-key")
+
+    assert rows[0]["error"] == ""
+    assert rows[0]["score"] == noul
+    assert rows[0]["prediction"] == int(noul >= 0.5)
+
+
+@pytest.mark.parametrize("provider", ["fastino.ai", "laya-ai.com"])
+@pytest.mark.parametrize(
+    "answer",
+    [
+        {},
+        {"confidence": 0.99},
+        {"noul": None, "confidence": 0.99},
+        {"noul": True},
+        {"noul": "0.2"},
+        {"noul": "invalid"},
+        {"noul": -0.1},
+        {"noul": 1.1},
+        {"noul": float("nan")},
+        {"noul": float("inf")},
+        {"noul": float("-inf")},
+    ],
+)
+def test_systemone_rejects_invalid_noul(monkeypatch, provider, answer):
+    class DummyResponse:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"answers": {"score": answer}, "confidence": 0.99, "token_usage": 422}
+
+    monkeypatch.setattr(httpx, "post", lambda *args, **kwargs: DummyResponse())
+
+    with pytest.raises(ValueError, match=r"answers\.score\.noul"):
+        call_provider(provider, "Is this unsafe?", "Example text", api_key="test-key")
+
+
+@pytest.mark.parametrize("provider", ["fastino.ai", "laya-ai.com"])
+def test_systemone_missing_noul_is_saved_as_error(monkeypatch, tmp_path, provider):
+    def fake_post(*args, **kwargs):
+        return httpx.Response(
+            200,
+            request=httpx.Request("POST", "https://example.test/systemone"),
+            json={"answers": {"score": {"confidence": 0.99}}},
+        )
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    monkeypatch.setattr("benchmark.provider_suite.DATA_DIR", tmp_path)
+    monkeypatch.setattr("benchmark.provider_suite.OUTPUT_DIR", tmp_path / "outputs")
+    (tmp_path / "hatecheck.csv").write_text(
+        "sample_id,text,label\n0,Example text,0\n", encoding="utf-8"
+    )
+
+    rows = run_single_benchmark(provider, "hatecheck", "v1", 0.5, api_key="test-key")
+    assert rows[0]["score"] is None
+    assert rows[0]["prediction"] is None
+    assert "answers.score.noul" in rows[0]["error"]
+
+    path = save_rows(rows, provider, "hatecheck", "v1", 0.5)
+    with path.open(encoding="utf-8", newline="") as stream:
+        saved = list(csv.DictReader(stream))
+    assert saved[0]["score"] == ""
+    assert saved[0]["prediction"] == ""
+    assert "answers.score.noul" in saved[0]["error"]
+
+
+@pytest.mark.parametrize("provider", ["fastino.ai", "laya-ai.com"])
+@pytest.mark.parametrize(
+    "payload",
+    [
+        None,
+        [],
+        {},
+        {"answers": None},
+        {"answers": []},
+        {"answers": {}},
+        {"answers": {"score": 0.2}},
+        {"answers": {"other": {"noul": 0.2}}},
+    ],
+)
+def test_systemone_rejects_missing_answer(monkeypatch, provider, payload):
+    class DummyResponse:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return payload
+
+    monkeypatch.setattr(httpx, "post", lambda *args, **kwargs: DummyResponse())
+
+    with pytest.raises(ValueError, match=r"answers\.score\.noul"):
+        call_provider(provider, "Is this unsafe?", "Example text", api_key="test-key")
