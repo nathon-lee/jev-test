@@ -22,6 +22,7 @@ def positive_int(value):
 
 def prepare_records(records, *, dataset, split, revision):
     return [validate_sample({**record, "dataset": dataset, "split": split,
+                             "partition_role": "training_reference" if split == "train" else "held_out",
                              "revision": revision}) for record in records]
 
 
@@ -63,6 +64,7 @@ def main(argv=None):
     prepare = subparsers.add_parser("prepare", help="Download one explicit partition with intact gold spans")
     prepare.add_argument("--dataset", choices=["ai4privacy/pii-masking-nano-1k", "ai4privacy/pii-masking-mini-10k"], required=True)
     prepare.add_argument("--split", default="validation", choices=["train", "validation"])
+    prepare.add_argument("--allow-train-eval", action="store_true", help="Explicitly permit training-reference PII data")
     prepare.add_argument("--revision", default="main", help="HF revision; resolved to a commit SHA before download")
     prepare.add_argument("--limit", type=positive_int)
     prepare.add_argument("--output", type=Path, required=True)
@@ -89,6 +91,8 @@ def main(argv=None):
             parser.error("Input, predictions, and summary paths must be different")
 
     if args.command == "prepare":
+        if args.split == "train" and not args.allow_train_eval:
+            parser.error("Training-reference PII preparation requires --allow-train-eval")
         from datasets import load_dataset
         from huggingface_hub import HfApi
         revision = HfApi().dataset_info(args.dataset, revision=args.revision).sha

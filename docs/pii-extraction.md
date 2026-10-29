@@ -23,7 +23,8 @@ python -m scripts.pii_extraction prepare \
 records the dataset, exact revision, split, stable `uid` as `sample_id`, source
 text, and gold spans. Reuse that SHA for subsequent runs. Mini uses the same
 command with `ai4privacy/pii-masking-mini-10k`. Validation is the extraction
-default; `--split train` is explicit for development. Do not mix train/full/test
+default; `--split train --allow-train-eval` is explicit for development and marks
+rows as training-reference data. Do not mix train/full/test
 results or tune thresholds on the evaluation partition. `--limit N` takes the
 first N rows, so it is a smoke test, not a representative multilingual sample.
 

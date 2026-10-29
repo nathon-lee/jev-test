@@ -1,6 +1,9 @@
 from pathlib import Path
+import hashlib
+import json
 import pandas as pd
 from datasets import load_dataset
+from benchmark.dataset_partitions import attach_provenance, load_evaluation_partition
 # ============================================================
 # Common helpers
 # ============================================================
@@ -20,6 +23,10 @@ def normalize_text(series: pd.Series) -> pd.Series:
 def save_dataset(df: pd.DataFrame, path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, index=False)
+    if "evaluation_partition" in df.attrs:
+        manifest = {**df.attrs["evaluation_partition"],
+                    "csv_sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+        path.with_suffix(".manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"\nSaved: {path}")
     print(f"Rows : {len(df)}")
     print("Label distribution:")
@@ -39,13 +46,16 @@ def prepare_hf_binary_dataset(
     text_candidates,
     label_candidates,
     label_map=None,
-    split: str = "train",
+    split: str | None = None,
+    revision: str | None = None,
+    allow_train_eval: bool = False,
 ):
     print("\n" + "=" * 70)
     print(f"Preparing {dataset_name}")
     print("=" * 70)
 
-    ds = load_dataset(repo_name, split=split)
+    ds, provenance = load_evaluation_partition(
+        repo_name, split=split, revision=revision, allow_train_eval=allow_train_eval)
     df = ds.to_pandas()
     print("Original rows:", len(df))
     print("Columns:", list(df.columns))
@@ -99,28 +109,20 @@ def prepare_hf_binary_dataset(
     result = cleaned[["sample_id", "text", "label"]].copy()
     result.insert(0, "dataset", dataset_name)
     assert result["label"].isin([0, 1]).all()
-    return result
+    return attach_provenance(result, provenance)
 # ============================================================
 # ToxiGen
 # ============================================================
-def prepare_toxigen() -> pd.DataFrame:
+def prepare_toxigen(**partition_options) -> pd.DataFrame:
     print("\n" + "=" * 70)
     print("Preparing ToxiGen")
     print("=" * 70)
     # --------------------------------------------------------
-    # 1. Load the 9.9k human-annotated dataset
+    # 1. Load one declared human-annotated evaluation partition
     # --------------------------------------------------------
-    ds = load_dataset(
-        "toxigen/toxigen-data",
-        "annotated",
-    )
-    annotated = pd.concat(
-        [
-            ds["train"].to_pandas(),
-            ds["test"].to_pandas(),
-        ],
-        ignore_index=True,
-    )
+    ds, provenance = load_evaluation_partition(
+        "toxigen/toxigen-data", "annotated", **partition_options)
+    annotated = ds.to_pandas()
     annotated["sample_id"] = range(len(annotated))
     print("Annotated rows:", len(annotated))
     # --------------------------------------------------------
@@ -131,6 +133,7 @@ def prepare_toxigen() -> pd.DataFrame:
         "toxigen/toxigen-data",
         "train",
         split="train",
+        revision=provenance["source_revision"],
     ).to_pandas()
     print("Original train rows:", len(train))
     # --------------------------------------------------------
@@ -180,7 +183,7 @@ def prepare_toxigen() -> pd.DataFrame:
     # There should now be one label per normalized text.
     assert not mapping["match_text"].duplicated().any()
     # --------------------------------------------------------
-    # 6. Map ground truth onto annotated 9.9k
+    # 6. Map the existing label lookup onto the selected annotated partition
     # --------------------------------------------------------
     merged = annotated.merge(
         mapping,
@@ -231,18 +234,19 @@ def prepare_toxigen() -> pd.DataFrame:
     assert result["text"].notna().all()
     assert result["label"].isin([0, 1]).all()
     assert result["sample_id"].is_unique
-    return result
+    provenance["label_reference"] = {
+        "config": "train", "split": "train", "role": "label_lookup_only",
+        "revision": provenance["source_revision"], "label_field": "prompt_label",
+    }
+    return attach_provenance(result, provenance)
 # ============================================================
 # HateCheck
 # ============================================================
-def prepare_hatecheck() -> pd.DataFrame:
+def prepare_hatecheck(**partition_options) -> pd.DataFrame:
     print("\n" + "=" * 70)
     print("Preparing HateCheck")
     print("=" * 70)
-    ds = load_dataset(
-        "Paul/hatecheck",
-        split="test",
-    )
+    ds, provenance = load_evaluation_partition("Paul/hatecheck", **partition_options)
     df = ds.to_pandas()
     print("Original rows:", len(df))
     print("Columns:", list(df.columns))
@@ -278,18 +282,16 @@ def prepare_hatecheck() -> pd.DataFrame:
     })
     result["label"] = result["label"].astype(int)
     assert result["label"].isin([0, 1]).all()
-    return result
+    return attach_provenance(result, provenance)
 # ============================================================
 # AEGIS 2.0
 # ============================================================
-def prepare_aegis2() -> pd.DataFrame:
+def prepare_aegis2(**partition_options) -> pd.DataFrame:
     print("\n" + "=" * 70)
     print("Preparing AEGIS 2.0")
     print("=" * 70)
-    ds = load_dataset(
-        "nvidia/Aegis-AI-Content-Safety-Dataset-2.0",
-        split="test",
-    )
+    ds, provenance = load_evaluation_partition(
+        "nvidia/Aegis-AI-Content-Safety-Dataset-2.0", **partition_options)
     df = ds.to_pandas()
     print("Original rows:", len(df))
     print("Columns:", list(df.columns))
@@ -330,10 +332,10 @@ def prepare_aegis2() -> pd.DataFrame:
     })
     result["label"] = result["label"].astype(int)
     assert result["label"].isin([0, 1]).all()
-    return result
+    return attach_provenance(result, provenance)
 
 
-def prepare_detect_jailbreak() -> pd.DataFrame:
+def prepare_detect_jailbreak(**partition_options) -> pd.DataFrame:
     return prepare_hf_binary_dataset(
         repo_name="GuardrailsAI/detect-jailbreak",
         dataset_name="detect-jailbreak",
@@ -355,10 +357,11 @@ def prepare_detect_jailbreak() -> pd.DataFrame:
             "malicious": 1,
             "1": 1,
         },
+        **partition_options,
     )
 
 
-def prepare_jailbreak_classification() -> pd.DataFrame:
+def prepare_jailbreak_classification(**partition_options) -> pd.DataFrame:
     return prepare_hf_binary_dataset(
         repo_name="jackhhao/jailbreak-classification",
         dataset_name="jailbreak-classification",
@@ -378,10 +381,11 @@ def prepare_jailbreak_classification() -> pd.DataFrame:
             "true": 1,
             "1": 1,
         },
+        **partition_options,
     )
 
 
-def prepare_jailbreakhub() -> pd.DataFrame:
+def prepare_jailbreakhub(**partition_options) -> pd.DataFrame:
     return prepare_hf_binary_dataset(
         repo_name="walledai/JailbreakHub",
         dataset_name="jailbreakhub",
@@ -401,6 +405,7 @@ def prepare_jailbreakhub() -> pd.DataFrame:
             "malicious": 1,
             "1": 1,
         },
+        **partition_options,
     )
 
 
@@ -417,7 +422,7 @@ def _parse_privacy_mask(mask_value):
     return parse_annotation_list(mask_value)
 
 
-def prepare_pii_masking(dataset_name: str, limit: int | None = None) -> pd.DataFrame:
+def prepare_pii_masking(dataset_name: str, limit: int | None = None, **partition_options) -> pd.DataFrame:
     """
     Prepare AI4Privacy PII masking datasets into the benchmark CSV format.
 
@@ -432,7 +437,8 @@ def prepare_pii_masking(dataset_name: str, limit: int | None = None) -> pd.DataF
     print(f"Preparing {dataset_name}")
     print("=" * 70)
 
-    ds = load_dataset(dataset_name, split="train")
+    ds, provenance = load_evaluation_partition(dataset_name, **partition_options)
+    provenance["selection_limit"] = limit
     df = ds.to_pandas()
     if limit is not None:
         df = df.head(limit)
@@ -490,12 +496,12 @@ def prepare_pii_masking(dataset_name: str, limit: int | None = None) -> pd.DataF
 
     assert result["sample_id"].is_unique
     assert result["label"].isin([1]).all()
-    return result
+    return attach_provenance(result, provenance)
 
 
-def prepare_pii_masking_nano_1k(limit: int | None = None) -> pd.DataFrame:
-    return prepare_pii_masking("ai4privacy/pii-masking-nano-1k", limit=limit)
+def prepare_pii_masking_nano_1k(limit: int | None = None, **partition_options) -> pd.DataFrame:
+    return prepare_pii_masking("ai4privacy/pii-masking-nano-1k", limit=limit, **partition_options)
 
 
-def prepare_pii_masking_mini_10k(limit: int | None = None) -> pd.DataFrame:
-    return prepare_pii_masking("ai4privacy/pii-masking-mini-10k", limit=limit)
+def prepare_pii_masking_mini_10k(limit: int | None = None, **partition_options) -> pd.DataFrame:
+    return prepare_pii_masking("ai4privacy/pii-masking-mini-10k", limit=limit, **partition_options)

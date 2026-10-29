@@ -2,6 +2,12 @@
 
 This project benchmarks multiple providers against safety classification datasets, including prompt-version comparison (v1/v2) and threshold tuning.
 
+Dataset preparation now follows an explicit [evaluation partition policy](docs/evaluation-partitions.md):
+official test first, then validation; train-only sources require reference-only
+opt-in. Every new prepared file records its source revision, split, role, and
+checksum. Regenerate every provider's predictions before comparing scores on the
+new partitions; historical outputs use the older mixed split policy.
+
 PII **extraction** has a separate [span/entity benchmark](docs/pii-extraction.md):
 `python -m scripts.pii_extraction {prepare,run,evaluate}`. It preserves gold
 annotations and reports exact typed entity precision/recall/F1, per-type results,

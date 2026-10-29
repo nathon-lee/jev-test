@@ -6,6 +6,7 @@ from typing import Any
 
 import httpx
 import pandas as pd
+from benchmark.dataset_partitions import PROVENANCE_COLUMNS
 
 try:
     from typesafe_sdk import Noul, TypeSafeClient
@@ -525,6 +526,7 @@ def run_single_benchmark(
         sample_id = row.get("sample_id", len(rows))
         text = str(row.get("text", ""))
         label = int(row.get("label", 0))
+        provenance = {key: row[key] for key in PROVENANCE_COLUMNS if key in row}
         try:
             score = call_provider(
                 provider_name=provider_name,
@@ -538,6 +540,7 @@ def run_single_benchmark(
             rows.append(
                 {
                     "dataset": dataset_name,
+                    **provenance,
                     "sample_id": sample_id,
                     "text": text,
                     "label": label,
@@ -553,6 +556,7 @@ def run_single_benchmark(
             rows.append(
                 {
                     "dataset": dataset_name,
+                    **provenance,
                     "sample_id": sample_id,
                     "text": text,
                     "label": label,
