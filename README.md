@@ -2,6 +2,30 @@
 
 This project benchmarks multiple providers against safety classification datasets, including prompt-version comparison (v1/v2) and threshold tuning.
 
+Corrected live reruns using `answers.score.noul` are published separately in
+[the corrected classification results](outputs/corrected_classification_2026-10-28/README.md).
+The original Fastino/Laya output directories and comparison figures are historical
+snapshots and must not be interpreted as results from the corrected parser.
+
+To reproduce or resume the GLiDE rerun with the existing prepared rows:
+
+```bash
+python -m scripts.rerun_classification --provider fastino.ai \
+  --output-dir outputs/corrected_classification_2026-10-28 --workers 32
+python -m scripts.report_classification_rerun \
+  --input-dir outputs/corrected_classification_2026-10-28
+```
+
+Set `FASTINO_API_KEY` in the environment. Laya uses the same command with
+`--provider laya-ai.com` and `LAYA_API_KEY`; `--env-file PATH` can load a local
+credential file. The runner checkpoints each response, retries transient failures,
+and stops on authorization or billing denials. Resuming reuses successful requests
+only when input hashes, prompt, model, and endpoint still match. Use a fresh output
+directory for a new independent run. One live probability is requested per row and
+prompt; threshold metrics for 0.5–0.8 are derived offline, not repeated API calls.
+The new report compares against historical Jev outputs only after matching text,
+labels, and successful sample IDs. PII classification remains detection-only.
+
 PII **extraction** has a separate [span/entity benchmark](docs/pii-extraction.md):
 `python -m scripts.pii_extraction {prepare,run,evaluate}`. It preserves gold
 annotations and reports exact typed entity precision/recall/F1, per-type results,
