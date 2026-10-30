@@ -1,5 +1,6 @@
 {
-  "generated_at": "2026-10-26T08:37:04.730338+00:00",
+  "generated_at": "2026-10-30T00:01:13.666530+00:00",
+  "previous_generated_at": "2026-10-26T08:37:04.730338+00:00",
   "input_dir": "outputs",
   "data_dir": "data/prepared",
   "providers": [
@@ -9,7 +10,6 @@
   ],
   "baseline_datasets": [
     "aegis2",
-    "detect-jailbreak",
     "hatecheck",
     "jailbreak-classification",
     "jailbreakhub",
@@ -38,17 +38,17 @@
       "total": 64,
       "rows": 454584,
       "errors": 5386,
-      "baseline_datasets": 6,
-      "macro_accuracy": 0.4484439515851115,
-      "macro_precision": 0.40152146045702025,
-      "macro_recall": 0.8806679393888722,
-      "macro_f1": 0.5130388658387731,
-      "macro_balanced_accuracy": 0.5077225198775167,
-      "macro_auroc": 0.6271889089222721,
-      "macro_fpr": 0.8652228996338386,
-      "macro_fnr": 0.11933206061112778,
-      "baseline_elapsed_ms": null,
-      "macro_elapsed_ms": null
+      "baseline_datasets": 5,
+      "macro_accuracy": 0.8141623992744499,
+      "macro_precision": 0.788554525828106,
+      "macro_recall": 0.8060315846263538,
+      "macro_f1": 0.7181710426710992,
+      "macro_balanced_accuracy": 0.838765811256571,
+      "macro_auroc": 0.9327688322802368,
+      "macro_fpr": 0.12849996211321182,
+      "macro_fnr": 0.1939684153736462,
+      "baseline_elapsed_ms": 223.70310261991975,
+      "macro_elapsed_ms": 222.48327780765084
     },
     {
       "provider": "laya-ai.com",
@@ -57,13 +57,13 @@
       "total": 64,
       "rows": 366162,
       "errors": 3714,
-      "baseline_datasets": 6,
-      "macro_accuracy": 0.4047108090340006,
-      "macro_precision": 0.4047108090340006,
+      "baseline_datasets": 5,
+      "macro_accuracy": 0.4641441777656897,
+      "macro_precision": 0.4641441777656897,
       "macro_recall": 1.0,
-      "macro_f1": 0.535645126637889,
+      "macro_f1": 0.603933629606939,
       "macro_balanced_accuracy": 0.5,
-      "macro_auroc": 0.40415832494877246,
+      "macro_auroc": 0.37141777755141575,
       "macro_fpr": 1.0,
       "macro_fnr": 0.0,
       "baseline_elapsed_ms": null,
@@ -76,17 +76,17 @@
       "total": 64,
       "rows": 454584,
       "errors": 0,
-      "baseline_datasets": 6,
-      "macro_accuracy": 0.8440354947095523,
-      "macro_precision": 0.7309038521621365,
-      "macro_recall": 0.8235880735494807,
-      "macro_f1": 0.724271874860479,
-      "macro_balanced_accuracy": 0.8502109881369943,
-      "macro_auroc": 0.9321985784996424,
-      "macro_fpr": 0.12316609727549221,
-      "macro_fnr": 0.1764119264505193,
-      "baseline_elapsed_ms": 228.09350991752441,
-      "macro_elapsed_ms": 227.77912452232724
+      "baseline_datasets": 5,
+      "macro_accuracy": 0.8461960150068564,
+      "macro_precision": 0.8009319643108666,
+      "macro_recall": 0.8124524024723162,
+      "macro_f1": 0.7628454616552348,
+      "macro_balanced_accuracy": 0.8495579731962157,
+      "macro_auroc": 0.9329313842601045,
+      "macro_fpr": 0.11333645607988471,
+      "macro_fnr": 0.18754759752768382,
+      "baseline_elapsed_ms": 230.65301552380953,
+      "macro_elapsed_ms": 228.51993052143612
     }
   ],
   "runs": [
@@ -105,27 +105,28 @@
       "error_rate": 0.0,
       "coverage": 1.0,
       "error_categories": {},
-      "mean_elapsed_ms": 497.3928413610252,
-      "elapsed_s": 3376.8,
+      "mean_elapsed_ms": 219.37118559139788,
+      "elapsed_s": 1489.31097898,
       "log_processed": 6789,
       "log_total": 6789,
-      "log_elapsed_s": 3376.8,
-      "log_file": "outputs/fastino.ai/run_model_suite.log",
+      "log_elapsed_s": 1489.31097898,
+      "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
       "n": 6789,
-      "tn": 212,
-      "fp": 3206,
-      "fn": 904,
-      "tp": 2467,
-      "accuracy": 0.3946089262041538,
-      "precision": 0.4348669134496739,
-      "recall": 0.7318303174132305,
-      "f1": 0.5455550641309155,
-      "fpr": 0.9379754242246928,
-      "fnr": 0.2681696825867695,
-      "balanced_accuracy": 0.39692744659426876,
-      "auroc": 0.23801678829113984,
+      "tn": 3358,
+      "fp": 60,
+      "fn": 2283,
+      "tp": 1088,
+      "accuracy": 0.6548828988068935,
+      "precision": 0.9477351916376306,
+      "recall": 0.3227528923168199,
+      "f1": 0.48152246072139854,
+      "fpr": 0.017554125219426564,
+      "fnr": 0.6772471076831801,
+      "balanced_accuracy": 0.6525993835486967,
+      "auroc": 0.839971400992078,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.8356164383561644
+      "positive_rate": 0.1690970687877449,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -162,7 +163,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.2786810677726709,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -199,7 +201,8 @@
       "balanced_accuracy": 0.7375406155035575,
       "auroc": 0.8752054099963565,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.2677861246133451
+      "positive_rate": 0.2677861246133451,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -236,7 +239,8 @@
       "balanced_accuracy": 0.3729004438261918,
       "auroc": 0.23801678829113984,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.7906908233907792
+      "positive_rate": 0.7906908233907792,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -275,7 +279,8 @@
       "balanced_accuracy": 0.41819476786760873,
       "auroc": 0.27875533252126306,
       "majority_accuracy": 0.5033883323512081,
-      "positive_rate": 0.8637301119622864
+      "positive_rate": 0.8637301119622864,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -312,7 +317,8 @@
       "balanced_accuracy": 0.7161207813382273,
       "auroc": 0.8753926158111409,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.23773751657092354
+      "positive_rate": 0.23773751657092354,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -349,7 +355,8 @@
       "balanced_accuracy": 0.3568482612251019,
       "auroc": 0.23801678829113984,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.7487111503903373
+      "positive_rate": 0.7487111503903373,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -386,7 +393,8 @@
       "balanced_accuracy": 0.35471644090588517,
       "auroc": 0.2786810677726709,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.653557224922669
+      "positive_rate": 0.653557224922669,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -423,7 +431,8 @@
       "balanced_accuracy": 0.6922018753908801,
       "auroc": 0.8762820821035928,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.2084253940197378
+      "positive_rate": 0.2084253940197378,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -460,7 +469,8 @@
       "balanced_accuracy": 0.3350435138522756,
       "auroc": 0.23801678829113984,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.6843423184563264
+      "positive_rate": 0.6843423184563264,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -501,7 +511,8 @@
       "balanced_accuracy": 0.33897073499733216,
       "auroc": 0.27893536425903,
       "majority_accuracy": 0.5038336773813035,
-      "positive_rate": 0.44161014450014746
+      "positive_rate": 0.44161014450014746,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -538,7 +549,8 @@
       "balanced_accuracy": 0.6605578872144418,
       "auroc": 0.8755808631047282,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.16968625718073355
+      "positive_rate": 0.16968625718073355,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -575,7 +587,8 @@
       "balanced_accuracy": 0.41504075914084243,
       "auroc": 0.297388110026681,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.8348799528649286
+      "positive_rate": 0.8348799528649286,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -615,7 +628,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.280168459837468,
       "majority_accuracy": 0.5036840554081934,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -652,7 +666,8 @@
       "balanced_accuracy": 0.7558374886891063,
       "auroc": 0.8745746643964742,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.2935631168065989
+      "positive_rate": 0.2935631168065989,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -689,7 +704,8 @@
       "balanced_accuracy": 0.3974971788942932,
       "auroc": 0.297388110026681,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.7902489320960377
+      "positive_rate": 0.7902489320960377,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -728,7 +744,8 @@
       "balanced_accuracy": 0.3981696035848469,
       "auroc": 0.280311496767823,
       "majority_accuracy": 0.5033883323512081,
-      "positive_rate": 0.8218915733647614
+      "positive_rate": 0.8218915733647614,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -765,7 +782,8 @@
       "balanced_accuracy": 0.7351633533465056,
       "auroc": 0.8741722630240829,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.2648401826484018
+      "positive_rate": 0.2648401826484018,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -802,7 +820,8 @@
       "balanced_accuracy": 0.38112999235033823,
       "auroc": 0.297388110026681,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.7453233171306525
+      "positive_rate": 0.7453233171306525,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -841,7 +860,8 @@
       "balanced_accuracy": 0.3418466585417831,
       "auroc": 0.28040153216059205,
       "majority_accuracy": 0.5036098423456609,
-      "positive_rate": 0.6259024605864152
+      "positive_rate": 0.6259024605864152,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -878,7 +898,8 @@
       "balanced_accuracy": 0.7130039390464116,
       "auroc": 0.8742689469729332,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.23434968331123876
+      "positive_rate": 0.23434968331123876,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -915,7 +936,8 @@
       "balanced_accuracy": 0.3647765186106186,
       "auroc": 0.297388110026681,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.6811017822948888
+      "positive_rate": 0.6811017822948888,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -954,7 +976,8 @@
       "balanced_accuracy": 0.3513898216215554,
       "auroc": 0.2804704760033402,
       "majority_accuracy": 0.5035366931918656,
-      "positive_rate": 0.38712054229295606
+      "positive_rate": 0.38712054229295606,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -991,7 +1014,8 @@
       "balanced_accuracy": 0.6838671809026114,
       "auroc": 0.8744958591670704,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.19605243776697598
+      "positive_rate": 0.19605243776697598,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1008,27 +1032,28 @@
       "error_rate": 0.0,
       "coverage": 1.0,
       "error_categories": {},
-      "mean_elapsed_ms": 325.5096566523605,
-      "elapsed_s": 1213.5,
+      "mean_elapsed_ms": 223.07756612124464,
+      "elapsed_s": 831.6331665,
       "log_processed": 3728,
       "log_total": 3728,
-      "log_elapsed_s": 1213.5,
-      "log_file": "outputs/fastino.ai/run_model_suite.log",
+      "log_elapsed_s": 831.6331665,
+      "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
       "n": 3728,
-      "tn": 106,
-      "fp": 1059,
-      "fn": 71,
-      "tp": 2492,
-      "accuracy": 0.6968884120171673,
-      "precision": 0.7017741481272881,
-      "recall": 0.9722980881779165,
-      "f1": 0.8151782793588486,
-      "fpr": 0.9090128755364807,
-      "fnr": 0.027701911822083494,
-      "balanced_accuracy": 0.5316426063207178,
-      "auroc": 0.7833048382478285,
+      "tn": 1103,
+      "fp": 62,
+      "fn": 24,
+      "tp": 2539,
+      "accuracy": 0.976931330472103,
+      "precision": 0.9761630142252979,
+      "recall": 0.9906359734685914,
+      "f1": 0.9833462432223082,
+      "fpr": 0.05321888412017167,
+      "fnr": 0.009364026531408505,
+      "balanced_accuracy": 0.9687085446742099,
+      "auroc": 0.9966271419457147,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.9525214592274678
+      "positive_rate": 0.6976931330472103,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1067,7 +1092,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.4311019757230972,
       "majority_accuracy": 0.6874161524013952,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1104,7 +1130,8 @@
       "balanced_accuracy": 0.9239563012095202,
       "auroc": 0.9928135450174905,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.7237124463519313
+      "positive_rate": 0.7237124463519313,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1141,7 +1168,8 @@
       "balanced_accuracy": 0.5378462738977761,
       "auroc": 0.7833048382478285,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.9318669527896996
+      "positive_rate": 0.9318669527896996,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1178,7 +1206,8 @@
       "balanced_accuracy": 0.49512290284822474,
       "auroc": 0.43111428901552135,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.5898605150214592
+      "positive_rate": 0.5898605150214592,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1215,7 +1244,8 @@
       "balanced_accuracy": 0.9441279750292626,
       "auroc": 0.9928490452611362,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.7025214592274678
+      "positive_rate": 0.7025214592274678,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1252,7 +1282,8 @@
       "balanced_accuracy": 0.5478735856418261,
       "auroc": 0.7833048382478285,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.9138948497854077
+      "positive_rate": 0.9138948497854077,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1289,7 +1320,8 @@
       "balanced_accuracy": 0.3858759266484588,
       "auroc": 0.43111428901552135,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.16496781115879827
+      "positive_rate": 0.16496781115879827,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1326,7 +1358,8 @@
       "balanced_accuracy": 0.9555598907530238,
       "auroc": 0.9927607970139606,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.6813304721030042
+      "positive_rate": 0.6813304721030042,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1363,7 +1396,8 @@
       "balanced_accuracy": 0.5775263363246195,
       "auroc": 0.7833048382478285,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.8731223175965666
+      "positive_rate": 0.8731223175965666,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1400,7 +1434,8 @@
       "balanced_accuracy": 0.40624268435427235,
       "auroc": 0.43111428901552135,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.07108369098712447
+      "positive_rate": 0.07108369098712447,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1437,7 +1472,8 @@
       "balanced_accuracy": 0.9600078033554428,
       "auroc": 0.9926995088574783,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.653969957081545
+      "positive_rate": 0.653969957081545,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1474,7 +1510,8 @@
       "balanced_accuracy": 0.5128755364806867,
       "auroc": 0.8439258580760542,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.9704935622317596
+      "positive_rate": 0.9704935622317596,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1511,7 +1548,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.3680894673121459,
       "majority_accuracy": 0.6875,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1548,7 +1586,8 @@
       "balanced_accuracy": 0.9259851736246587,
       "auroc": 0.9943362040527213,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.7204935622317596
+      "positive_rate": 0.7204935622317596,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1585,7 +1624,8 @@
       "balanced_accuracy": 0.5268045259461569,
       "auroc": 0.8439258580760542,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.9493025751072961
+      "positive_rate": 0.9493025751072961,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1622,7 +1662,8 @@
       "balanced_accuracy": 0.4636363636363636,
       "auroc": 0.3680894673121459,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.5740343347639485
+      "positive_rate": 0.5740343347639485,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1659,7 +1700,8 @@
       "balanced_accuracy": 0.9502145922746781,
       "auroc": 0.9941525070372534,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.697156652360515
+      "positive_rate": 0.697156652360515,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1696,7 +1738,8 @@
       "balanced_accuracy": 0.5503316426063207,
       "auroc": 0.8439258580760542,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.9232832618025751
+      "positive_rate": 0.9232832618025751,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1733,7 +1776,8 @@
       "balanced_accuracy": 0.32676550916894265,
       "auroc": 0.3680894673121459,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.16523605150214593
+      "positive_rate": 0.16523605150214593,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1770,7 +1814,8 @@
       "balanced_accuracy": 0.9622707764338665,
       "auroc": 0.9942072644885369,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.6802575107296137
+      "positive_rate": 0.6802575107296137,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1807,7 +1852,8 @@
       "balanced_accuracy": 0.5882949668357393,
       "auroc": 0.8439258580760542,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.8827789699570815
+      "positive_rate": 0.8827789699570815,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1847,7 +1893,8 @@
       "balanced_accuracy": 0.3757776221862752,
       "auroc": 0.36771134288879764,
       "majority_accuracy": 0.6876006441223832,
-      "positive_rate": 0.09205582393988192
+      "positive_rate": 0.09205582393988192,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1884,7 +1931,8 @@
       "balanced_accuracy": 0.968162309793211,
       "auroc": 0.9942700597308345,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.6574570815450643
+      "positive_rate": 0.6574570815450643,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -1901,27 +1949,28 @@
       "error_rate": 0.0,
       "coverage": 1.0,
       "error_categories": {},
-      "mean_elapsed_ms": 370.9775967413442,
-      "elapsed_s": 728.6,
+      "mean_elapsed_ms": 221.097895799389,
+      "elapsed_s": 434.23626735,
       "log_processed": 1964,
       "log_total": 1964,
-      "log_elapsed_s": 728.6,
-      "log_file": "outputs/fastino.ai/run_model_suite.log",
+      "log_elapsed_s": 434.23626735,
+      "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
       "n": 1964,
-      "tn": 123,
-      "fp": 782,
-      "fn": 184,
-      "tp": 875,
-      "accuracy": 0.5081466395112016,
-      "precision": 0.528062764031382,
-      "recall": 0.826251180358829,
-      "f1": 0.6443298969072165,
-      "fpr": 0.8640883977900552,
-      "fnr": 0.17374881964117092,
-      "balanced_accuracy": 0.48108139128438693,
-      "auroc": 0.4614522195963042,
+      "tn": 804,
+      "fp": 101,
+      "fn": 219,
+      "tp": 840,
+      "accuracy": 0.8370672097759674,
+      "precision": 0.8926673751328374,
+      "recall": 0.7932011331444759,
+      "f1": 0.84,
+      "fpr": 0.11160220994475138,
+      "fnr": 0.20679886685552407,
+      "balanced_accuracy": 0.8407994615998623,
+      "auroc": 0.9198268980952531,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.8436863543788188
+      "positive_rate": 0.4791242362525458,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -1958,7 +2007,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.34101336087938694,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -1995,7 +2045,8 @@
       "balanced_accuracy": 0.8118489766745445,
       "auroc": 0.9048930764455158,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.4954175152749491
+      "positive_rate": 0.4954175152749491,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -2032,7 +2083,8 @@
       "balanced_accuracy": 0.4726323697431644,
       "auroc": 0.4614522195963042,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.8014256619144603
+      "positive_rate": 0.8014256619144603,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -2069,7 +2121,8 @@
       "balanced_accuracy": 0.4589422941480288,
       "auroc": 0.34101336087938694,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.8905295315682281
+      "positive_rate": 0.8905295315682281,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -2106,7 +2159,8 @@
       "balanced_accuracy": 0.8148315673600134,
       "auroc": 0.9050814121526094,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.4511201629327902
+      "positive_rate": 0.4511201629327902,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -2143,7 +2197,8 @@
       "balanced_accuracy": 0.46142091726271534,
       "auroc": 0.4614522195963042,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.7617107942973523
+      "positive_rate": 0.7617107942973523,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -2180,7 +2235,8 @@
       "balanced_accuracy": 0.4070242436573646,
       "auroc": 0.34101336087938694,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.7174134419551935
+      "positive_rate": 0.7174134419551935,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -2217,7 +2273,8 @@
       "balanced_accuracy": 0.8058300596309454,
       "auroc": 0.9050814121526093,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.4093686354378819
+      "positive_rate": 0.4093686354378819,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -2254,7 +2311,8 @@
       "balanced_accuracy": 0.46757756457410565,
       "auroc": 0.4614522195963042,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.7031568228105907
+      "positive_rate": 0.7031568228105907,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -2291,7 +2349,8 @@
       "balanced_accuracy": 0.37700426233442375,
       "auroc": 0.34101336087938694,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.5005091649694501
+      "positive_rate": 0.5005091649694501,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -2328,7 +2387,8 @@
       "balanced_accuracy": 0.7888725421146813,
       "auroc": 0.9045753577595875,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.3645621181262729
+      "positive_rate": 0.3645621181262729,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -2365,7 +2425,8 @@
       "balanced_accuracy": 0.47081526927832473,
       "auroc": 0.4588160414025533,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.8569246435845214
+      "positive_rate": 0.8569246435845214,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -2402,7 +2463,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.28927112516238085,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -2439,7 +2501,8 @@
       "balanced_accuracy": 0.8068051273222419,
       "auroc": 0.9053918269607,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.4424643584521385
+      "positive_rate": 0.4424643584521385,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -2478,7 +2541,8 @@
       "balanced_accuracy": 0.46341708458569497,
       "auroc": 0.4584031027871502,
       "majority_accuracy": 0.5390107088220296,
-      "positive_rate": 0.818969913309536
+      "positive_rate": 0.818969913309536,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -2515,7 +2579,8 @@
       "balanced_accuracy": 0.40026554812994647,
       "auroc": 0.28927112516238085,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.8095723014256619
+      "positive_rate": 0.8095723014256619,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -2552,7 +2617,8 @@
       "balanced_accuracy": 0.8038611428481993,
       "auroc": 0.9051028020805618,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.40835030549898166
+      "positive_rate": 0.40835030549898166,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -2589,7 +2655,8 @@
       "balanced_accuracy": 0.45223994282107066,
       "auroc": 0.4588160414025533,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.7871690427698574
+      "positive_rate": 0.7871690427698574,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -2626,7 +2693,8 @@
       "balanced_accuracy": 0.3356789215302668,
       "auroc": 0.28927112516238085,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.5697556008146639
+      "positive_rate": 0.5697556008146639,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -2663,7 +2731,8 @@
       "balanced_accuracy": 0.7955529818081272,
       "auroc": 0.9054935595448641,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.3772912423625255
+      "positive_rate": 0.3772912423625255,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -2700,7 +2769,8 @@
       "balanced_accuracy": 0.43989273733690176,
       "auroc": 0.4588160414025533,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.7163951120162932
+      "positive_rate": 0.7163951120162932,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -2737,7 +2807,8 @@
       "balanced_accuracy": 0.3687028834666291,
       "auroc": 0.28927112516238085,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.3070264765784114
+      "positive_rate": 0.3070264765784114,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -2774,7 +2845,8 @@
       "balanced_accuracy": 0.7858184777675175,
       "auroc": 0.9057658898470881,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.3513238289205703
+      "positive_rate": 0.3513238289205703,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -2791,27 +2863,28 @@
       "error_rate": 0.0,
       "coverage": 1.0,
       "error_categories": {},
-      "mean_elapsed_ms": 437.2549019607843,
-      "elapsed_s": 7983.4,
+      "mean_elapsed_ms": 229.47824763720016,
+      "elapsed_s": 4189.81384536,
       "log_processed": 18258,
       "log_total": 18258,
-      "log_elapsed_s": 7983.4,
-      "log_file": "outputs/fastino.ai/run_model_suite.log",
+      "log_elapsed_s": 4189.81384536,
+      "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
       "n": 18258,
-      "tn": 3697,
-      "fp": 12596,
-      "fn": 198,
-      "tp": 1767,
-      "accuracy": 0.29926607514514186,
-      "precision": 0.12302443779154773,
-      "recall": 0.899236641221374,
-      "f1": 0.21643802057814795,
-      "fpr": 0.773092739213159,
-      "fnr": 0.10076335877862595,
-      "balanced_accuracy": 0.5630719510041075,
-      "auroc": 0.8059126845244428,
+      "tn": 10554,
+      "fp": 5739,
+      "fn": 59,
+      "tp": 1906,
+      "accuracy": 0.6824405739949612,
+      "precision": 0.24931327665140615,
+      "recall": 0.9699745547073791,
+      "f1": 0.3966701352757544,
+      "fpr": 0.3522371570613147,
+      "fnr": 0.030025445292620866,
+      "balanced_accuracy": 0.8088686988230323,
+      "auroc": 0.9419259336304686,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.7866688574871289
+      "positive_rate": 0.41872056085003834,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -2851,7 +2924,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.567861061935556,
       "majority_accuracy": 0.8924560346244453,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -2888,7 +2962,8 @@
       "balanced_accuracy": 0.8532375398417248,
       "auroc": 0.928494354886947,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.24843904042063752
+      "positive_rate": 0.24843904042063752,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "fastino.ai",
@@ -2927,7 +3002,8 @@
       "balanced_accuracy": 0.5856943322531735,
       "auroc": 0.8059119073099146,
       "majority_accuracy": 0.8923700498438955,
-      "positive_rate": 0.7233937667743879
+      "positive_rate": 0.7233937667743879,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "laya-ai.com",
@@ -2966,7 +3042,8 @@
       "balanced_accuracy": 0.5230006830566912,
       "auroc": 0.5678965544418701,
       "majority_accuracy": 0.8923481692611269,
-      "positive_rate": 0.9446941460206095
+      "positive_rate": 0.9446941460206095,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3003,7 +3080,8 @@
       "balanced_accuracy": 0.8593048670271455,
       "auroc": 0.9289952646736787,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.224887720451309
+      "positive_rate": 0.224887720451309,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "fastino.ai",
@@ -3040,7 +3118,8 @@
       "balanced_accuracy": 0.6074124934465839,
       "auroc": 0.8059126845244428,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.6602037463029905
+      "positive_rate": 0.6602037463029905,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "laya-ai.com",
@@ -3079,7 +3158,8 @@
       "balanced_accuracy": 0.5466504196469539,
       "auroc": 0.5679174340085942,
       "majority_accuracy": 0.8924071436397502,
-      "positive_rate": 0.8836419414922757
+      "positive_rate": 0.8836419414922757,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3116,7 +3196,8 @@
       "balanced_accuracy": 0.8623890838710765,
       "auroc": 0.9290431317465828,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.20106254792419762
+      "positive_rate": 0.20106254792419762,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "fastino.ai",
@@ -3155,7 +3236,8 @@
       "balanced_accuracy": 0.6578747964157934,
       "auroc": 0.8059210440004273,
       "majority_accuracy": 0.8923700498438955,
-      "positive_rate": 0.5472421536944734
+      "positive_rate": 0.5472421536944734,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "laya-ai.com",
@@ -3195,7 +3277,8 @@
       "balanced_accuracy": 0.5864430700546978,
       "auroc": 0.5679030162022495,
       "majority_accuracy": 0.8923953539338155,
-      "positive_rate": 0.7571225071225072
+      "positive_rate": 0.7571225071225072,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3232,7 +3315,8 @@
       "balanced_accuracy": 0.8668606805807579,
       "auroc": 0.9286252123759731,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.16814547047869427
+      "positive_rate": 0.16814547047869427,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "fastino.ai",
@@ -3269,7 +3353,8 @@
       "balanced_accuracy": 0.5530612359637421,
       "auroc": 0.7729404079149181,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.8111512761529193
+      "positive_rate": 0.8111512761529193,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "laya-ai.com",
@@ -3309,7 +3394,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.6171955025928401,
       "majority_accuracy": 0.8923953539338155,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3346,7 +3432,8 @@
       "balanced_accuracy": 0.8426910727830946,
       "auroc": 0.919526314318158,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.2713331142512871
+      "positive_rate": 0.2713331142512871,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "fastino.ai",
@@ -3383,7 +3470,8 @@
       "balanced_accuracy": 0.5658313901488159,
       "auroc": 0.7729404079149181,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.7624055208675649
+      "positive_rate": 0.7624055208675649,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "laya-ai.com",
@@ -3422,7 +3510,8 @@
       "balanced_accuracy": 0.5581979092259104,
       "auroc": 0.6171482816924795,
       "majority_accuracy": 0.8924012491097354,
-      "positive_rate": 0.8492850490330357
+      "positive_rate": 0.8492850490330357,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3459,7 +3548,8 @@
       "balanced_accuracy": 0.8493555280378451,
       "auroc": 0.9194060922211869,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.2492605980939862
+      "positive_rate": 0.2492605980939862,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "fastino.ai",
@@ -3498,7 +3588,8 @@
       "balanced_accuracy": 0.5774870832581995,
       "auroc": 0.7421255303189678,
       "majority_accuracy": 0.8921574008012733,
-      "positive_rate": 0.7222984468470446
+      "positive_rate": 0.7222984468470446,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "laya-ai.com",
@@ -3537,7 +3628,8 @@
       "balanced_accuracy": 0.6006629771741563,
       "auroc": 0.6171675643473249,
       "majority_accuracy": 0.8924071436397502,
-      "positive_rate": 0.6864248931740988
+      "positive_rate": 0.6864248931740988,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3574,7 +3666,8 @@
       "balanced_accuracy": 0.8495947072292087,
       "auroc": 0.919223026045466,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.23102201774564574
+      "positive_rate": 0.23102201774564574,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "fastino.ai",
@@ -3614,7 +3707,8 @@
       "balanced_accuracy": 0.6635153965102014,
       "auroc": 0.8190946591990168,
       "majority_accuracy": 0.8720605275713994,
-      "positive_rate": 0.5842819167064276
+      "positive_rate": 0.5842819167064276,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "laya-ai.com",
@@ -3636,7 +3730,8 @@
       "log_processed": 3500,
       "log_total": 18258,
       "log_elapsed_s": 19214.10133393,
-      "log_file": "outputs/laya-ai.com/run_model_suite_2026-10-19_123324.log"
+      "log_file": "outputs/laya-ai.com/run_model_suite_2026-10-19_123324.log",
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3673,7 +3768,8 @@
       "balanced_accuracy": 0.8484785064348808,
       "auroc": 0.9190976189996516,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.21316683097820133
+      "positive_rate": 0.21316683097820133,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "fastino.ai",
@@ -3690,27 +3786,28 @@
       "error_rate": 0.0,
       "coverage": 1.0,
       "error_categories": {},
-      "mean_elapsed_ms": null,
-      "elapsed_s": null,
-      "log_processed": null,
-      "log_total": null,
-      "log_elapsed_s": null,
-      "log_file": null,
+      "mean_elapsed_ms": 222.66024850574712,
+      "elapsed_s": 232.45729944,
+      "log_processed": 1044,
+      "log_total": 1044,
+      "log_elapsed_s": 232.45729944,
+      "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
       "n": 1044,
-      "tn": 50,
-      "fp": 467,
-      "fn": 23,
-      "tp": 504,
-      "accuracy": 0.5306513409961686,
-      "precision": 0.5190525231719877,
-      "recall": 0.9563567362428842,
-      "f1": 0.6728971962616822,
-      "fpr": 0.9032882011605415,
-      "fnr": 0.04364326375711575,
-      "balanced_accuracy": 0.5265342675411713,
-      "auroc": 0.7278012471601232,
+      "tn": 473,
+      "fp": 44,
+      "fn": 11,
+      "tp": 516,
+      "accuracy": 0.9473180076628352,
+      "precision": 0.9214285714285714,
+      "recall": 0.9791271347248577,
+      "f1": 0.9494020239190433,
+      "fpr": 0.0851063829787234,
+      "fnr": 0.020872865275142316,
+      "balanced_accuracy": 0.9470103758730671,
+      "auroc": 0.9931732847878029,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.9300766283524904
+      "positive_rate": 0.5363984674329502,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -3747,7 +3844,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.15187606208640564,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -3784,7 +3882,8 @@
       "balanced_accuracy": 0.9524882642893059,
       "auroc": 0.9943330923184772,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.46455938697318006
+      "positive_rate": 0.46455938697318006,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -3823,7 +3922,8 @@
       "tp": 0,
       "tn": 0,
       "fp": 0,
-      "fn": 0
+      "fn": 0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -3845,7 +3945,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3882,7 +3983,8 @@
       "balanced_accuracy": 0.9439493648585658,
       "auroc": 0.994151413607185,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.4559386973180077
+      "positive_rate": 0.4559386973180077,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -3921,7 +4023,8 @@
       "balanced_accuracy": 0.534087643678161,
       "auroc": 0.7346623563218391,
       "majority_accuracy": 0.5209580838323353,
-      "positive_rate": 0.8832335329341318
+      "positive_rate": 0.8832335329341318,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -3943,7 +4046,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -3980,7 +4084,8 @@
       "balanced_accuracy": 0.9373447014046149,
       "auroc": 0.9945606494922172,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.4454022988505747
+      "positive_rate": 0.4454022988505747,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4017,7 +4122,8 @@
       "balanced_accuracy": 0.5628314718911837,
       "auroc": 0.7278012471601232,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.8409961685823755
+      "positive_rate": 0.8409961685823755,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4039,7 +4145,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -4076,7 +4183,8 @@
       "balanced_accuracy": 0.9231499051233396,
       "auroc": 0.9943496085649584,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.4272030651340996
+      "positive_rate": 0.4272030651340996,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4113,7 +4221,8 @@
       "balanced_accuracy": 0.506224789784885,
       "auroc": 0.6186031659809366,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.9501915708812261
+      "positive_rate": 0.9501915708812261,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4150,7 +4259,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.3376434619520735,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -4187,7 +4297,8 @@
       "balanced_accuracy": 0.9534370308927215,
       "auroc": 0.9947735255579738,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.46551724137931033
+      "positive_rate": 0.46551724137931033,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4224,7 +4335,8 @@
       "balanced_accuracy": 0.49007740614184153,
       "auroc": 0.7267882507092809,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.935823754789272
+      "positive_rate": 0.935823754789272,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4246,7 +4358,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -4283,7 +4396,8 @@
       "balanced_accuracy": 0.945865249450376,
       "auroc": 0.9946927794640662,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.4559386973180077
+      "positive_rate": 0.4559386973180077,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4320,7 +4434,8 @@
       "balanced_accuracy": 0.4979061069738933,
       "auroc": 0.7267882507092809,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.9185823754789272
+      "positive_rate": 0.9185823754789272,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4342,7 +4457,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -4379,7 +4495,8 @@
       "balanced_accuracy": 0.9430556524100875,
       "auroc": 0.9946982848795599,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.4492337164750958
+      "positive_rate": 0.4492337164750958,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4416,7 +4533,8 @@
       "balanced_accuracy": 0.5086912159260659,
       "auroc": 0.6186031659809366,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.89272030651341
+      "positive_rate": 0.89272030651341,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4438,7 +4556,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -4475,7 +4594,8 @@
       "balanced_accuracy": 0.9316888045540797,
       "auroc": 0.9946340550321333,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.43582375478927204
+      "positive_rate": 0.43582375478927204,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4492,27 +4612,28 @@
       "error_rate": 0.0,
       "coverage": 1.0,
       "error_categories": {},
-      "mean_elapsed_ms": 311.8692206076618,
-      "elapsed_s": 4721.7,
+      "mean_elapsed_ms": 226.20949302047555,
+      "elapsed_s": 3424.81172433,
       "log_processed": 15140,
       "log_total": 15140,
-      "log_elapsed_s": 4721.7,
-      "log_file": "outputs/fastino.ai/run_model_suite.log",
+      "log_elapsed_s": 3424.81172433,
+      "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
       "n": 15140,
-      "tn": 2693,
-      "fp": 11042,
-      "fn": 143,
-      "tp": 1262,
-      "accuracy": 0.26122853368560106,
-      "precision": 0.10256827048114435,
-      "recall": 0.898220640569395,
-      "f1": 0.18411262674155665,
-      "fpr": 0.8039315617036767,
-      "fnr": 0.10177935943060498,
-      "balanced_accuracy": 0.5471445394328591,
-      "auroc": 0.7462570750103316,
+      "tn": 8583,
+      "fp": 5152,
+      "fn": 78,
+      "tp": 1327,
+      "accuracy": 0.654557463672391,
+      "precision": 0.20481555795647477,
+      "recall": 0.9444839857651246,
+      "f1": 0.33663115169964486,
+      "fpr": 0.37510010921004733,
+      "fnr": 0.05551601423487545,
+      "balanced_accuracy": 0.7846919382775386,
+      "auroc": 0.9142047163712728,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.8126816380449141
+      "positive_rate": 0.42793923381770144,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4551,7 +4672,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.6544164212955181,
       "majority_accuracy": 0.9072287564424475,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -4588,7 +4710,8 @@
       "balanced_accuracy": 0.8219723360456636,
       "auroc": 0.8973211798830688,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.2869881109643329
+      "positive_rate": 0.2869881109643329,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4625,7 +4748,8 @@
       "balanced_accuracy": 0.5637872178902381,
       "auroc": 0.7462570750103316,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.7597093791281374
+      "positive_rate": 0.7597093791281374,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4664,7 +4788,8 @@
       "balanced_accuracy": 0.522569321240115,
       "auroc": 0.6544222832278186,
       "majority_accuracy": 0.9072287564424475,
-      "positive_rate": 0.9469406634068984
+      "positive_rate": 0.9469406634068984,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -4701,7 +4826,8 @@
       "balanced_accuracy": 0.8239771112323115,
       "auroc": 0.8974302085613941,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.25772787318361956
+      "positive_rate": 0.25772787318361956,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4738,7 +4864,8 @@
       "balanced_accuracy": 0.5828086803202976,
       "auroc": 0.7462074576341451,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.6981505944517834
+      "positive_rate": 0.6981505944517834,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4777,7 +4904,8 @@
       "balanced_accuracy": 0.5430060601231117,
       "auroc": 0.654399135151557,
       "majority_accuracy": 0.9072226260490319,
-      "positive_rate": 0.8934778299081477
+      "positive_rate": 0.8934778299081477,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -4814,7 +4942,8 @@
       "balanced_accuracy": 0.8330145989089359,
       "auroc": 0.896852081921786,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.22780713342140027
+      "positive_rate": 0.22780713342140027,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4851,7 +4980,8 @@
       "balanced_accuracy": 0.6055445798522361,
       "auroc": 0.7460007747047247,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.6170409511228534
+      "positive_rate": 0.6170409511228534,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -4890,7 +5020,8 @@
       "balanced_accuracy": 0.5875777354473639,
       "auroc": 0.6543993023781807,
       "majority_accuracy": 0.9072287564424475,
-      "positive_rate": 0.7834016122637769
+      "positive_rate": 0.7834016122637769,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -4927,7 +5058,8 @@
       "balanced_accuracy": 0.8326946121747827,
       "auroc": 0.8974617926770971,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.1928005284015852
+      "positive_rate": 0.1928005284015852,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -4964,7 +5096,8 @@
       "balanced_accuracy": 0.5428112453961422,
       "auroc": 0.7688867441285024,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.8333553500660502
+      "positive_rate": 0.8333553500660502,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5003,7 +5136,8 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.7098164022053316,
       "majority_accuracy": 0.9072287564424475,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -5040,7 +5174,8 @@
       "balanced_accuracy": 0.8187694890705746,
       "auroc": 0.8936655063369033,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.28639365918097753
+      "positive_rate": 0.28639365918097753,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5077,7 +5212,8 @@
       "balanced_accuracy": 0.5584421439370287,
       "auroc": 0.7688867182186454,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.7879128137384412
+      "positive_rate": 0.7879128137384412,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5116,7 +5252,8 @@
       "balanced_accuracy": 0.5344808714255183,
       "auroc": 0.7098209413122014,
       "majority_accuracy": 0.9072287564424475,
-      "positive_rate": 0.9153561517113784
+      "positive_rate": 0.9153561517113784,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -5153,7 +5290,8 @@
       "balanced_accuracy": 0.8205671149503762,
       "auroc": 0.8939574845156217,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.26605019815059444
+      "positive_rate": 0.26605019815059444,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5190,7 +5328,8 @@
       "balanced_accuracy": 0.5730782335177684,
       "auroc": 0.7689677124316789,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.7421400264200793
+      "positive_rate": 0.7421400264200793,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5229,7 +5368,8 @@
       "balanced_accuracy": 0.5759861398066264,
       "auroc": 0.7098685693505743,
       "majority_accuracy": 0.9072042300066094,
-      "positive_rate": 0.8208195637805684
+      "positive_rate": 0.8208195637805684,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -5266,7 +5406,8 @@
       "balanced_accuracy": 0.8281647918725961,
       "auroc": 0.8937656738441289,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.23731836195508588
+      "positive_rate": 0.23731836195508588,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5305,7 +5446,8 @@
       "balanced_accuracy": 0.5944300893385094,
       "auroc": 0.7688949211427909,
       "majority_accuracy": 0.9071933417002443,
-      "positive_rate": 0.6742189048153775
+      "positive_rate": 0.6742189048153775,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5344,7 +5486,8 @@
       "balanced_accuracy": 0.6466048518124264,
       "auroc": 0.7098364002133122,
       "majority_accuracy": 0.9072287564424475,
-      "positive_rate": 0.6186071098189507
+      "positive_rate": 0.6186071098189507,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -5381,7 +5524,8 @@
       "balanced_accuracy": 0.8369198621077409,
       "auroc": 0.8936514372845432,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.20079260237780713
+      "positive_rate": 0.20079260237780713,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5418,7 +5562,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8611111111111112
+      "positive_rate": 0.8611111111111112,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5455,7 +5600,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -5492,7 +5638,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9433333333333334
+      "positive_rate": 0.9433333333333334,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5529,7 +5676,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8233333333333334
+      "positive_rate": 0.8233333333333334,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5568,7 +5716,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8290322580645161
+      "positive_rate": 0.8290322580645161,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -5605,7 +5754,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.93
+      "positive_rate": 0.93,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5642,7 +5792,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.7777777777777778
+      "positive_rate": 0.7777777777777778,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5664,7 +5815,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -5701,7 +5853,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9177777777777778
+      "positive_rate": 0.9177777777777778,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5738,7 +5891,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.7011111111111111
+      "positive_rate": 0.7011111111111111,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5777,7 +5931,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.058823529411764705
+      "positive_rate": 0.058823529411764705,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -5814,7 +5969,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8911111111111111
+      "positive_rate": 0.8911111111111111,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5851,7 +6007,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9255555555555556
+      "positive_rate": 0.9255555555555556,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -5890,7 +6047,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -5927,7 +6085,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9566666666666667
+      "positive_rate": 0.9566666666666667,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -5964,7 +6123,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9011111111111111
+      "positive_rate": 0.9011111111111111,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6003,7 +6163,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.6040268456375839
+      "positive_rate": 0.6040268456375839,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -6040,7 +6201,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9522222222222222
+      "positive_rate": 0.9522222222222222,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6077,7 +6239,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8777777777777778
+      "positive_rate": 0.8777777777777778,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6116,7 +6279,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.21283783783783783
+      "positive_rate": 0.21283783783783783,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -6153,7 +6317,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9366666666666666
+      "positive_rate": 0.9366666666666666,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6190,7 +6355,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8366666666666667
+      "positive_rate": 0.8366666666666667,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6229,7 +6395,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.03741496598639456
+      "positive_rate": 0.03741496598639456,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -6266,7 +6433,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9233333333333333
+      "positive_rate": 0.9233333333333333,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6303,7 +6471,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8595555555555555
+      "positive_rate": 0.8595555555555555,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6340,7 +6509,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "typesafe.ai",
@@ -6377,7 +6547,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9494444444444444
+      "positive_rate": 0.9494444444444444,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6414,7 +6585,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8217777777777778
+      "positive_rate": 0.8217777777777778,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6436,7 +6608,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -6473,7 +6646,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.937
+      "positive_rate": 0.937,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6512,7 +6686,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.7751972441382375
+      "positive_rate": 0.7751972441382375,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6534,7 +6709,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -6571,7 +6747,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9216666666666666
+      "positive_rate": 0.9216666666666666,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6610,7 +6787,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.6898544282698078
+      "positive_rate": 0.6898544282698078,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6632,7 +6810,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -6669,7 +6848,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.893
+      "positive_rate": 0.893,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6706,7 +6886,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9291111111111111
+      "positive_rate": 0.9291111111111111,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6728,7 +6909,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -6765,7 +6947,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9596666666666667
+      "positive_rate": 0.9596666666666667,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6802,7 +6985,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9051111111111111
+      "positive_rate": 0.9051111111111111,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6824,7 +7008,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -6861,7 +7046,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9537777777777777
+      "positive_rate": 0.9537777777777777,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6898,7 +7084,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8775555555555555
+      "positive_rate": 0.8775555555555555,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -6920,7 +7107,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -6957,7 +7145,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9454444444444444
+      "positive_rate": 0.9454444444444444,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "fastino.ai",
@@ -6994,7 +7183,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.8304444444444444
+      "positive_rate": 0.8304444444444444,
+      "source_kind": "local_predictions"
     },
     {
       "provider": "laya-ai.com",
@@ -7016,7 +7206,8 @@
       "log_processed": null,
       "log_total": null,
       "log_elapsed_s": null,
-      "log_file": null
+      "log_file": null,
+      "source_kind": "historical_summary"
     },
     {
       "provider": "typesafe.ai",
@@ -7053,7 +7244,8 @@
       "balanced_accuracy": null,
       "auroc": null,
       "majority_accuracy": 1.0,
-      "positive_rate": 0.9312222222222222
+      "positive_rate": 0.9312222222222222,
+      "source_kind": "local_predictions"
     }
   ],
   "paired": [
@@ -7065,20 +7257,20 @@
       "threshold": 0.5,
       "common_coverage": 1.0,
       "n": 6789,
-      "tn": 212,
-      "fp": 3206,
-      "fn": 904,
-      "tp": 2467,
-      "accuracy": 0.3946089262041538,
-      "precision": 0.4348669134496739,
-      "recall": 0.7318303174132305,
-      "f1": 0.5455550641309155,
-      "fpr": 0.9379754242246928,
-      "fnr": 0.2681696825867695,
-      "balanced_accuracy": 0.39692744659426876,
-      "auroc": 0.23801678829113984,
+      "tn": 3358,
+      "fp": 60,
+      "fn": 2283,
+      "tp": 1088,
+      "accuracy": 0.6548828988068935,
+      "precision": 0.9477351916376306,
+      "recall": 0.3227528923168199,
+      "f1": 0.48152246072139854,
+      "fpr": 0.017554125219426564,
+      "fnr": 0.6772471076831801,
+      "balanced_accuracy": 0.6525993835486967,
+      "auroc": 0.839971400992078,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.8356164383561644
+      "positive_rate": 0.1690970687877449
     },
     {
       "provider": "laya-ai.com",
@@ -7617,20 +7809,20 @@
       "threshold": 0.5,
       "common_coverage": 0.9997317596566524,
       "n": 3727,
-      "tn": 106,
-      "fp": 1059,
-      "fn": 71,
-      "tp": 2491,
-      "accuracy": 0.6968070834451301,
-      "precision": 0.7016901408450704,
-      "recall": 0.9722872755659641,
-      "f1": 0.8151178010471204,
-      "fpr": 0.9090128755364807,
-      "fnr": 0.02771272443403591,
-      "balanced_accuracy": 0.5316372000147416,
-      "auroc": 0.7832393549835328,
+      "tn": 1103,
+      "fp": 62,
+      "fn": 24,
+      "tp": 2538,
+      "accuracy": 0.9769251408639656,
+      "precision": 0.9761538461538461,
+      "recall": 0.990632318501171,
+      "f1": 0.9833397907787679,
+      "fpr": 0.05321888412017167,
+      "fnr": 0.00936768149882904,
+      "balanced_accuracy": 0.9687067171904996,
+      "auroc": 0.9966258254515484,
       "majority_accuracy": 0.6874161524013952,
-      "positive_rate": 0.9525087201502549
+      "positive_rate": 0.697612020391736
     },
     {
       "provider": "laya-ai.com",
@@ -8169,20 +8361,20 @@
       "threshold": 0.5,
       "common_coverage": 1.0,
       "n": 1964,
-      "tn": 123,
-      "fp": 782,
-      "fn": 184,
-      "tp": 875,
-      "accuracy": 0.5081466395112016,
-      "precision": 0.528062764031382,
-      "recall": 0.826251180358829,
-      "f1": 0.6443298969072165,
-      "fpr": 0.8640883977900552,
-      "fnr": 0.17374881964117092,
-      "balanced_accuracy": 0.48108139128438693,
-      "auroc": 0.4614522195963042,
+      "tn": 804,
+      "fp": 101,
+      "fn": 219,
+      "tp": 840,
+      "accuracy": 0.8370672097759674,
+      "precision": 0.8926673751328374,
+      "recall": 0.7932011331444759,
+      "f1": 0.84,
+      "fpr": 0.11160220994475138,
+      "fnr": 0.20679886685552407,
+      "balanced_accuracy": 0.8407994615998623,
+      "auroc": 0.9198268980952531,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.8436863543788188
+      "positive_rate": 0.4791242362525458
     },
     {
       "provider": "laya-ai.com",
@@ -8718,82 +8910,8 @@
       "model": "request model=fastino/GLiDE；resolved model=glide_v2",
       "dataset": "detect-jailbreak",
       "prompt": "v1",
-      "threshold": 0.5,
-      "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 3696,
-      "fp": 12594,
-      "fn": 198,
-      "tp": 1765,
-      "accuracy": 0.2991836958308223,
-      "precision": 0.12291942335817257,
-      "recall": 0.8991339786041773,
-      "f1": 0.21627251562308542,
-      "fpr": 0.7731123388581952,
-      "fnr": 0.10086602139582272,
-      "balanced_accuracy": 0.5630108198729911,
-      "auroc": 0.8060008093248736,
-      "majority_accuracy": 0.8924560346244453,
-      "positive_rate": 0.7866652057196077
-    },
-    {
-      "provider": "laya-ai.com",
-      "model": "request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions",
-      "dataset": "detect-jailbreak",
-      "prompt": "v1",
-      "threshold": 0.5,
-      "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 0,
-      "fp": 16290,
-      "fn": 0,
-      "tp": 1963,
-      "accuracy": 0.1075439653755547,
-      "precision": 0.1075439653755547,
-      "recall": 1.0,
-      "f1": 0.1942026117926395,
-      "fpr": 1.0,
-      "fnr": 0.0,
-      "balanced_accuracy": 0.5,
-      "auroc": 0.567861061935556,
-      "majority_accuracy": 0.8924560346244453,
-      "positive_rate": 1.0
-    },
-    {
-      "provider": "typesafe.ai",
-      "model": "request model=jev-latest；resolved model=待接口返回确认",
-      "dataset": "detect-jailbreak",
-      "prompt": "v1",
-      "threshold": 0.5,
-      "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 13483,
-      "fp": 2807,
-      "fn": 237,
-      "tp": 1726,
-      "accuracy": 0.8332328932230318,
-      "precision": 0.38076329141848664,
-      "recall": 0.8792664289353032,
-      "f1": 0.5314039408866995,
-      "fpr": 0.17231430325352978,
-      "fnr": 0.1207335710646969,
-      "balanced_accuracy": 0.8534760628408867,
-      "auroc": 0.928534549697332,
-      "majority_accuracy": 0.8924560346244453,
-      "positive_rate": 0.2483427381800252
-    },
-    {
-      "provider": "fastino.ai",
-      "model": "request model=fastino/GLiDE；resolved model=glide_v2",
-      "dataset": "detect-jailbreak",
-      "prompt": "v1",
       "threshold": 0.6,
       "common_coverage": 0.9991784423266513,
-      "n": 18243,
-      "tn": 4802,
-      "fp": 11477,
-      "fn": 243,
-      "tp": 1721,
       "accuracy": 0.3575618045277641,
       "precision": 0.1303985452341264,
       "recall": 0.8762729124236253,
@@ -8803,7 +8921,12 @@
       "balanced_accuracy": 0.5856270883145216,
       "auroc": 0.8060516691565571,
       "majority_accuracy": 0.8923422682672806,
-      "positive_rate": 0.7234555720002193
+      "positive_rate": 0.7234555720002193,
+      "n": 18243,
+      "tp": 1721,
+      "tn": 4802,
+      "fp": 11477,
+      "fn": 243
     },
     {
       "provider": "laya-ai.com",
@@ -8812,11 +8935,6 @@
       "prompt": "v1",
       "threshold": 0.6,
       "common_coverage": 0.9991784423266513,
-      "n": 18243,
-      "tn": 981,
-      "fp": 15298,
-      "fn": 28,
-      "tp": 1936,
       "accuracy": 0.15989694677410513,
       "precision": 0.11233607984217245,
       "recall": 0.9857433808553971,
@@ -8826,7 +8944,12 @@
       "balanced_accuracy": 0.523002533845599,
       "auroc": 0.5678724191913688,
       "majority_accuracy": 0.8923422682672806,
-      "positive_rate": 0.9446911144000438
+      "positive_rate": 0.9446911144000438,
+      "n": 18243,
+      "tp": 1936,
+      "tn": 981,
+      "fp": 15298,
+      "fn": 28
     },
     {
       "provider": "typesafe.ai",
@@ -8835,11 +8958,6 @@
       "prompt": "v1",
       "threshold": 0.6,
       "common_coverage": 0.9991784423266513,
-      "n": 18243,
-      "tn": 13877,
-      "fp": 2402,
-      "fn": 262,
-      "tp": 1702,
       "accuracy": 0.8539713862851505,
       "precision": 0.41471734892787526,
       "recall": 0.8665987780040734,
@@ -8849,7 +8967,12 @@
       "balanced_accuracy": 0.8595233585333346,
       "auroc": 0.9290654441035763,
       "majority_accuracy": 0.8923422682672806,
-      "positive_rate": 0.2249629995066601
+      "positive_rate": 0.2249629995066601,
+      "n": 18243,
+      "tp": 1702,
+      "tn": 13877,
+      "fp": 2402,
+      "fn": 262
     },
     {
       "provider": "fastino.ai",
@@ -8858,11 +8981,6 @@
       "prompt": "v1",
       "threshold": 0.7,
       "common_coverage": 0.9997809179537737,
-      "n": 18254,
-      "tn": 5912,
-      "fp": 10378,
-      "fn": 291,
-      "tp": 1673,
       "accuracy": 0.41552536430371423,
       "precision": 0.1388266533897602,
       "recall": 0.8518329938900203,
@@ -8872,7 +8990,12 @@
       "balanced_accuracy": 0.60737751597509,
       "auroc": 0.80609844606227,
       "majority_accuracy": 0.8924071436397502,
-      "positive_rate": 0.660184069245097
+      "positive_rate": 0.660184069245097,
+      "n": 18254,
+      "tp": 1673,
+      "tn": 5912,
+      "fp": 10378,
+      "fn": 291
     },
     {
       "provider": "laya-ai.com",
@@ -8881,11 +9004,6 @@
       "prompt": "v1",
       "threshold": 0.7,
       "common_coverage": 0.9997809179537737,
-      "n": 18254,
-      "tn": 2059,
-      "fp": 14231,
-      "fn": 65,
-      "tp": 1899,
       "accuracy": 0.21682918812315108,
       "precision": 0.11773093614383137,
       "recall": 0.9669042769857433,
@@ -8895,7 +9013,12 @@
       "balanced_accuracy": 0.5466504196469539,
       "auroc": 0.5679174340085942,
       "majority_accuracy": 0.8924071436397502,
-      "positive_rate": 0.8836419414922757
+      "positive_rate": 0.8836419414922757,
+      "n": 18254,
+      "tp": 1899,
+      "tn": 2059,
+      "fp": 14231,
+      "fn": 65
     },
     {
       "provider": "typesafe.ai",
@@ -8904,11 +9027,6 @@
       "prompt": "v1",
       "threshold": 0.7,
       "common_coverage": 0.9997809179537737,
-      "n": 18254,
-      "tn": 14286,
-      "fp": 2004,
-      "fn": 298,
-      "tp": 1666,
       "accuracy": 0.8738906541032102,
       "precision": 0.4539509536784741,
       "recall": 0.8482688391038696,
@@ -8918,7 +9036,12 @@
       "balanced_accuracy": 0.8626242906384909,
       "auroc": 0.9291194696682707,
       "majority_accuracy": 0.8924071436397502,
-      "positive_rate": 0.20105182425769694
+      "positive_rate": 0.20105182425769694,
+      "n": 18254,
+      "tp": 1666,
+      "tn": 14286,
+      "fp": 2004,
+      "fn": 298
     },
     {
       "provider": "fastino.ai",
@@ -8927,11 +9050,6 @@
       "prompt": "v1",
       "threshold": 0.8,
       "common_coverage": 0.999616606419104,
-      "n": 18251,
-      "tn": 7926,
-      "fp": 8361,
-      "fn": 335,
-      "tp": 1629,
       "accuracy": 0.5235329570982412,
       "precision": 0.16306306306306306,
       "recall": 0.8294297352342159,
@@ -8941,7 +9059,12 @@
       "balanced_accuracy": 0.6580377631779848,
       "auroc": 0.806093789018943,
       "majority_accuracy": 0.8923894581118843,
-      "positive_rate": 0.5473672675469837
+      "positive_rate": 0.5473672675469837,
+      "n": 18251,
+      "tp": 1629,
+      "tn": 7926,
+      "fp": 8361,
+      "fn": 335
     },
     {
       "provider": "laya-ai.com",
@@ -8950,11 +9073,6 @@
       "prompt": "v1",
       "threshold": 0.8,
       "common_coverage": 0.999616606419104,
-      "n": 18251,
-      "tn": 4259,
-      "fp": 12028,
-      "fn": 174,
-      "tp": 1790,
       "accuracy": 0.33143389403320367,
       "precision": 0.12954117817339703,
       "recall": 0.9114052953156823,
@@ -8964,7 +9082,12 @@
       "balanced_accuracy": 0.5864510973416381,
       "auroc": 0.5679366342054069,
       "majority_accuracy": 0.8923894581118843,
-      "positive_rate": 0.757109199495918
+      "positive_rate": 0.757109199495918,
+      "n": 18251,
+      "tp": 1790,
+      "tn": 4259,
+      "fp": 12028,
+      "fn": 174
     },
     {
       "provider": "typesafe.ai",
@@ -8973,11 +9096,6 @@
       "prompt": "v1",
       "threshold": 0.8,
       "common_coverage": 0.999616606419104,
-      "n": 18251,
-      "tn": 14835,
-      "fp": 1452,
-      "fn": 347,
-      "tp": 1617,
       "accuracy": 0.9014300586269246,
       "precision": 0.5268817204301075,
       "recall": 0.8233197556008147,
@@ -8987,7 +9105,12 @@
       "balanced_accuracy": 0.8670844495447433,
       "auroc": 0.9287067597425358,
       "majority_accuracy": 0.8923894581118843,
-      "positive_rate": 0.16815516957974905
+      "positive_rate": 0.16815516957974905,
+      "n": 18251,
+      "tp": 1617,
+      "tn": 14835,
+      "fp": 1452,
+      "fn": 347
     },
     {
       "provider": "fastino.ai",
@@ -8996,11 +9119,6 @@
       "prompt": "v2",
       "threshold": 0.5,
       "common_coverage": 0.9996713769306605,
-      "n": 18252,
-      "tn": 3260,
-      "fp": 13028,
-      "fn": 185,
-      "tp": 1779,
       "accuracy": 0.27607933377164146,
       "precision": 0.12014587695009117,
       "recall": 0.9058044806517311,
@@ -9010,7 +9128,12 @@
       "balanced_accuracy": 0.5529759141961996,
       "auroc": 0.7731526889712268,
       "majority_accuracy": 0.8923953539338155,
-      "positive_rate": 0.8112535612535613
+      "positive_rate": 0.8112535612535613,
+      "n": 18252,
+      "tp": 1779,
+      "tn": 3260,
+      "fp": 13028,
+      "fn": 185
     },
     {
       "provider": "laya-ai.com",
@@ -9019,11 +9142,6 @@
       "prompt": "v2",
       "threshold": 0.5,
       "common_coverage": 0.9996713769306605,
-      "n": 18252,
-      "tn": 0,
-      "fp": 16288,
-      "fn": 0,
-      "tp": 1964,
       "accuracy": 0.10760464606618453,
       "precision": 0.10760464606618453,
       "recall": 1.0,
@@ -9033,7 +9151,12 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.6171955025928401,
       "majority_accuracy": 0.8923953539338155,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "n": 18252,
+      "tp": 1964,
+      "tn": 0,
+      "fp": 16288,
+      "fn": 0
     },
     {
       "provider": "typesafe.ai",
@@ -9042,11 +9165,6 @@
       "prompt": "v2",
       "threshold": 0.5,
       "common_coverage": 0.9996713769306605,
-      "n": 18252,
-      "tn": 13071,
-      "fp": 3217,
-      "fn": 230,
-      "tp": 1734,
       "accuracy": 0.8111439842209073,
       "precision": 0.3502322763078166,
       "recall": 0.8828920570264766,
@@ -9056,7 +9174,12 @@
       "balanced_accuracy": 0.8426923448197216,
       "auroc": 0.9196010913786068,
       "majority_accuracy": 0.8923953539338155,
-      "positive_rate": 0.2712579443348674
+      "positive_rate": 0.2712579443348674,
+      "n": 18252,
+      "tp": 1734,
+      "tn": 13071,
+      "fp": 3217,
+      "fn": 230
     },
     {
       "provider": "fastino.ai",
@@ -9065,11 +9188,6 @@
       "prompt": "v2",
       "threshold": 0.6,
       "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 4100,
-      "fp": 12189,
-      "fn": 236,
-      "tp": 1728,
       "accuracy": 0.3192899797293596,
       "precision": 0.12416469066609183,
       "recall": 0.879837067209776,
@@ -9079,7 +9197,12 @@
       "balanced_accuracy": 0.5657703354343434,
       "auroc": 0.7731666153823649,
       "majority_accuracy": 0.8924012491097354,
-      "positive_rate": 0.7624500082178272
+      "positive_rate": 0.7624500082178272,
+      "n": 18253,
+      "tp": 1728,
+      "tn": 4100,
+      "fp": 12189,
+      "fn": 236
     },
     {
       "provider": "laya-ai.com",
@@ -9088,11 +9211,6 @@
       "prompt": "v2",
       "threshold": 0.6,
       "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 2659,
-      "fp": 13630,
-      "fn": 92,
-      "tp": 1872,
       "accuracy": 0.24823316715060537,
       "precision": 0.12075861179202683,
       "recall": 0.9531568228105907,
@@ -9102,7 +9220,12 @@
       "balanced_accuracy": 0.5581979092259104,
       "auroc": 0.6171482816924795,
       "majority_accuracy": 0.8924012491097354,
-      "positive_rate": 0.8492850490330357
+      "positive_rate": 0.8492850490330357,
+      "n": 18253,
+      "tp": 1872,
+      "tn": 2659,
+      "fp": 13630,
+      "fn": 92
     },
     {
       "provider": "typesafe.ai",
@@ -9111,11 +9234,6 @@
       "prompt": "v2",
       "threshold": 0.6,
       "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 13454,
-      "fp": 2835,
-      "fn": 250,
-      "tp": 1714,
       "accuracy": 0.8309866871199255,
       "precision": 0.3767861068366674,
       "recall": 0.8727087576374746,
@@ -9125,7 +9243,12 @@
       "balanced_accuracy": 0.8493324621878822,
       "auroc": 0.9194745863882503,
       "majority_accuracy": 0.8924012491097354,
-      "positive_rate": 0.24921930641538378
+      "positive_rate": 0.24921930641538378,
+      "n": 18253,
+      "tp": 1714,
+      "tn": 13454,
+      "fp": 2835,
+      "fn": 250
     },
     {
       "provider": "fastino.ai",
@@ -9134,11 +9257,6 @@
       "prompt": "v2",
       "threshold": 0.7,
       "common_coverage": 0.9977544090261803,
-      "n": 18217,
-      "tn": 4784,
-      "fp": 11469,
-      "fn": 273,
-      "tp": 1691,
       "accuracy": 0.3554372289619586,
       "precision": 0.1284954407294833,
       "recall": 0.8609979633401222,
@@ -9148,7 +9266,12 @@
       "balanced_accuracy": 0.5776718113015138,
       "auroc": 0.7423311510217195,
       "majority_accuracy": 0.8921886150299171,
-      "positive_rate": 0.7224021518361969
+      "positive_rate": 0.7224021518361969,
+      "n": 18217,
+      "tp": 1691,
+      "tn": 4784,
+      "fp": 11469,
+      "fn": 273
     },
     {
       "provider": "laya-ai.com",
@@ -9157,11 +9280,6 @@
       "prompt": "v2",
       "threshold": 0.7,
       "common_coverage": 0.9977544090261803,
-      "n": 18217,
-      "tn": 5446,
-      "fp": 10807,
-      "fn": 263,
-      "tp": 1701,
       "accuracy": 0.39232584948125376,
       "precision": 0.13599296450271825,
       "recall": 0.8660896130346232,
@@ -9171,7 +9289,12 @@
       "balanced_accuracy": 0.6005831071387353,
       "auroc": 0.61706532198411,
       "majority_accuracy": 0.8921886150299171,
-      "positive_rate": 0.6866114069275951
+      "positive_rate": 0.6866114069275951,
+      "n": 18217,
+      "tp": 1701,
+      "tn": 5446,
+      "fp": 10807,
+      "fn": 263
     },
     {
       "provider": "typesafe.ai",
@@ -9180,11 +9303,6 @@
       "prompt": "v2",
       "threshold": 0.7,
       "common_coverage": 0.9977544090261803,
-      "n": 18217,
-      "tn": 13722,
-      "fp": 2531,
-      "fn": 284,
-      "tp": 1680,
       "accuracy": 0.8454740077949169,
       "precision": 0.3989551175492757,
       "recall": 0.8553971486761711,
@@ -9194,7 +9312,12 @@
       "balanced_accuracy": 0.8498360258854922,
       "auroc": 0.9193388612072619,
       "majority_accuracy": 0.8921886150299171,
-      "positive_rate": 0.2311577098314761
+      "positive_rate": 0.2311577098314761,
+      "n": 18217,
+      "tp": 1680,
+      "tn": 13722,
+      "fp": 2531,
+      "fn": 284
     },
     {
       "provider": "fastino.ai",
@@ -9204,20 +9327,20 @@
       "threshold": 0.5,
       "common_coverage": 1.0,
       "n": 1044,
-      "tn": 50,
-      "fp": 467,
-      "fn": 23,
-      "tp": 504,
-      "accuracy": 0.5306513409961686,
-      "precision": 0.5190525231719877,
-      "recall": 0.9563567362428842,
-      "f1": 0.6728971962616822,
-      "fpr": 0.9032882011605415,
-      "fnr": 0.04364326375711575,
-      "balanced_accuracy": 0.5265342675411713,
-      "auroc": 0.7278012471601232,
+      "tn": 473,
+      "fp": 44,
+      "fn": 11,
+      "tp": 516,
+      "accuracy": 0.9473180076628352,
+      "precision": 0.9214285714285714,
+      "recall": 0.9791271347248577,
+      "f1": 0.9494020239190433,
+      "fpr": 0.0851063829787234,
+      "fnr": 0.020872865275142316,
+      "balanced_accuracy": 0.9470103758730671,
+      "auroc": 0.9931732847878029,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.9300766283524904
+      "positive_rate": 0.5363984674329502
     },
     {
       "provider": "laya-ai.com",
@@ -9342,20 +9465,20 @@
       "threshold": 0.5,
       "common_coverage": 0.9996036988110965,
       "n": 15134,
-      "tn": 2693,
-      "fp": 11037,
-      "fn": 143,
-      "tp": 1261,
-      "accuracy": 0.26126602352319284,
-      "precision": 0.10253699788583509,
-      "recall": 0.8981481481481481,
-      "f1": 0.1840607210626186,
-      "fpr": 0.8038601602330663,
-      "fnr": 0.10185185185185185,
-      "balanced_accuracy": 0.5471439939575409,
-      "auroc": 0.7466230341776591,
+      "tn": 8581,
+      "fp": 5149,
+      "fn": 78,
+      "tp": 1326,
+      "accuracy": 0.6546187392625875,
+      "precision": 0.2047876447876448,
+      "recall": 0.9444444444444444,
+      "f1": 0.3365909379362863,
+      "fpr": 0.37501820830298616,
+      "fnr": 0.05555555555555555,
+      "balanced_accuracy": 0.7847131180707292,
+      "auroc": 0.9142467520745015,
       "majority_accuracy": 0.9072287564424475,
-      "positive_rate": 0.8126073741244879
+      "positive_rate": 0.4278445883441258
     },
     {
       "provider": "laya-ai.com",
@@ -10447,20 +10570,20 @@
       "dataset": "toxigen",
       "common_coverage": 1.0,
       "n": 6789,
-      "tn": 212,
-      "fp": 3206,
-      "fn": 904,
-      "tp": 2467,
-      "accuracy": 0.3946089262041538,
-      "precision": 0.4348669134496739,
-      "recall": 0.7318303174132305,
-      "f1": 0.5455550641309155,
-      "fpr": 0.9379754242246928,
-      "fnr": 0.2681696825867695,
-      "balanced_accuracy": 0.39692744659426876,
-      "auroc": 0.23801678829113984,
+      "tn": 3358,
+      "fp": 60,
+      "fn": 2283,
+      "tp": 1088,
+      "accuracy": 0.6548828988068935,
+      "precision": 0.9477351916376306,
+      "recall": 0.3227528923168199,
+      "f1": 0.48152246072139854,
+      "fpr": 0.017554125219426564,
+      "fnr": 0.6772471076831801,
+      "balanced_accuracy": 0.6525993835486967,
+      "auroc": 0.839971400992078,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.8356164383561644
+      "positive_rate": 0.1690970687877449
     },
     {
       "pair": "fastino.ai vs laya-ai.com",
@@ -10491,20 +10614,20 @@
       "dataset": "toxigen",
       "common_coverage": 1.0,
       "n": 6789,
-      "tn": 212,
-      "fp": 3206,
-      "fn": 904,
-      "tp": 2467,
-      "accuracy": 0.3946089262041538,
-      "precision": 0.4348669134496739,
-      "recall": 0.7318303174132305,
-      "f1": 0.5455550641309155,
-      "fpr": 0.9379754242246928,
-      "fnr": 0.2681696825867695,
-      "balanced_accuracy": 0.39692744659426876,
-      "auroc": 0.23801678829113984,
+      "tn": 3358,
+      "fp": 60,
+      "fn": 2283,
+      "tp": 1088,
+      "accuracy": 0.6548828988068935,
+      "precision": 0.9477351916376306,
+      "recall": 0.3227528923168199,
+      "f1": 0.48152246072139854,
+      "fpr": 0.017554125219426564,
+      "fnr": 0.6772471076831801,
+      "balanced_accuracy": 0.6525993835486967,
+      "auroc": 0.839971400992078,
       "majority_accuracy": 0.5034614818088083,
-      "positive_rate": 0.8356164383561644
+      "positive_rate": 0.1690970687877449
     },
     {
       "pair": "fastino.ai vs typesafe.ai",
@@ -10579,20 +10702,20 @@
       "dataset": "hatecheck",
       "common_coverage": 0.9997317596566524,
       "n": 3727,
-      "tn": 106,
-      "fp": 1059,
-      "fn": 71,
-      "tp": 2491,
-      "accuracy": 0.6968070834451301,
-      "precision": 0.7016901408450704,
-      "recall": 0.9722872755659641,
-      "f1": 0.8151178010471204,
-      "fpr": 0.9090128755364807,
-      "fnr": 0.02771272443403591,
-      "balanced_accuracy": 0.5316372000147416,
-      "auroc": 0.7832393549835328,
+      "tn": 1103,
+      "fp": 62,
+      "fn": 24,
+      "tp": 2538,
+      "accuracy": 0.9769251408639656,
+      "precision": 0.9761538461538461,
+      "recall": 0.990632318501171,
+      "f1": 0.9833397907787679,
+      "fpr": 0.05321888412017167,
+      "fnr": 0.00936768149882904,
+      "balanced_accuracy": 0.9687067171904996,
+      "auroc": 0.9966258254515484,
       "majority_accuracy": 0.6874161524013952,
-      "positive_rate": 0.9525087201502549
+      "positive_rate": 0.697612020391736
     },
     {
       "pair": "fastino.ai vs laya-ai.com",
@@ -10623,20 +10746,20 @@
       "dataset": "hatecheck",
       "common_coverage": 1.0,
       "n": 3728,
-      "tn": 106,
-      "fp": 1059,
-      "fn": 71,
-      "tp": 2492,
-      "accuracy": 0.6968884120171673,
-      "precision": 0.7017741481272881,
-      "recall": 0.9722980881779165,
-      "f1": 0.8151782793588486,
-      "fpr": 0.9090128755364807,
-      "fnr": 0.027701911822083494,
-      "balanced_accuracy": 0.5316426063207178,
-      "auroc": 0.7833048382478285,
+      "tn": 1103,
+      "fp": 62,
+      "fn": 24,
+      "tp": 2539,
+      "accuracy": 0.976931330472103,
+      "precision": 0.9761630142252979,
+      "recall": 0.9906359734685914,
+      "f1": 0.9833462432223082,
+      "fpr": 0.05321888412017167,
+      "fnr": 0.009364026531408505,
+      "balanced_accuracy": 0.9687085446742099,
+      "auroc": 0.9966271419457147,
       "majority_accuracy": 0.6875,
-      "positive_rate": 0.9525214592274678
+      "positive_rate": 0.6976931330472103
     },
     {
       "pair": "fastino.ai vs typesafe.ai",
@@ -10711,20 +10834,20 @@
       "dataset": "aegis2",
       "common_coverage": 1.0,
       "n": 1964,
-      "tn": 123,
-      "fp": 782,
-      "fn": 184,
-      "tp": 875,
-      "accuracy": 0.5081466395112016,
-      "precision": 0.528062764031382,
-      "recall": 0.826251180358829,
-      "f1": 0.6443298969072165,
-      "fpr": 0.8640883977900552,
-      "fnr": 0.17374881964117092,
-      "balanced_accuracy": 0.48108139128438693,
-      "auroc": 0.4614522195963042,
+      "tn": 804,
+      "fp": 101,
+      "fn": 219,
+      "tp": 840,
+      "accuracy": 0.8370672097759674,
+      "precision": 0.8926673751328374,
+      "recall": 0.7932011331444759,
+      "f1": 0.84,
+      "fpr": 0.11160220994475138,
+      "fnr": 0.20679886685552407,
+      "balanced_accuracy": 0.8407994615998623,
+      "auroc": 0.9198268980952531,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.8436863543788188
+      "positive_rate": 0.4791242362525458
     },
     {
       "pair": "fastino.ai vs laya-ai.com",
@@ -10755,20 +10878,20 @@
       "dataset": "aegis2",
       "common_coverage": 1.0,
       "n": 1964,
-      "tn": 123,
-      "fp": 782,
-      "fn": 184,
-      "tp": 875,
-      "accuracy": 0.5081466395112016,
-      "precision": 0.528062764031382,
-      "recall": 0.826251180358829,
-      "f1": 0.6443298969072165,
-      "fpr": 0.8640883977900552,
-      "fnr": 0.17374881964117092,
-      "balanced_accuracy": 0.48108139128438693,
-      "auroc": 0.4614522195963042,
+      "tn": 804,
+      "fp": 101,
+      "fn": 219,
+      "tp": 840,
+      "accuracy": 0.8370672097759674,
+      "precision": 0.8926673751328374,
+      "recall": 0.7932011331444759,
+      "f1": 0.84,
+      "fpr": 0.11160220994475138,
+      "fnr": 0.20679886685552407,
+      "balanced_accuracy": 0.8407994615998623,
+      "auroc": 0.9198268980952531,
       "majority_accuracy": 0.5392057026476579,
-      "positive_rate": 0.8436863543788188
+      "positive_rate": 0.4791242362525458
     },
     {
       "pair": "fastino.ai vs typesafe.ai",
@@ -10837,70 +10960,26 @@
       "positive_rate": 0.4954175152749491
     },
     {
-      "pair": "fastino.ai vs laya-ai.com",
-      "provider": "fastino.ai",
-      "model": "request model=fastino/GLiDE；resolved model=glide_v2",
-      "dataset": "detect-jailbreak",
-      "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 3696,
-      "fp": 12594,
-      "fn": 198,
-      "tp": 1765,
-      "accuracy": 0.2991836958308223,
-      "precision": 0.12291942335817257,
-      "recall": 0.8991339786041773,
-      "f1": 0.21627251562308542,
-      "fpr": 0.7731123388581952,
-      "fnr": 0.10086602139582272,
-      "balanced_accuracy": 0.5630108198729911,
-      "auroc": 0.8060008093248736,
-      "majority_accuracy": 0.8924560346244453,
-      "positive_rate": 0.7866652057196077
-    },
-    {
-      "pair": "fastino.ai vs laya-ai.com",
-      "provider": "laya-ai.com",
-      "model": "request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions",
-      "dataset": "detect-jailbreak",
-      "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 0,
-      "fp": 16290,
-      "fn": 0,
-      "tp": 1963,
-      "accuracy": 0.1075439653755547,
-      "precision": 0.1075439653755547,
-      "recall": 1.0,
-      "f1": 0.1942026117926395,
-      "fpr": 1.0,
-      "fnr": 0.0,
-      "balanced_accuracy": 0.5,
-      "auroc": 0.567861061935556,
-      "majority_accuracy": 0.8924560346244453,
-      "positive_rate": 1.0
-    },
-    {
       "pair": "fastino.ai vs typesafe.ai",
       "provider": "fastino.ai",
       "model": "request model=fastino/GLiDE；resolved model=glide_v2",
       "dataset": "detect-jailbreak",
       "common_coverage": 1.0,
-      "n": 18258,
-      "tn": 3697,
-      "fp": 12596,
-      "fn": 198,
-      "tp": 1767,
-      "accuracy": 0.29926607514514186,
-      "precision": 0.12302443779154773,
-      "recall": 0.899236641221374,
-      "f1": 0.21643802057814795,
-      "fpr": 0.773092739213159,
-      "fnr": 0.10076335877862595,
-      "balanced_accuracy": 0.5630719510041075,
-      "auroc": 0.8059126845244428,
+      "accuracy": 0.6824405739949612,
+      "precision": 0.24931327665140615,
+      "recall": 0.9699745547073791,
+      "f1": 0.3966701352757544,
+      "fpr": 0.3522371570613147,
+      "fnr": 0.030025445292620866,
+      "balanced_accuracy": 0.8088686988230323,
+      "auroc": 0.9419259336304686,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.7866688574871289
+      "positive_rate": 0.41872056085003834,
+      "n": 18258,
+      "tp": 1906,
+      "tn": 10554,
+      "fp": 5739,
+      "fn": 59
     },
     {
       "pair": "fastino.ai vs typesafe.ai",
@@ -10908,11 +10987,6 @@
       "model": "request model=jev-latest；resolved model=待接口返回确认",
       "dataset": "detect-jailbreak",
       "common_coverage": 1.0,
-      "n": 18258,
-      "tn": 13484,
-      "fp": 2809,
-      "fn": 238,
-      "tp": 1727,
       "accuracy": 0.833114251287107,
       "precision": 0.38073192239858905,
       "recall": 0.878880407124682,
@@ -10922,7 +10996,12 @@
       "balanced_accuracy": 0.8532375398417248,
       "auroc": 0.928494354886947,
       "majority_accuracy": 0.8923759447913243,
-      "positive_rate": 0.24843904042063752
+      "positive_rate": 0.24843904042063752,
+      "n": 18258,
+      "tp": 1727,
+      "tn": 13484,
+      "fp": 2809,
+      "fn": 238
     },
     {
       "pair": "laya-ai.com vs typesafe.ai",
@@ -10930,11 +11009,6 @@
       "model": "request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions",
       "dataset": "detect-jailbreak",
       "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 0,
-      "fp": 16290,
-      "fn": 0,
-      "tp": 1963,
       "accuracy": 0.1075439653755547,
       "precision": 0.1075439653755547,
       "recall": 1.0,
@@ -10944,7 +11018,12 @@
       "balanced_accuracy": 0.5,
       "auroc": 0.567861061935556,
       "majority_accuracy": 0.8924560346244453,
-      "positive_rate": 1.0
+      "positive_rate": 1.0,
+      "n": 18253,
+      "tp": 1963,
+      "tn": 0,
+      "fp": 16290,
+      "fn": 0
     },
     {
       "pair": "laya-ai.com vs typesafe.ai",
@@ -10952,11 +11031,6 @@
       "model": "request model=jev-latest；resolved model=待接口返回确认",
       "dataset": "detect-jailbreak",
       "common_coverage": 0.9997261474422171,
-      "n": 18253,
-      "tn": 13483,
-      "fp": 2807,
-      "fn": 237,
-      "tp": 1726,
       "accuracy": 0.8332328932230318,
       "precision": 0.38076329141848664,
       "recall": 0.8792664289353032,
@@ -10966,7 +11040,12 @@
       "balanced_accuracy": 0.8534760628408867,
       "auroc": 0.928534549697332,
       "majority_accuracy": 0.8924560346244453,
-      "positive_rate": 0.2483427381800252
+      "positive_rate": 0.2483427381800252,
+      "n": 18253,
+      "tp": 1726,
+      "tn": 13483,
+      "fp": 2807,
+      "fn": 237
     },
     {
       "pair": "fastino.ai vs laya-ai.com",
@@ -10975,20 +11054,20 @@
       "dataset": "jailbreak-classification",
       "common_coverage": 1.0,
       "n": 1044,
-      "tn": 50,
-      "fp": 467,
-      "fn": 23,
-      "tp": 504,
-      "accuracy": 0.5306513409961686,
-      "precision": 0.5190525231719877,
-      "recall": 0.9563567362428842,
-      "f1": 0.6728971962616822,
-      "fpr": 0.9032882011605415,
-      "fnr": 0.04364326375711575,
-      "balanced_accuracy": 0.5265342675411713,
-      "auroc": 0.7278012471601232,
+      "tn": 473,
+      "fp": 44,
+      "fn": 11,
+      "tp": 516,
+      "accuracy": 0.9473180076628352,
+      "precision": 0.9214285714285714,
+      "recall": 0.9791271347248577,
+      "f1": 0.9494020239190433,
+      "fpr": 0.0851063829787234,
+      "fnr": 0.020872865275142316,
+      "balanced_accuracy": 0.9470103758730671,
+      "auroc": 0.9931732847878029,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.9300766283524904
+      "positive_rate": 0.5363984674329502
     },
     {
       "pair": "fastino.ai vs laya-ai.com",
@@ -11019,20 +11098,20 @@
       "dataset": "jailbreak-classification",
       "common_coverage": 1.0,
       "n": 1044,
-      "tn": 50,
-      "fp": 467,
-      "fn": 23,
-      "tp": 504,
-      "accuracy": 0.5306513409961686,
-      "precision": 0.5190525231719877,
-      "recall": 0.9563567362428842,
-      "f1": 0.6728971962616822,
-      "fpr": 0.9032882011605415,
-      "fnr": 0.04364326375711575,
-      "balanced_accuracy": 0.5265342675411713,
-      "auroc": 0.7278012471601232,
+      "tn": 473,
+      "fp": 44,
+      "fn": 11,
+      "tp": 516,
+      "accuracy": 0.9473180076628352,
+      "precision": 0.9214285714285714,
+      "recall": 0.9791271347248577,
+      "f1": 0.9494020239190433,
+      "fpr": 0.0851063829787234,
+      "fnr": 0.020872865275142316,
+      "balanced_accuracy": 0.9470103758730671,
+      "auroc": 0.9931732847878029,
       "majority_accuracy": 0.5047892720306514,
-      "positive_rate": 0.9300766283524904
+      "positive_rate": 0.5363984674329502
     },
     {
       "pair": "fastino.ai vs typesafe.ai",
@@ -11107,20 +11186,20 @@
       "dataset": "jailbreakhub",
       "common_coverage": 0.9996036988110965,
       "n": 15134,
-      "tn": 2693,
-      "fp": 11037,
-      "fn": 143,
-      "tp": 1261,
-      "accuracy": 0.26126602352319284,
-      "precision": 0.10253699788583509,
-      "recall": 0.8981481481481481,
-      "f1": 0.1840607210626186,
-      "fpr": 0.8038601602330663,
-      "fnr": 0.10185185185185185,
-      "balanced_accuracy": 0.5471439939575409,
-      "auroc": 0.7466230341776591,
+      "tn": 8581,
+      "fp": 5149,
+      "fn": 78,
+      "tp": 1326,
+      "accuracy": 0.6546187392625875,
+      "precision": 0.2047876447876448,
+      "recall": 0.9444444444444444,
+      "f1": 0.3365909379362863,
+      "fpr": 0.37501820830298616,
+      "fnr": 0.05555555555555555,
+      "balanced_accuracy": 0.7847131180707292,
+      "auroc": 0.9142467520745015,
       "majority_accuracy": 0.9072287564424475,
-      "positive_rate": 0.8126073741244879
+      "positive_rate": 0.4278445883441258
     },
     {
       "pair": "fastino.ai vs laya-ai.com",
@@ -11151,20 +11230,20 @@
       "dataset": "jailbreakhub",
       "common_coverage": 1.0,
       "n": 15140,
-      "tn": 2693,
-      "fp": 11042,
-      "fn": 143,
-      "tp": 1262,
-      "accuracy": 0.26122853368560106,
-      "precision": 0.10256827048114435,
-      "recall": 0.898220640569395,
-      "f1": 0.18411262674155665,
-      "fpr": 0.8039315617036767,
-      "fnr": 0.10177935943060498,
-      "balanced_accuracy": 0.5471445394328591,
-      "auroc": 0.7462570750103316,
+      "tn": 8583,
+      "fp": 5152,
+      "fn": 78,
+      "tp": 1327,
+      "accuracy": 0.654557463672391,
+      "precision": 0.20481555795647477,
+      "recall": 0.9444839857651246,
+      "f1": 0.33663115169964486,
+      "fpr": 0.37510010921004733,
+      "fnr": 0.05551601423487545,
+      "balanced_accuracy": 0.7846919382775386,
+      "auroc": 0.9142047163712728,
       "majority_accuracy": 0.9071994715984147,
-      "positive_rate": 0.8126816380449141
+      "positive_rate": 0.42793923381770144
     },
     {
       "pair": "fastino.ai vs typesafe.ai",
@@ -11236,10 +11315,39 @@
   "warnings": [
     "outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress；整份日志不用于逐配置耗时比较，不猜测并发进度的阈值归属。可核验的完整四轮均值仅用于四模型参考图。",
     "outputs/laya-ai.com/run_model_suite_2026-10-21_084817.log: interleaved task starts cannot be assigned to progress；整份日志不用于逐配置耗时比较，不猜测并发进度的阈值归属。可核验的完整四轮均值仅用于四模型参考图。",
+    "outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress；整份日志不用于逐配置耗时比较，不猜测并发进度的阈值归属。可核验的完整四轮均值仅用于四模型参考图。",
+    "outputs/laya-ai.com/run_model_suite_2026-10-21_084817.log: interleaved task starts cannot be assigned to progress；整份日志不用于逐配置耗时比较，不猜测并发进度的阈值归属。可核验的完整四轮均值仅用于四模型参考图。",
     "fastino.ai/jailbreak-classification_v1_t0.5.csv：历史日志对应的预测文件已被新结果替换，不沿用该旧日志的耗时；质量指标仍使用新 CSV。",
     "fastino.ai/jailbreak-classification_v1_t0.8.csv：历史日志对应的预测文件已被新结果替换，不沿用该旧日志的耗时；质量指标仍使用新 CSV。",
     "fastino.ai/jailbreak-classification_v2_t0.5.csv：历史日志对应的预测文件已被新结果替换，不沿用该旧日志的耗时；质量指标仍使用新 CSV。",
-    "fastino.ai/jailbreak-classification_v2_t0.8.csv：历史日志对应的预测文件已被新结果替换，不沿用该旧日志的耗时；质量指标仍使用新 CSV。"
+    "fastino.ai/jailbreak-classification_v2_t0.8.csv：历史日志对应的预测文件已被新结果替换，不沿用该旧日志的耗时；质量指标仍使用新 CSV。",
+    "本次为增量更新：未提供历史逐样本 CSV 的配置保留旧报告汇总，不代表重新测试。新 CSV 替换同配置旧结果，缺少新日志时不沿用旧耗时。只有配置均未变更、原始预测可对齐，或各模型均在全量参考样本上成功时，才保留或补充共同样本指标；无法核验的交集不参与公平均值。",
+    "detect-jailbreak/v1/0.5：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。",
+    "fastino.ai vs laya-ai.com/detect-jailbreak：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。",
+    "本次仅更新 Fastino 前六个数据集的 v1 / 0.5；Laya 保留本轮重跑前的结果快照，未混入进行中的部分结果。",
+    "Fastino 本次六个配置使用 2026-10-29 六数据集并发运行日志；comparison 日志仅按数据集重排原始记录，未改变 elapsed。两个 HTTP 503 样本已补跑成功，质量指标包含补跑结果；主轮 elapsed 不含随后补跑耗时，不能解释为单请求延迟。",
+    "fastino.ai/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v1_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v1_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。"
   ],
   "repeat_log_timings": [
     {
@@ -11349,10 +11457,10 @@
       "errors": 0,
       "error_rate": 0.0,
       "n": 6789,
-      "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
+      "flipped": 4823,
+      "mean_score_std": 0.28634057363099896,
+      "mean_score_range": 0.6612752290630765,
+      "decision_flip_rate": 0.7104139048460746
     },
     {
       "provider": "laya-ai.com",
@@ -11463,10 +11571,10 @@
       "errors": 0,
       "error_rate": 0.0,
       "n": 3728,
-      "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
+      "flipped": 1174,
+      "mean_score_std": 0.12312689563730025,
+      "mean_score_range": 0.28434938536271304,
+      "decision_flip_rate": 0.31491416309012876
     },
     {
       "provider": "laya-ai.com",
@@ -11577,10 +11685,10 @@
       "errors": 0,
       "error_rate": 0.0,
       "n": 1964,
-      "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
+      "flipped": 1078,
+      "mean_score_std": 0.20486909452975738,
+      "mean_score_range": 0.4731249075015612,
+      "decision_flip_rate": 0.5488798370672098
     },
     {
       "provider": "laya-ai.com",
@@ -11685,16 +11793,16 @@
       "expected": 18258,
       "available_repeats": 4,
       "complete_repeats": 4,
-      "status": "complete",
-      "coverage": 0.9998904589768869,
+      "status": "unavailable_raw",
+      "coverage": null,
       "rows": 73032,
       "errors": 2,
       "error_rate": 2.738525577828897e-05,
-      "n": 18256,
+      "n": 0,
       "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
+      "mean_score_std": null,
+      "mean_score_range": null,
+      "decision_flip_rate": null
     },
     {
       "provider": "laya-ai.com",
@@ -11919,10 +12027,10 @@
       "errors": 0,
       "error_rate": 0.0,
       "n": 15140,
-      "flipped": 35,
-      "mean_score_std": 0.0009313771879055235,
-      "mean_score_range": 0.002150923505683143,
-      "decision_flip_rate": 0.002311756935270806
+      "flipped": 10904,
+      "mean_score_std": 0.23000999484286683,
+      "mean_score_range": 0.5319621159132344,
+      "decision_flip_rate": 0.7202113606340819
     },
     {
       "provider": "laya-ai.com",
@@ -12257,10 +12365,10 @@
       "expected": 6789,
       "coverage": 0.9988216232140227,
       "n": 6781,
-      "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
+      "flipped": 4819,
+      "mean_score_std": 0.2864512493267508,
+      "mean_score_range": 0.6615308236340167,
+      "decision_flip_rate": 0.7106621442265153
     },
     {
       "provider": "laya-ai.com",
@@ -12335,10 +12443,10 @@
       "expected": 3728,
       "coverage": 0.9997317596566524,
       "n": 3727,
-      "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
+      "flipped": 1174,
+      "mean_score_std": 0.12315967775445567,
+      "mean_score_range": 0.2844250924193702,
+      "decision_flip_rate": 0.31499865843842234
     },
     {
       "provider": "laya-ai.com",
@@ -12413,10 +12521,10 @@
       "expected": 1964,
       "coverage": 1.0,
       "n": 1964,
-      "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
+      "flipped": 1078,
+      "mean_score_std": 0.20486909452975738,
+      "mean_score_range": 0.4731249075015612,
+      "decision_flip_rate": 0.5488798370672098
     },
     {
       "provider": "laya-ai.com",
@@ -12486,54 +12594,15 @@
     {
       "provider": "fastino.ai",
       "model": "request model=fastino/GLiDE；resolved model=glide_v2",
-      "dataset": "detect-jailbreak",
-      "prompt": "v1",
-      "expected": 18258,
-      "coverage": 0.998959360280425,
-      "n": 18239,
-      "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
-    },
-    {
-      "provider": "laya-ai.com",
-      "model": "request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions",
-      "dataset": "detect-jailbreak",
-      "prompt": "v1",
-      "expected": 18258,
-      "coverage": 0.998959360280425,
-      "n": 18239,
-      "flipped": 0,
-      "mean_score_std": 0.0,
-      "mean_score_range": 0.0,
-      "decision_flip_rate": 0.0
-    },
-    {
-      "provider": "typesafe.ai",
-      "model": "request model=jev-latest；resolved model=待接口返回确认",
-      "dataset": "detect-jailbreak",
-      "prompt": "v1",
-      "expected": 18258,
-      "coverage": 0.998959360280425,
-      "n": 18239,
-      "flipped": 155,
-      "mean_score_std": 0.005079753679904526,
-      "mean_score_range": 0.012412961236909919,
-      "decision_flip_rate": 0.008498272931630024
-    },
-    {
-      "provider": "fastino.ai",
-      "model": "request model=fastino/GLiDE；resolved model=glide_v2",
       "dataset": "jailbreakhub",
       "prompt": "v1",
       "expected": 15140,
       "coverage": 0.9993394980184941,
       "n": 15130,
-      "flipped": 35,
-      "mean_score_std": 0.000931248355644002,
-      "mean_score_range": 0.002150625980336231,
-      "decision_flip_rate": 0.002313284864507601
+      "flipped": 10898,
+      "mean_score_std": 0.23000025603137317,
+      "mean_score_range": 0.5319390577572222,
+      "decision_flip_rate": 0.7202908129543952
     },
     {
       "provider": "laya-ai.com",
@@ -12647,20 +12716,19 @@
       "prompt": "v1",
       "datasets": [
         "aegis2",
-        "detect-jailbreak",
         "hatecheck",
         "jailbreakhub",
         "toxigen"
       ],
-      "n": 45841,
-      "expected": 45879,
-      "coverage": 0.9991717343446893,
-      "rows": 183516,
-      "errors": 2,
-      "error_rate": 1.089823230671985e-05,
-      "mean_score_std": 0.00018624967112880039,
-      "mean_score_range": 0.00043012519606724616,
-      "decision_flip_rate": 0.0004626569729015202
+      "n": 27602,
+      "expected": 27621,
+      "coverage": 0.9993121175916875,
+      "rows": 110484,
+      "errors": 0,
+      "error_rate": 0.0,
+      "mean_score_std": 0.21112006941058425,
+      "mean_score_range": 0.4877549703280426,
+      "decision_flip_rate": 0.5737078631716357
     },
     {
       "provider": "laya-ai.com",
@@ -12668,17 +12736,16 @@
       "prompt": "v1",
       "datasets": [
         "aegis2",
-        "detect-jailbreak",
         "hatecheck",
         "jailbreakhub",
         "toxigen"
       ],
-      "n": 45841,
-      "expected": 45879,
-      "coverage": 0.9991717343446893,
-      "rows": 183516,
-      "errors": 63,
-      "error_rate": 0.0003432943176616753,
+      "n": 27602,
+      "expected": 27621,
+      "coverage": 0.9993121175916875,
+      "rows": 110484,
+      "errors": 34,
+      "error_rate": 0.0003077368668766518,
       "mean_score_std": 0.0,
       "mean_score_range": 0.0,
       "decision_flip_rate": 0.0
@@ -12689,20 +12756,19 @@
       "prompt": "v1",
       "datasets": [
         "aegis2",
-        "detect-jailbreak",
         "hatecheck",
         "jailbreakhub",
         "toxigen"
       ],
-      "n": 45841,
-      "expected": 45879,
-      "coverage": 0.9991717343446893,
-      "rows": 183516,
+      "n": 27602,
+      "expected": 27621,
+      "coverage": 0.9993121175916875,
+      "rows": 110484,
       "errors": 0,
       "error_rate": 0.0,
-      "mean_score_std": 0.005350546228978545,
-      "mean_score_range": 0.013139289828277344,
-      "decision_flip_rate": 0.011746705802320321
+      "mean_score_std": 0.005418244366247049,
+      "mean_score_range": 0.0133208719761192,
+      "decision_flip_rate": 0.012558814019992896
     },
     {
       "provider": "fastino.ai",
@@ -13369,27 +13435,27 @@
         "error_rate": 0.0,
         "coverage": 1.0,
         "error_categories": {},
-        "mean_elapsed_ms": 429.96391221092944,
-        "elapsed_s": 3376.8,
+        "mean_elapsed_ms": 360.4584982685226,
+        "elapsed_s": 1489.31097898,
         "log_processed": 6789,
         "log_total": 6789,
-        "log_elapsed_s": 3376.8,
-        "log_file": "outputs/fastino.ai/run_model_suite.log",
+        "log_elapsed_s": 1489.31097898,
+        "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
         "n": 6789,
-        "tn": 212,
-        "fp": 3206,
-        "fn": 904,
-        "tp": 2467,
-        "accuracy": 0.3946089262041538,
-        "precision": 0.4348669134496739,
-        "recall": 0.7318303174132305,
-        "f1": 0.5455550641309155,
-        "fpr": 0.9379754242246928,
-        "fnr": 0.2681696825867695,
-        "balanced_accuracy": 0.39692744659426876,
-        "auroc": 0.23801678829113984,
+        "tn": 3358,
+        "fp": 60,
+        "fn": 2283,
+        "tp": 1088,
+        "accuracy": 0.6548828988068935,
+        "precision": 0.9477351916376306,
+        "recall": 0.3227528923168199,
+        "f1": 0.48152246072139854,
+        "fpr": 0.017554125219426564,
+        "fnr": 0.6772471076831801,
+        "balanced_accuracy": 0.6525993835486967,
+        "auroc": 0.839971400992078,
         "majority_accuracy": 0.5034614818088083,
-        "positive_rate": 0.8356164383561644,
+        "positive_rate": 0.1690970687877449,
         "source_kind": "local_predictions"
       },
       {
@@ -13600,27 +13666,27 @@
         "error_rate": 0.0,
         "coverage": 1.0,
         "error_categories": {},
-        "mean_elapsed_ms": 332.8795600858369,
-        "elapsed_s": 1213.5,
+        "mean_elapsed_ms": 307.27153745305793,
+        "elapsed_s": 831.6331665,
         "log_processed": 3728,
         "log_total": 3728,
-        "log_elapsed_s": 1213.5,
-        "log_file": "outputs/fastino.ai/run_model_suite.log",
+        "log_elapsed_s": 831.6331665,
+        "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
         "n": 3728,
-        "tn": 106,
-        "fp": 1059,
-        "fn": 71,
-        "tp": 2492,
-        "accuracy": 0.6968884120171673,
-        "precision": 0.7017741481272881,
-        "recall": 0.9722980881779165,
-        "f1": 0.8151782793588486,
-        "fpr": 0.9090128755364807,
-        "fnr": 0.027701911822083494,
-        "balanced_accuracy": 0.5316426063207178,
-        "auroc": 0.7833048382478285,
+        "tn": 1103,
+        "fp": 62,
+        "fn": 24,
+        "tp": 2539,
+        "accuracy": 0.976931330472103,
+        "precision": 0.9761630142252979,
+        "recall": 0.9906359734685914,
+        "f1": 0.9833462432223082,
+        "fpr": 0.05321888412017167,
+        "fnr": 0.009364026531408505,
+        "balanced_accuracy": 0.9687085446742099,
+        "auroc": 0.9966271419457147,
         "majority_accuracy": 0.6875,
-        "positive_rate": 0.9525214592274678,
+        "positive_rate": 0.6976931330472103,
         "source_kind": "local_predictions"
       },
       {
@@ -13830,27 +13896,27 @@
         "error_rate": 0.0,
         "coverage": 1.0,
         "error_categories": {},
-        "mean_elapsed_ms": 457.2683299389002,
-        "elapsed_s": 728.6,
+        "mean_elapsed_ms": 419.7984047034114,
+        "elapsed_s": 434.23626735,
         "log_processed": 1964,
         "log_total": 1964,
-        "log_elapsed_s": 728.6,
-        "log_file": "outputs/fastino.ai/run_model_suite.log",
+        "log_elapsed_s": 434.23626735,
+        "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
         "n": 1964,
-        "tn": 123,
-        "fp": 782,
-        "fn": 184,
-        "tp": 875,
-        "accuracy": 0.5081466395112016,
-        "precision": 0.528062764031382,
-        "recall": 0.826251180358829,
-        "f1": 0.6443298969072165,
-        "fpr": 0.8640883977900552,
-        "fnr": 0.17374881964117092,
-        "balanced_accuracy": 0.48108139128438693,
-        "auroc": 0.4614522195963042,
+        "tn": 804,
+        "fp": 101,
+        "fn": 219,
+        "tp": 840,
+        "accuracy": 0.8370672097759674,
+        "precision": 0.8926673751328374,
+        "recall": 0.7932011331444759,
+        "f1": 0.84,
+        "fpr": 0.11160220994475138,
+        "fnr": 0.20679886685552407,
+        "balanced_accuracy": 0.8407994615998623,
+        "auroc": 0.9198268980952531,
         "majority_accuracy": 0.5392057026476579,
-        "positive_rate": 0.8436863543788188,
+        "positive_rate": 0.4791242362525458,
         "source_kind": "local_predictions"
       },
       {
@@ -14058,27 +14124,27 @@
         "error_rate": 0.0,
         "coverage": 1.0,
         "error_categories": {},
-        "mean_elapsed_ms": 382.20916858363455,
-        "elapsed_s": 7983.4,
+        "mean_elapsed_ms": 330.2650050027385,
+        "elapsed_s": 4189.81384536,
         "log_processed": 18258,
         "log_total": 18258,
-        "log_elapsed_s": 7983.4,
-        "log_file": "outputs/fastino.ai/run_model_suite.log",
+        "log_elapsed_s": 4189.81384536,
+        "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
         "n": 18258,
-        "tn": 3697,
-        "fp": 12596,
-        "fn": 198,
-        "tp": 1767,
-        "accuracy": 0.29926607514514186,
-        "precision": 0.12302443779154773,
-        "recall": 0.899236641221374,
-        "f1": 0.21643802057814795,
-        "fpr": 0.773092739213159,
-        "fnr": 0.10076335877862595,
-        "balanced_accuracy": 0.5630719510041075,
-        "auroc": 0.8059126845244428,
+        "tn": 10554,
+        "fp": 5739,
+        "fn": 59,
+        "tp": 1906,
+        "accuracy": 0.6824405739949612,
+        "precision": 0.24931327665140615,
+        "recall": 0.9699745547073791,
+        "f1": 0.3966701352757544,
+        "fpr": 0.3522371570613147,
+        "fnr": 0.030025445292620866,
+        "balanced_accuracy": 0.8088686988230323,
+        "auroc": 0.9419259336304686,
         "majority_accuracy": 0.8923759447913243,
-        "positive_rate": 0.7866688574871289,
+        "positive_rate": 0.41872056085003834,
         "source_kind": "local_predictions"
       },
       {
@@ -14292,28 +14358,30 @@
         "error_rate": 0.0,
         "coverage": 1.0,
         "error_categories": {},
-        "mean_elapsed_ms": null,
-        "elapsed_s": null,
-        "log_processed": null,
-        "log_total": null,
-        "log_elapsed_s": null,
-        "log_file": null,
+        "mean_elapsed_ms": 222.66024850574712,
+        "elapsed_s": 232.45729944,
+        "log_processed": 1044,
+        "log_total": 1044,
+        "log_elapsed_s": 232.45729944,
+        "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
         "n": 1044,
-        "tn": 50,
-        "fp": 467,
-        "fn": 23,
-        "tp": 504,
-        "accuracy": 0.5306513409961686,
-        "precision": 0.5190525231719877,
-        "recall": 0.9563567362428842,
-        "f1": 0.6728971962616822,
-        "fpr": 0.9032882011605415,
-        "fnr": 0.04364326375711575,
-        "balanced_accuracy": 0.5265342675411713,
-        "auroc": 0.7278012471601232,
+        "tn": 473,
+        "fp": 44,
+        "fn": 11,
+        "tp": 516,
+        "accuracy": 0.9473180076628352,
+        "precision": 0.9214285714285714,
+        "recall": 0.9791271347248577,
+        "f1": 0.9494020239190433,
+        "fpr": 0.0851063829787234,
+        "fnr": 0.020872865275142316,
+        "balanced_accuracy": 0.9470103758730671,
+        "auroc": 0.9931732847878029,
         "majority_accuracy": 0.5047892720306514,
-        "positive_rate": 0.9300766283524904,
-        "source_kind": "local_predictions"
+        "positive_rate": 0.5363984674329502,
+        "source_kind": "local_predictions",
+        "latency_source_kind": "single_complete_run",
+        "latency_log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log"
       },
       {
         "provider": "laya-ai.com",
@@ -14522,27 +14590,27 @@
         "error_rate": 0.0,
         "coverage": 1.0,
         "error_categories": {},
-        "mean_elapsed_ms": 389.5673712021136,
-        "elapsed_s": 4721.7,
+        "mean_elapsed_ms": 368.15243930531705,
+        "elapsed_s": 3424.81172433,
         "log_processed": 15140,
         "log_total": 15140,
-        "log_elapsed_s": 4721.7,
-        "log_file": "outputs/fastino.ai/run_model_suite.log",
+        "log_elapsed_s": 3424.81172433,
+        "log_file": "logs/fastino_v1_t0.5_20261029T223558Z_comparison.log",
         "n": 15140,
-        "tn": 2693,
-        "fp": 11042,
-        "fn": 143,
-        "tp": 1262,
-        "accuracy": 0.26122853368560106,
-        "precision": 0.10256827048114435,
-        "recall": 0.898220640569395,
-        "f1": 0.18411262674155665,
-        "fpr": 0.8039315617036767,
-        "fnr": 0.10177935943060498,
-        "balanced_accuracy": 0.5471445394328591,
-        "auroc": 0.7462570750103316,
+        "tn": 8583,
+        "fp": 5152,
+        "fn": 78,
+        "tp": 1327,
+        "accuracy": 0.654557463672391,
+        "precision": 0.20481555795647477,
+        "recall": 0.9444839857651246,
+        "f1": 0.33663115169964486,
+        "fpr": 0.37510010921004733,
+        "fnr": 0.05551601423487545,
+        "balanced_accuracy": 0.7846919382775386,
+        "auroc": 0.9142047163712728,
         "majority_accuracy": 0.9071994715984147,
-        "positive_rate": 0.8126816380449141,
+        "positive_rate": 0.42793923381770144,
         "source_kind": "local_predictions"
       },
       {
@@ -15733,12 +15801,12 @@
           "jailbreak-classification",
           "jailbreakhub"
         ],
-        "accuracy": 0.4484649879265724,
-        "precision": 0.40155817617550393,
-        "recall": 0.8806989339972715,
-        "f1": 0.5130851806630612,
-        "auroc": 0.6271241421383617,
-        "mean_elapsed_ms": null
+        "accuracy": 0.7921995807308586,
+        "precision": 0.6986871645053697,
+        "recall": 0.8333626123545415,
+        "f1": 0.6645953358063582,
+        "auroc": 0.934288229303765,
+        "mean_elapsed_ms": 334.76768887313244
       },
       {
         "provider": "laya-ai.com",
@@ -15905,14 +15973,17 @@
     ]
   },
   "conclusions": [
-    "固定 v1 / 0.5、共同完成的 6 个非 PII 数据集上，typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 的宏平均 F1 最高（72.43%），宏平均 AUROC 为 93.22%。这是当前快照下的描述性结果，不代表未测试任务或统计显著性。",
-    "同一基线比较：typesafe.ai / request model=jev-latest；resolved model=待接口返回确认：F1 72.43%、误报率 12.32%、漏报率 17.64%；laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions：F1 53.56%、误报率 100.00%、漏报率 0.00%；fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2：F1 51.30%、误报率 86.52%、漏报率 11.93%。高误报意味着正常内容被拦截，高漏报意味着危险内容被放过。",
-    "分数据集基线 F1 最优：aegis2：typesafe.ai（81.59%）；detect-jailbreak：typesafe.ai（53.14%）；hatecheck：typesafe.ai（96.33%）；jailbreak-classification：typesafe.ai（95.06%）；jailbreakhub：typesafe.ai（42.57%）；toxigen：laya-ai.com（66.36%）。",
+    "固定 v1 / 0.5、共同完成的 5 个非 PII 数据集上，typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 的宏平均 F1 最高（76.28%），宏平均 AUROC 为 93.29%。这是当前快照下的描述性结果，不代表未测试任务或统计显著性。",
+    "同一基线比较：typesafe.ai / request model=jev-latest；resolved model=待接口返回确认：F1 76.28%、误报率 11.33%、漏报率 18.75%；fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2：F1 71.82%、误报率 12.85%、漏报率 19.40%；laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions：F1 60.39%、误报率 100.00%、漏报率 0.00%。高误报意味着正常内容被拦截，高漏报意味着危险内容被放过。",
+    "分数据集基线 F1 最优：aegis2：fastino.ai（84.00%）；hatecheck：fastino.ai（98.33%）；jailbreak-classification：typesafe.ai（95.06%）；jailbreakhub：typesafe.ai（42.57%）；toxigen：laya-ai.com（66.36%）。",
     "综合表现领先仍不等于可直接上线：typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 在自身最弱的共同基线数据集 jailbreakhub 上 F1 为 42.57%、误报率 22.72%、漏报率 12.89%，需结合业务容忍度单独选阈值，而不是照搬统一 0.5。",
     "laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions 在共同基线的有效样本中全部预测为正类（误报率 100%、平衡准确率 50%），因此即使个别数据集 F1 较高，也不代表具备有效区分能力，不建议直接使用该固定配置作为拦截器。",
+    "相同基线任务中，fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 的日志摊销平均耗时最低（223.70 ms/样本）。包含网络、客户端开销和失败等待，且各轮非同一时刻运行；不能解释为纯模型推理速度。",
     "laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions 仅完整落盘 49/64 个配置；缺测不记零分，也不把已有任务的均值当作全套能力，当前排名是阶段性结论。",
+    "扩展两两比较（fastino.ai vs typesafe.ai，共同完整且有共同有效样本的 6 个非 PII 数据集）：fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 宏 F1 66.46%；typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 宏 F1 72.43%。此口径覆盖范围更广，但不能与三家共同基线的数值混排。",
+    "扩展两两比较（laya-ai.com vs typesafe.ai，共同完整且有共同有效样本的 6 个非 PII 数据集）：laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions 宏 F1 53.56%；typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 宏 F1 72.43%。此口径覆盖范围更广，但不能与三家共同基线的数值混排。",
     "以下配置虽完整落盘但全部请求失败：fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 / jailbreak-classification / v1 / 0.6（1044/1044）。这些配置没有质量分数，不参与质量均值；这是接口可靠性问题，不能当作缺测或正常能力结果忽略。",
-    "部分基线 AUROC 低于 0.5：fastino.ai / toxigen=23.80%；laya-ai.com / toxigen=27.87%；laya-ai.com / hatecheck=43.11%；fastino.ai / aegis2=46.15%；laya-ai.com / aegis2=34.10%；laya-ai.com / jailbreak-classification=15.19%。建议优先核对返回分数语义及接口解析；当前数据不能直接区分模型能力弱与分数映射问题，不自动翻转分数。",
+    "部分基线 AUROC 低于 0.5：laya-ai.com / toxigen=27.87%；laya-ai.com / hatecheck=43.11%；laya-ai.com / aegis2=34.10%；laya-ai.com / jailbreak-classification=15.19%。建议优先核对返回分数语义及接口解析；当前数据不能直接区分模型能力弱与分数映射问题，不自动翻转分数。",
     "PII 数据全是正样本，恒预测“含 PII”即可获得 100% 检出率；现有输出没有脱敏文本，不能评价实体定位、泄露率或脱敏质量，不应据此选定脱敏模型。",
     "选型优先参考固定配置的 F1、AUROC、误报/漏报及错误率；表中的最优提示词/阈值是在同一测试集上挑选的探索性上限，部署前需独立验证集重新选参并复测。",
     "OpenJev 4B 及其他内部模型为用户提供的汇总结果，仅加入独立参考图表，未提供逐样本输出，不参与上述共同成功样本基线、排名或重复调用一致性分析。"

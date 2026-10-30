@@ -6,11 +6,11 @@
 \toprule
 Model & Macro F1 (\%) & Macro AUROC (\%) & Macro FPR (\%) & Macro FNR (\%) & Elapsed (ms) \\
 \midrule
-\shortstack[l]{Fastino | request: fastino/GLiDE\\resolved: glide\_v2} & 51.30 & 62.72 & 86.52 & 11.93 & -- \\
-\shortstack[l]{Laya | request: typed-decisions\\serving: laya-rl-agent\\routed: typed-decisions} & 53.56 & 40.42 & 100.00 & 0.00 & -- \\
-\shortstack[l]{TypeSafe | request: jev-latest\\resolved: unconfirmed (API response required)} & 72.43 & 93.22 & 12.32 & 17.64 & 228.09 \\
+\shortstack[l]{Fastino | request: fastino/GLiDE\\resolved: glide\_v2} & 71.82 & 93.28 & 12.85 & 19.40 & 223.70 \\
+\shortstack[l]{Laya | request: typed-decisions\\serving: laya-rl-agent\\routed: typed-decisions} & 60.39 & 37.14 & 100.00 & 0.00 & -- \\
+\shortstack[l]{TypeSafe | request: jev-latest\\resolved: unconfirmed (API response required)} & 76.28 & 93.29 & 11.33 & 18.75 & 230.65 \\
 \bottomrule
 \end{tabular}
-\caption{Paired baseline on 6 common completed non-PII datasets (prompt v1, threshold 0.5). Quality metrics are dataset-macro averages over common successful sample IDs. Elapsed time is amortized end-to-end log time per processed sample, not pure inference latency. TypeSafe's resolved model remains unconfirmed until an API response is available.}
+\caption{Paired baseline on 5 common completed non-PII datasets (prompt v1, threshold 0.5). Quality metrics are dataset-macro averages over common successful sample IDs. Elapsed time is amortized end-to-end log time per processed sample, not pure inference latency. TypeSafe's resolved model remains unconfirmed until an API response is available.}
 \label{tab:model-comparison}
 \end{table*}

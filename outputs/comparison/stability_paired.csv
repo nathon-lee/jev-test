@@ -1,26 +1,23 @@
 ﻿provider,model,dataset,prompt,expected,coverage,n,flipped,mean_score_std,mean_score_range,decision_flip_rate
-fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,toxigen,v1,6789,0.9988216232140227,6781,0,0.0,0.0,0.0
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,toxigen,v1,6789,0.9988216232140227,6781,4819,0.2864512493267508,0.6615308236340167,0.7106621442265153
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,toxigen,v1,6789,0.9988216232140227,6781,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,toxigen,v1,6789,0.9988216232140227,6781,79,0.0051465029099867134,0.012672172245981418,0.011650199085680579
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,toxigen,v2,6789,0.9986743261157756,6780,0,0.0,0.0,0.0
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,toxigen,v2,6789,0.9986743261157756,6780,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,toxigen,v2,6789,0.9986743261157756,6780,88,0.004798653102207273,0.011799410029498525,0.012979351032448377
-fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,hatecheck,v1,3728,0.9997317596566524,3727,0,0.0,0.0,0.0
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,hatecheck,v1,3728,0.9997317596566524,3727,1174,0.12315967775445567,0.2844250924193702,0.31499865843842234
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,hatecheck,v1,3728,0.9997317596566524,3727,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,hatecheck,v1,3728,0.9997317596566524,3727,50,0.005096681632806716,0.012540917628119132,0.013415615776764154
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,hatecheck,v2,3728,0.9994635193133047,3726,0,0.0,0.0,0.0
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,hatecheck,v2,3728,0.9994635193133047,3726,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,hatecheck,v2,3728,0.9994635193133047,3726,35,0.004581185810270563,0.01127482555018787,0.00939345142243693
-fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,aegis2,v1,1964,1.0,1964,0,0.0,0.0,0.0
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,aegis2,v1,1964,1.0,1964,1078,0.20486909452975738,0.4731249075015612,0.5488798370672098
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,aegis2,v1,1964,1.0,1964,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,aegis2,v1,1964,1.0,1964,31,0.006415256584401719,0.01585030549898167,0.015784114052953158
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,aegis2,v2,1964,0.9984725050916496,1961,0,0.0,0.0,0.0
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,aegis2,v2,1964,0.9984725050916496,1961,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,aegis2,v2,1964,0.9984725050916496,1961,34,0.005374579777634409,0.013314635390107089,0.017338092809790925
-fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,detect-jailbreak,v1,18258,0.998959360280425,18239,0,0.0,0.0,0.0
-laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,detect-jailbreak,v1,18258,0.998959360280425,18239,0,0.0,0.0,0.0
-typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,detect-jailbreak,v1,18258,0.998959360280425,18239,155,0.005079753679904526,0.012412961236909919,0.008498272931630024
-fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,jailbreakhub,v1,15140,0.9993394980184941,15130,35,0.000931248355644002,0.002150625980336231,0.002313284864507601
+fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,jailbreakhub,v1,15140,0.9993394980184941,15130,10898,0.23000025603137317,0.5319390577572222,0.7202908129543952
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,jailbreakhub,v1,15140,0.9993394980184941,15130,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,jailbreakhub,v1,15140,0.9993394980184941,15130,142,0.005014536337793048,0.01222009253139458,0.009385327164573694
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,jailbreakhub,v2,15140,0.9992073976221929,15128,2,0.0001125672596652245,0.00025996295067862347,0.00013220518244315177

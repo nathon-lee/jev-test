@@ -1,5 +1,5 @@
 {
-  "source_generated_at": "2026-10-26T08:37:04.730338+00:00",
+  "source_generated_at": "2026-10-30T00:01:13.666530+00:00",
   "model_identities": {
     "fastino.ai": {
       "request_model": "fastino/GLiDE",
@@ -17,7 +17,6 @@
   },
   "baseline_datasets": [
     "aegis2",
-    "detect-jailbreak",
     "hatecheck",
     "jailbreak-classification",
     "jailbreakhub",
@@ -125,6 +124,72 @@
         "svg": "fig09_repeat_consistency_averages.svg",
         "pdf": "fig09_repeat_consistency_averages.pdf"
       }
+    },
+    {
+      "name": "fig14_category_reference_averages",
+      "title": "Dataset-Category Multi-Model Reference Averages (v1 / Threshold 0.5)",
+      "caption": "Fixed prompt v1 and threshold 0.5. Harmful content averages ToxiGen, HateCheck and AEGIS2; Jailbreak averages Detect-Jailbreak, Jailbreak-Classification and JailbreakHub; PII averages Nano-1K and Mini-10K. Every dataset within a category has equal weight. All six metrics are averaged separately from per-dataset values; F1 is not recomputed from mean Precision/Recall. Missing required data or undefined metrics remain N/A; no category drops datasets to fill missing values. PII measures presence detection, not masking quality, and its single-class AUROC is undefined. Quality uses each model's own successful samples or supplied aggregates, not sample-aligned comparisons. Latency averages the reference timings used in the per-dataset chart, including network and failure waits; single-run and four-run timing protocols differ and are reference-only. Historical PII and other models' snapshots are retained; categories need not share an evaluation date. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details.",
+      "files": {
+        "png": "fig14_category_reference_averages.png",
+        "svg": "fig14_category_reference_averages.svg",
+        "pdf": "fig14_category_reference_averages.pdf"
+      },
+      "panels": [
+        {
+          "metric": "accuracy",
+          "title": "Accuracy",
+          "files": {
+            "png": "fig14_category_reference_averages_accuracy.png",
+            "svg": "fig14_category_reference_averages_accuracy.svg",
+            "pdf": "fig14_category_reference_averages_accuracy.pdf"
+          }
+        },
+        {
+          "metric": "precision",
+          "title": "Precision",
+          "files": {
+            "png": "fig14_category_reference_averages_precision.png",
+            "svg": "fig14_category_reference_averages_precision.svg",
+            "pdf": "fig14_category_reference_averages_precision.pdf"
+          }
+        },
+        {
+          "metric": "recall",
+          "title": "Recall",
+          "files": {
+            "png": "fig14_category_reference_averages_recall.png",
+            "svg": "fig14_category_reference_averages_recall.svg",
+            "pdf": "fig14_category_reference_averages_recall.pdf"
+          }
+        },
+        {
+          "metric": "f1",
+          "title": "F1",
+          "files": {
+            "png": "fig14_category_reference_averages_f1.png",
+            "svg": "fig14_category_reference_averages_f1.svg",
+            "pdf": "fig14_category_reference_averages_f1.pdf"
+          }
+        },
+        {
+          "metric": "auroc",
+          "title": "AUROC",
+          "files": {
+            "png": "fig14_category_reference_averages_auroc.png",
+            "svg": "fig14_category_reference_averages_auroc.svg",
+            "pdf": "fig14_category_reference_averages_auroc.pdf"
+          }
+        },
+        {
+          "metric": "mean_elapsed_ms",
+          "title": "AVG latency (ms)",
+          "files": {
+            "png": "fig14_category_reference_averages_mean_elapsed_ms.png",
+            "svg": "fig14_category_reference_averages_mean_elapsed_ms.svg",
+            "pdf": "fig14_category_reference_averages_mean_elapsed_ms.pdf"
+          }
+        }
+      ]
     },
     {
       "name": "fig10_openjev_reference_v1",
@@ -338,10 +403,39 @@
   "warnings": [
     "outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
     "outputs/laya-ai.com/run_model_suite_2026-10-21_084817.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
+    "outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
+    "outputs/laya-ai.com/run_model_suite_2026-10-21_084817.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
     "fastino.ai/jailbreak-classification_v1_t0.5.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
     "fastino.ai/jailbreak-classification_v1_t0.8.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
     "fastino.ai/jailbreak-classification_v2_t0.5.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
-    "fastino.ai/jailbreak-classification_v2_t0.8.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV."
+    "fastino.ai/jailbreak-classification_v2_t0.8.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
+    "本次为增量更新：未提供历史逐样本 CSV 的配置保留旧报告汇总，不代表重新测试。新 CSV 替换同配置旧结果，缺少新日志时不沿用旧耗时。只有配置均未变更、原始预测可对齐，或各模型均在全量参考样本上成功时，才保留或补充共同样本指标；无法核验的交集不参与公平均值。",
+    "detect-jailbreak/v1/0.5：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。",
+    "fastino.ai vs laya-ai.com/detect-jailbreak：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。",
+    "本次仅更新 Fastino 前六个数据集的 v1 / 0.5；Laya 保留本轮重跑前的结果快照，未混入进行中的部分结果。",
+    "Fastino 本次六个配置使用 2026-10-29 六数据集并发运行日志；comparison 日志仅按数据集重排原始记录，未改变 elapsed。两个 HTTP 503 样本已补跑成功，质量指标包含补跑结果；主轮 elapsed 不含随后补跑耗时，不能解释为单请求延迟。",
+    "fastino.ai/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "fastino.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v1_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v1_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "typesafe.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。"
   ],
   "external_comparison": {
     "source": "data/external/openjev_summary.csv",
@@ -394,6 +488,7 @@
       0.8
     ],
     "internal_source": "data/external/internal_model_summary.csv",
+    "category_averages_csv": "category_reference_averages.csv",
     "v1_scope_averages_csv": "v1_reference_scope_averages.csv"
   }
 }
