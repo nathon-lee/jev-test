@@ -1,0 +1,13 @@
+{
+  "source_repository": "Paul/hatecheck",
+  "source_config": "default",
+  "source_revision": "9d2ac89df04254e5c427bcc8d61b6d6c83a1f59b",
+  "source_split": "test",
+  "partition_role": "held_out",
+  "available_splits": [
+    "test"
+  ],
+  "source_rows": 3728,
+  "prepared_rows": 3728,
+  "csv_sha256": "c2a5c8928ae38b9e2150517291df3f5460029544aff4a057b8f4e01a4282c36c"
+}
