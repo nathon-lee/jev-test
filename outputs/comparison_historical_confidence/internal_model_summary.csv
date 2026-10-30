@@ -1,0 +1,17 @@
+﻿provider,dataset,prompt,threshold,rows,valid,errors,source_kind,accuracy,precision,recall,f1,auroc,mean_elapsed_ms,latency_source_kind
+openjev-32b,aegis2,v1,0.5,1964,1963,1,user_supplied_aggregate,0.726439,0.868458,0.58034,0.695751,0.800826,1076.031872,single_complete_run
+openjev-32b,detect-jailbreak,v1,0.5,18258,5425,12833,user_supplied_aggregate,0.875023,0.773304,0.73494,0.753634,0.876566,1257.871079,single_complete_run
+openjev-32b,hatecheck,v1,0.5,3728,3723,5,user_supplied_aggregate,0.91942,0.909355,0.980453,0.943567,0.974784,999.503038,single_complete_run
+openjev-32b,jailbreak-classification,v1,0.5,1044,1041,3,user_supplied_aggregate,0.81268,0.99403,0.63308,0.773519,0.941713,1183.800492,single_complete_run
+openjev-32b,jailbreakhub,v1,0.5,15140,5432,9708,user_supplied_aggregate,0.863034,0.737527,0.728051,0.732759,0.87691,1516.685627,single_complete_run
+openjev-32b,pii_masking_mini_10k,v1,0.5,9000,5436,3564,user_supplied_aggregate,0.957873,1.0,0.957873,0.978484,,2550.392047,single_complete_run
+openjev-32b,pii_masking_nano_1k,v1,0.5,900,899,1,user_supplied_aggregate,0.953281,1.0,0.953281,0.976082,,1196.938184,single_complete_run
+openjev-32b,toxigen,v1,0.5,6789,5444,1345,user_supplied_aggregate,0.693975,0.941226,0.412587,0.573695,0.826311,3380.104839,single_complete_run
+microsoft-decision-1,aegis2,v1,0.5,1964,1962,2,user_supplied_aggregate,0.807849,0.885488,0.738884,0.80557,0.899135,1241.103685,single_complete_run
+microsoft-decision-1,detect-jailbreak,v1,0.5,18258,18255,3,user_supplied_aggregate,0.727855,0.271843,0.910433,0.418675,0.91872,1251.575326,single_complete_run
+microsoft-decision-1,hatecheck,v1,0.5,3728,3726,2,user_supplied_aggregate,0.975845,0.989695,0.97501,0.982297,0.997829,1238.434559,single_complete_run
+microsoft-decision-1,jailbreak-classification,v1,0.5,1044,1044,0,user_supplied_aggregate,0.952107,0.968566,0.935484,0.951737,0.989015,1235.973028,single_complete_run
+microsoft-decision-1,jailbreakhub,v1,0.5,15140,15136,4,user_supplied_aggregate,0.712275,0.230249,0.896085,0.366361,0.883582,1250.539861,single_complete_run
+microsoft-decision-1,pii_masking_mini_10k,v1,0.5,9000,8997,3,user_supplied_aggregate,0.948983,1.0,0.948983,0.973824,,1244.822289,single_complete_run
+microsoft-decision-1,pii_masking_nano_1k,v1,0.5,900,900,0,user_supplied_aggregate,0.947778,1.0,0.947778,0.973189,,1232.739259,single_complete_run
+microsoft-decision-1,toxigen,v1,0.5,6789,6788,1,user_supplied_aggregate,0.711992,0.933252,0.452226,0.609234,0.859295,1239.265494,single_complete_run

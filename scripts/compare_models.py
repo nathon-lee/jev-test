@@ -9,7 +9,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate an offline Chinese model comparison from saved outputs.")
     parser.add_argument("--input-dir", type=Path, default=Path("outputs"))
     parser.add_argument("--data-dir", type=Path, default=Path("data/prepared"))
-    parser.add_argument("--output-dir", type=Path, default=Path("outputs/comparison"))
+    parser.add_argument("--output-dir", type=Path, default=Path("outputs/comparison_historical_confidence"))
     parser.add_argument("--providers", default=",".join(MODELS), help="Comma-separated provider directory names")
     parser.add_argument("--paper-figures", action="store_true", help="Also export comparison PNG, SVG and PDF figures")
     parser.add_argument("--external-summary", type=Path, help="Optional OpenJev aggregate CSV (reference-only comparison)")
