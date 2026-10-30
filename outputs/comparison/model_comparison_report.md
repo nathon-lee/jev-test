@@ -2,7 +2,7 @@
 
 Historical prepared rows; not the new held-out split policy. v1 / threshold 0.5 unless stated. Jev is a saved historical reference, not a rerun.
 
-Laya: resumed after billing was restored; full rerun pending. Partial scores are excluded.
+Both provider suites have finished all configurations. Recorded request failures: 16; quality uses shared successful rows. See coverage for failure details.
 
 Scores use `answers.score.noul`. Historical confidence-based GLiDE/Laya scores are excluded. The previous presentation is archived in `../comparison_historical_confidence/`. The old 11-model chart is superseded: supplied summaries are retained separately below, without a combined ranking.
 
@@ -14,16 +14,28 @@ Positive deltas favor the corrected live provider. Higher AUROC with lower fixed
 |---|---|---|---|---|
 | fastino.ai | aegis2 | v1 | 0.0241 | 0.0149 |
 | fastino.ai | aegis2 | v2 | 0.0382 | 0.0139 |
-| fastino.ai | detect-jailbreak | v1 | -0.1347 | 0.0134 |
-| fastino.ai | detect-jailbreak | v2 | -0.1022 | 0.0116 |
+| fastino.ai | detect-jailbreak | v1 | -0.1349 | 0.0134 |
+| fastino.ai | detect-jailbreak | v2 | -0.1021 | 0.0116 |
 | fastino.ai | hatecheck | v1 | 0.0200 | 0.0038 |
 | fastino.ai | hatecheck | v2 | 0.0315 | 0.0052 |
 | fastino.ai | jailbreak-classification | v1 | -0.0012 | -0.0012 |
 | fastino.ai | jailbreak-classification | v2 | 0.0065 | -0.0007 |
-| fastino.ai | jailbreakhub | v1 | -0.0891 | 0.0169 |
-| fastino.ai | jailbreakhub | v2 | -0.0579 | 0.0109 |
+| fastino.ai | jailbreakhub | v1 | -0.0891 | 0.0168 |
+| fastino.ai | jailbreakhub | v2 | -0.0579 | 0.0108 |
 | fastino.ai | toxigen | v1 | -0.1772 | -0.0352 |
 | fastino.ai | toxigen | v2 | -0.0626 | -0.0242 |
+| laya-ai.com | aegis2 | v1 | -0.6746 | -0.2435 |
+| laya-ai.com | aegis2 | v2 | -0.4664 | -0.1865 |
+| laya-ai.com | detect-jailbreak | v1 | -0.2814 | -0.2202 |
+| laya-ai.com | detect-jailbreak | v2 | -0.2360 | -0.1693 |
+| laya-ai.com | hatecheck | v1 | -0.1933 | -0.2204 |
+| laya-ai.com | hatecheck | v2 | -0.1657 | -0.1784 |
+| laya-ai.com | jailbreak-classification | v1 | 0.0456 | 0.0056 |
+| laya-ai.com | jailbreak-classification | v2 | 0.0427 | 0.0050 |
+| laya-ai.com | jailbreakhub | v1 | -0.2258 | -0.1848 |
+| laya-ai.com | jailbreakhub | v2 | -0.2081 | -0.1096 |
+| laya-ai.com | toxigen | v1 | -0.4446 | -0.1486 |
+| laya-ai.com | toxigen | v2 | -0.4600 | -0.1502 |
 
 ## Three-dataset macro averages
 
@@ -35,6 +47,8 @@ Equal dataset weights, not pooled rows. AUPRC means average precision. v1 is the
 | fastino.ai | v2 | 0.8494 | 0.9383 | 0.7544 | 0.8201 | 0.9231 | 0.9334 | 12481 |
 | historical_jev | v1 | 0.8323 | 0.9104 | 0.7595 | 0.8127 | 0.9243 | 0.9321 | 12481 |
 | historical_jev | v2 | 0.8355 | 0.9192 | 0.7544 | 0.8177 | 0.9248 | 0.9318 | 12481 |
+| laya-ai.com | v1 | 0.5842 | 0.8470 | 0.3082 | 0.3752 | 0.7201 | 0.7575 | 12481 |
+| laya-ai.com | v2 | 0.6197 | 0.8836 | 0.3610 | 0.4537 | 0.7531 | 0.7945 | 12481 |
 
 ![Corrected three-dataset averages](figures/fig13_three_dataset_averages.png)
 
@@ -48,10 +62,10 @@ Quality excludes request errors and uses matching successful sample IDs, text an
 | historical_jev | aegis2 | v1 | 1964 | 0 | 0.8096 | 0.8520 | 0.7828 | 0.8159 | 0.9049 | 0.9178 | 0.1591 | 0.2172 |
 | fastino.ai | aegis2 | v2 | 1964 | 0 | 0.8315 | 0.8848 | 0.7904 | 0.8349 | 0.9193 | 0.9335 | 0.1204 | 0.2096 |
 | historical_jev | aegis2 | v2 | 1964 | 0 | 0.8004 | 0.8838 | 0.7252 | 0.7967 | 0.9054 | 0.9166 | 0.1116 | 0.2748 |
-| fastino.ai | detect-jailbreak | v1 | 18257 | 1 | 0.6824 | 0.2493 | 0.9700 | 0.3966 | 0.9419 | 0.7009 | 0.3523 | 0.0300 |
-| historical_jev | detect-jailbreak | v1 | 18257 | 1 | 0.8331 | 0.3807 | 0.8789 | 0.5313 | 0.9285 | 0.6814 | 0.1724 | 0.1211 |
-| fastino.ai | detect-jailbreak | v2 | 18257 | 1 | 0.6909 | 0.2525 | 0.9547 | 0.3993 | 0.9311 | 0.6502 | 0.3410 | 0.0453 |
-| historical_jev | detect-jailbreak | v2 | 18257 | 1 | 0.8111 | 0.3502 | 0.8830 | 0.5015 | 0.9195 | 0.6243 | 0.1976 | 0.1170 |
+| fastino.ai | detect-jailbreak | v1 | 18253 | 1 | 0.6825 | 0.2493 | 0.9700 | 0.3966 | 0.9420 | 0.7010 | 0.3522 | 0.0300 |
+| historical_jev | detect-jailbreak | v1 | 18253 | 1 | 0.8332 | 0.3809 | 0.8793 | 0.5315 | 0.9286 | 0.6816 | 0.1723 | 0.1207 |
+| fastino.ai | detect-jailbreak | v2 | 18253 | 1 | 0.6910 | 0.2525 | 0.9547 | 0.3993 | 0.9312 | 0.6503 | 0.3408 | 0.0453 |
+| historical_jev | detect-jailbreak | v2 | 18253 | 1 | 0.8111 | 0.3502 | 0.8829 | 0.5014 | 0.9196 | 0.6246 | 0.1976 | 0.1171 |
 | fastino.ai | hatecheck | v1 | 3728 | 0 | 0.9769 | 0.9762 | 0.9906 | 0.9833 | 0.9966 | 0.9984 | 0.0532 | 0.0094 |
 | historical_jev | hatecheck | v1 | 3728 | 0 | 0.9482 | 0.9392 | 0.9887 | 0.9633 | 0.9928 | 0.9968 | 0.1408 | 0.0113 |
 | fastino.ai | hatecheck | v2 | 3728 | 0 | 0.9933 | 0.9919 | 0.9984 | 0.9951 | 0.9995 | 0.9998 | 0.0180 | 0.0016 |
@@ -60,14 +74,26 @@ Quality excludes request errors and uses matching successful sample IDs, text an
 | historical_jev | jailbreak-classification | v1 | 1044 | 0 | 0.9521 | 0.9918 | 0.9127 | 0.9506 | 0.9943 | 0.9945 | 0.0077 | 0.0873 |
 | fastino.ai | jailbreak-classification | v2 | 1044 | 0 | 0.9569 | 0.9398 | 0.9772 | 0.9581 | 0.9941 | 0.9947 | 0.0638 | 0.0228 |
 | historical_jev | jailbreak-classification | v2 | 1044 | 0 | 0.9531 | 0.9918 | 0.9146 | 0.9516 | 0.9948 | 0.9949 | 0.0077 | 0.0854 |
-| fastino.ai | jailbreakhub | v1 | 15140 | 0 | 0.6546 | 0.2048 | 0.9445 | 0.3367 | 0.9142 | 0.5978 | 0.3750 | 0.0555 |
-| historical_jev | jailbreakhub | v1 | 15140 | 0 | 0.7819 | 0.2817 | 0.8712 | 0.4257 | 0.8973 | 0.5255 | 0.2272 | 0.1288 |
-| fastino.ai | jailbreakhub | v2 | 15140 | 0 | 0.6971 | 0.2268 | 0.9395 | 0.3653 | 0.9046 | 0.4835 | 0.3277 | 0.0605 |
-| historical_jev | jailbreakhub | v2 | 15140 | 0 | 0.7813 | 0.2802 | 0.8648 | 0.4233 | 0.8937 | 0.4887 | 0.2272 | 0.1352 |
+| fastino.ai | jailbreakhub | v1 | 15136 | 0 | 0.6547 | 0.2048 | 0.9444 | 0.3366 | 0.9143 | 0.5980 | 0.3749 | 0.0556 |
+| historical_jev | jailbreakhub | v1 | 15136 | 0 | 0.7820 | 0.2817 | 0.8711 | 0.4257 | 0.8974 | 0.5257 | 0.2271 | 0.1289 |
+| fastino.ai | jailbreakhub | v2 | 15136 | 0 | 0.6971 | 0.2267 | 0.9395 | 0.3653 | 0.9046 | 0.4835 | 0.3276 | 0.0605 |
+| historical_jev | jailbreakhub | v2 | 15136 | 0 | 0.7814 | 0.2802 | 0.8647 | 0.4232 | 0.8938 | 0.4889 | 0.2271 | 0.1353 |
 | fastino.ai | toxigen | v1 | 6789 | 0 | 0.6549 | 0.9477 | 0.3228 | 0.4815 | 0.8400 | 0.8527 | 0.0176 | 0.6772 |
 | historical_jev | toxigen | v1 | 6789 | 0 | 0.7391 | 0.9400 | 0.5070 | 0.6587 | 0.8752 | 0.8817 | 0.0319 | 0.4930 |
 | fastino.ai | toxigen | v2 | 6789 | 0 | 0.7235 | 0.9384 | 0.4743 | 0.6301 | 0.8504 | 0.8670 | 0.0307 | 0.5257 |
 | historical_jev | toxigen | v2 | 6789 | 0 | 0.7573 | 0.9323 | 0.5512 | 0.6928 | 0.8746 | 0.8814 | 0.0395 | 0.4488 |
+| laya-ai.com | aegis2 | v1 | 1964 | 0 | 0.4929 | 0.8119 | 0.0774 | 0.1414 | 0.6614 | 0.6788 | 0.0210 | 0.9226 |
+| laya-ai.com | aegis2 | v2 | 1964 | 0 | 0.5560 | 0.8848 | 0.2030 | 0.3303 | 0.7189 | 0.7609 | 0.0309 | 0.7970 |
+| laya-ai.com | detect-jailbreak | v1 | 18253 | 1 | 0.3959 | 0.1443 | 0.9364 | 0.2501 | 0.7084 | 0.1741 | 0.6693 | 0.0636 |
+| laya-ai.com | detect-jailbreak | v2 | 18253 | 1 | 0.4532 | 0.1551 | 0.9180 | 0.2654 | 0.7503 | 0.2256 | 0.6028 | 0.0820 |
+| laya-ai.com | hatecheck | v1 | 3728 | 0 | 0.7020 | 0.8201 | 0.7257 | 0.7700 | 0.7724 | 0.8667 | 0.3502 | 0.2743 |
+| laya-ai.com | hatecheck | v2 | 3728 | 0 | 0.7401 | 0.8571 | 0.7464 | 0.7979 | 0.8160 | 0.8931 | 0.2738 | 0.2536 |
+| laya-ai.com | jailbreak-classification | v1 | 1044 | 0 | 0.9962 | 0.9962 | 0.9962 | 0.9962 | 0.9999 | 0.9999 | 0.0039 | 0.0038 |
+| laya-ai.com | jailbreak-classification | v2 | 1044 | 0 | 0.9943 | 0.9962 | 0.9924 | 0.9943 | 0.9997 | 0.9998 | 0.0039 | 0.0076 |
+| laya-ai.com | jailbreakhub | v1 | 15136 | 0 | 0.2883 | 0.1116 | 0.9587 | 0.1999 | 0.7126 | 0.1577 | 0.7803 | 0.0413 |
+| laya-ai.com | jailbreakhub | v2 | 15136 | 0 | 0.3537 | 0.1212 | 0.9551 | 0.2152 | 0.7842 | 0.2352 | 0.7078 | 0.0449 |
+| laya-ai.com | toxigen | v1 | 6789 | 0 | 0.5577 | 0.9089 | 0.1213 | 0.2141 | 0.7266 | 0.7270 | 0.0120 | 0.8787 |
+| laya-ai.com | toxigen | v2 | 6789 | 0 | 0.5631 | 0.9091 | 0.1335 | 0.2328 | 0.7244 | 0.7295 | 0.0132 | 0.8665 |
 
 ## Coverage and request timing
 
@@ -91,6 +117,22 @@ Missing/error rows are not counted as negatives. Latency includes retries under 
 | fastino.ai | pii_masking_nano_1k | v2 | 900 | 0 | 900 | 32 | 505.5566 | 455.7670 | 899.4038 |
 | fastino.ai | toxigen | v1 | 6789 | 0 | 6789 | 32 | 488.3889 | 447.1087 | 785.4195 |
 | fastino.ai | toxigen | v2 | 6789 | 0 | 6789 | 32 | 537.7799 | 477.3067 | 1040.6861 |
+| laya-ai.com | aegis2 | v1 | 1964 | 0 | 1964 | 16 | 3672.9391 | 2998.6327 | 7113.9316 |
+| laya-ai.com | aegis2 | v2 | 1964 | 0 | 1964 | 16 | 4064.5160 | 3724.9812 | 6318.2229 |
+| laya-ai.com | detect-jailbreak | v1 | 18254 | 4 | 18258 | 16 | 4645.7399 | 4129.4467 | 10181.9047 |
+| laya-ai.com | detect-jailbreak | v2 | 18254 | 4 | 18258 | 16 | 4855.9106 | 4230.3561 | 11039.8283 |
+| laya-ai.com | hatecheck | v1 | 3728 | 0 | 3728 | 16 | 3563.9866 | 2439.1747 | 9439.1689 |
+| laya-ai.com | hatecheck | v2 | 3728 | 0 | 3728 | 16 | 2893.6050 | 2737.6011 | 3284.3726 |
+| laya-ai.com | jailbreak-classification | v1 | 1044 | 0 | 1044 | 16 | 8138.5779 | 8078.0311 | 11517.5916 |
+| laya-ai.com | jailbreak-classification | v2 | 1044 | 0 | 1044 | 16 | 8418.6642 | 8355.0209 | 11790.6310 |
+| laya-ai.com | jailbreakhub | v1 | 15136 | 4 | 15140 | 16 | 4946.0937 | 4315.8197 | 10665.1825 |
+| laya-ai.com | jailbreakhub | v2 | 15136 | 4 | 15140 | 16 | 5180.2170 | 4618.5612 | 10820.2531 |
+| laya-ai.com | pii_masking_mini_10k | v1 | 9000 | 0 | 9000 | 16 | 2818.2532 | 2753.0787 | 4752.7736 |
+| laya-ai.com | pii_masking_mini_10k | v2 | 9000 | 0 | 9000 | 16 | 2945.8819 | 2871.6930 | 5159.3290 |
+| laya-ai.com | pii_masking_nano_1k | v1 | 900 | 0 | 900 | 16 | 2872.7708 | 2777.3499 | 4732.8204 |
+| laya-ai.com | pii_masking_nano_1k | v2 | 900 | 0 | 900 | 16 | 3055.7805 | 3019.7747 | 5438.4692 |
+| laya-ai.com | toxigen | v1 | 6789 | 0 | 6789 | 16 | 2658.8555 | 2610.3558 | 3262.7394 |
+| laya-ai.com | toxigen | v2 | 6789 | 0 | 6789 | 16 | 1871.1008 | 1749.8768 | 3226.5885 |
 
 ## PII detection diagnostics
 
@@ -102,6 +144,10 @@ All-positive document labels: detection rate alone cannot measure extraction, fa
 | fastino.ai | pii_masking_mini_10k | v2 | 9000 | 9000 | 0.9530 |
 | fastino.ai | pii_masking_nano_1k | v1 | 900 | 900 | 0.9233 |
 | fastino.ai | pii_masking_nano_1k | v2 | 900 | 900 | 0.9456 |
+| laya-ai.com | pii_masking_mini_10k | v1 | 9000 | 9000 | 0.0334 |
+| laya-ai.com | pii_masking_mini_10k | v2 | 9000 | 9000 | 0.0993 |
+| laya-ai.com | pii_masking_nano_1k | v1 | 900 | 900 | 0.0300 |
+| laya-ai.com | pii_masking_nano_1k | v2 | 900 | 900 | 0.1078 |
 
 ## Supplied aggregate references — unpaired
 

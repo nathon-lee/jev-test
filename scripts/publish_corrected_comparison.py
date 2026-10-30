@@ -17,6 +17,7 @@ import pandas as pd
 from sklearn.metrics import average_precision_score
 
 from benchmark.comparison import fingerprint
+from benchmark.evaluation import evaluate_predictions
 from scripts.report_classification_rerun import build_report, valid_rows
 from scripts.rerun_classification import digest
 
@@ -46,6 +47,24 @@ def macro_rows(rows, datasets=FOCUSED):
 def collect_rows(report, root, historical_dir):
     rows, thresholds, timings, pii = [], [], [], []
     seen_jev = {}
+    # Build one common-success population per dataset/prompt before any quality
+    # comparison. Request-size failures stay visible in coverage, never as labels.
+    frames, shared_ids = {}, {}
+    for run in report["runs"]:
+        if run["result"]["pii_detection_only"]:
+            continue
+        paired = run.get("paired_baseline")
+        if not paired:
+            raise ValueError(f"Missing historical paired reference: {run['dataset']}/{run['prompt_version']}")
+        new_path = root / run["file"]
+        old_path = historical_dir / f"{run['dataset']}_{run['prompt_version']}_t0.5.csv"
+        if digest(new_path) != run["result"]["file_sha256"] or digest(old_path) != run["historical_jev_file_sha256"]:
+            raise ValueError("Source digest mismatch")
+        fresh, old = (valid_rows(pd.read_csv(p, dtype={"sample_id": str})) for p in (new_path, old_path))
+        ids = (set(fresh.index) & set(old.index)) - set(paired["excluded_legacy_nul_rows"])
+        key = (run["dataset"], run["prompt_version"])
+        shared_ids[key] = shared_ids[key] & ids if key in shared_ids else ids
+        frames[(run["provider"], *key)] = (fresh, old)
     for run in report["runs"]:
         result = run["result"]
         provider, dataset, prompt = run["provider"], run["dataset"], run["prompt_version"]
@@ -57,24 +76,26 @@ def collect_rows(report, root, historical_dir):
             pii.append({**common, "detection_rate": result["threshold_metrics"]["0.5"]["recall"],
                         "valid": result["valid"], "expected": result["expected_rows"]})
             continue
-        paired = run.get("paired_baseline")
-        if not paired:
-            raise ValueError(f"Missing historical paired reference: {dataset}/{prompt}")
-        new_path = root / run["file"]
-        old_path = historical_dir / f"{dataset}_{prompt}_t0.5.csv"
-        if digest(new_path) != result["file_sha256"] or digest(old_path) != run["historical_jev_file_sha256"]:
-            raise ValueError("Source digest mismatch")
-        fresh, old = (valid_rows(pd.read_csv(p, dtype={"sample_id": str})) for p in (new_path, old_path))
-        ids = sorted((set(fresh.index) & set(old.index)) - set(paired["excluded_legacy_nul_rows"]))
+        paired = run["paired_baseline"]
+        key = (dataset, prompt)
+        fresh, old = frames[(provider, *key)]
+        ids = sorted(shared_ids[key])
+        if not ids:
+            raise ValueError(f"No common successful rows: {dataset}/{prompt}")
+        for sample_id in ids:
+            left, right = fresh.loc[sample_id], old.loc[sample_id]
+            if int(left["label"]) != int(right["label"]) or fingerprint(str(left["text"])) != fingerprint(str(right["text"])):
+                raise ValueError(f"Reference label/text mismatch for sample {sample_id}")
         signature = tuple((i, fingerprint(str(fresh.loc[i, "text"])), int(fresh.loc[i, "label"])) for i in ids)
         key = (dataset, prompt)
         if key in seen_jev and seen_jev[key] != signature:
             raise ValueError("Providers have different paired rows; a shared Jev baseline would be misleading")
-        for identity, frame, metric in ((provider, fresh, paired["rerun"]), ("historical_jev", old, paired["historical_jev"])):
+        for identity, frame in ((provider, fresh), ("historical_jev", old)):
             if identity == "historical_jev" and key in seen_jev:
                 continue
             aligned = frame.loc[ids]
             labels = aligned["label"].astype(int)
+            metric = evaluate_predictions(labels, aligned["prediction"].astype(int), aligned["score"].astype(float))
             rows.append({**common, "provider": identity, **metric,
                          "auprc": float(average_precision_score(labels, aligned["score"].astype(float))) if labels.nunique() == 2 else None,
                          "paired_rows": len(ids), "excluded_nul_rows": len(paired["excluded_legacy_nul_rows"])})
@@ -251,7 +272,8 @@ def publish(root, output, historical_dir, reference_dir):
         fig.suptitle("Supplied historical aggregates — unpaired references\nPreserved separately from the corrected live comparison; no fresh evaluation claimed.", fontsize=12)
         save(fig, "fig07_supplied_references", "Reference-only model aggregates preserved from the archived presentation; do not combine with corrected live scores for a leaderboard.")
     (figures / "figure_manifest.json").write_text(json.dumps({"source_summary_sha256": digest(root / "summary.json"), "figures": manifest}, indent=2) + "\n")
-    status = "Laya: resumed after billing was restored; full rerun pending. Partial scores are excluded." if pending else "Both corrected provider suites are complete."
+    total_errors = sum(r["errors"] for r in timings)
+    status = "Laya: resumed after billing was restored; full rerun pending. Partial scores are excluded." if pending else f"Both provider suites have finished all configurations. Recorded request failures: {total_errors}; quality uses shared successful rows. See coverage for failure details."
     findings = []
     for fresh in [r for r in rows if r["provider"] != "historical_jev"]:
         old = next(r for r in rows if r["provider"] == "historical_jev" and r["dataset"] == fresh["dataset"] and r["prompt"] == fresh["prompt"])

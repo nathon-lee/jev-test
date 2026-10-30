@@ -143,6 +143,22 @@ def build_report(root, historical_dir=Path("outputs/typesafe.ai")):
         excluded = row.get("paired_baseline", {}).get("excluded_legacy_nul_rows", [])
         if excluded:
             lines.append(f"- {row['provider']} / {row['dataset']} / {row['prompt_version']}: excluded legacy NUL sample IDs {', '.join(excluded)}.")
+    failures = []
+    for row in records:
+        if not row["result"]["errors"]:
+            continue
+        frame = pd.read_csv(root / row["file"], dtype={"sample_id": str})
+        failed = frame[frame["error"].notna() & frame["error"].ne("")]
+        statuses = failed["http_status"].value_counts(dropna=False)
+        failures.append(f"- {row['provider']} / {row['dataset']} / {row['prompt_version']}: "
+                        f"{row['result']['errors']} failed rows; HTTP status counts "
+                        + ", ".join(f"{status:g}: {count}" for status, count in statuses.items()) + ".")
+    if failures:
+        lines += ["", "## Request failures", "",
+                  "All configurations finished, but not every request succeeded. Failed rows remain in raw CSVs and "
+                  "are excluded from quality metrics. HTTP 413 means the request was too large; inputs were not "
+                  "truncated to change the benchmark. The combined comparison uses shared successful rows "
+                  "across providers; the pairwise table above uses each provider's own overlap with Jev.", "", *failures]
     lines += ["", "## PII detection diagnostics", "",
               "These prepared PII datasets have all-positive document labels. "
               "Detection rate is not entity/span extraction F1 and does not measure "
