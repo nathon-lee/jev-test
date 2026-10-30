@@ -619,6 +619,10 @@ quality averages. AUPRC is average precision computed from verified saved scores
 
 `provider_status.json` in the corrected rerun directory declares the expected
 dataset/prompt matrix. A provider is published only after that matrix completes;
-Laya remains pending while its resumed run proceeds. Billing restrictions retain
+GLiDE has 113,646 successful requests; Laya finished with 113,630 successes and
+16 persistent HTTP 413 (request too large) failures across Detect Jailbreak and
+JailbreakHub, both prompts. Quality charts use the intersection of successful
+rows across GLiDE, Laya and historical Jev; coverage retains every failure.
+Inputs are not truncated to bypass the size limit. Billing restrictions retain
 their history with a resolved status once successful calls resume. These reports
 use the historical prepared rows, not the new split policy from PR #19.

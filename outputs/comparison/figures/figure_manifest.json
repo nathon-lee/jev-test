@@ -1,40 +1,40 @@
 {
-  "source_summary_sha256": "ea25eff0c8c2ce746ee513ee3e0f8691585526af73555b269cbd50fc774b1cc5",
+  "source_summary_sha256": "dc1793309173110eb08f01282bea7a9b957051d761075c3ef28b11c29d974be7",
   "figures": [
     {
       "name": "fig13_three_dataset_averages",
       "caption": "v1: macro means over exactly three datasets. Corrected Noul versus paired historical Jev. Historical prepared rows; not the new held-out split policy. v1 / threshold 0.5 unless stated. Jev is a saved historical reference, not a rerun.",
-      "png_sha256": "44d1c2d7365819c01119ab98810a10906698a5615b43ff909730048a0cc86a5c"
+      "png_sha256": "60cd6ccf5141c33670bcb8f17a67d95dfef36941241814eed5936a70d9693b41"
     },
     {
       "name": "fig02_three_dataset_averages_v2",
       "caption": "v2: macro means over exactly three datasets. Corrected Noul versus paired historical Jev. Historical prepared rows; not the new held-out split policy. v1 / threshold 0.5 unless stated. Jev is a saved historical reference, not a rerun.",
-      "png_sha256": "914c247c74f9bc27c248b708476417c7571a6b33e0a012a6886e4594498f5366"
+      "png_sha256": "40cba9f1847c0944d46ec0004d6cec1a4947ac008ed0288b54cf035b81ea7b94"
     },
     {
       "name": "fig03_classification_f1_v1",
       "caption": "Per-dataset paired rows; Detect Jailbreak excludes legacy NUL sample 15837.",
-      "png_sha256": "432f6f727a226844962c14fe491407cff4268b15ee2ca8892fa0d9ed7101fe3e"
+      "png_sha256": "ce4c44085ef614a7cba7e526784739b1144e31a4176493879236d37c7645d3a5"
     },
     {
       "name": "fig03_classification_f1_v2",
       "caption": "Per-dataset paired rows; Detect Jailbreak excludes legacy NUL sample 15837.",
-      "png_sha256": "2db88dc5128565944acf5282a065fa460daa55ebacf3bbced20e19e1d19bb665"
+      "png_sha256": "2d6702da08cd8456eed1810948a4edbac337ee2f394e13d3556043500a881f85"
     },
     {
       "name": "fig04_threshold_sensitivity",
       "caption": "Full rerun population; differs from paired Detect Jailbreak by one NUL row. Fixed primary threshold remains 0.5.",
-      "png_sha256": "b13dee43e1c3bba9029aabb24dda5857fffbe48e48dd1b4a34671254f036c700"
+      "png_sha256": "871e889dcd554083c569cb3fa7151a651c25941a0752290acb7578cf98b0ac43"
     },
     {
       "name": "fig05_request_latency",
       "caption": "Per-request timing under concurrent workload, not elapsed/row throughput. Worker counts and means are in request_timing.csv.",
-      "png_sha256": "04907530016b3cf6553c699b1694d0aeac3d047575348f777780e7ab1e07c248"
+      "png_sha256": "ea74954cfdc66c2622025ea41cf8a48d3bf860c8b950977f1078bda987c1644e"
     },
     {
       "name": "fig06_pii_detection_only",
       "caption": "Excluded from classification macro averages. Extraction benchmarking is a separate workflow.",
-      "png_sha256": "8ea0a2d18d3b5b91b9aa465dae7e928842cfee2107745862bee4cc58949c30c0"
+      "png_sha256": "b15519df59574bddada8ae78ff527fde604698af8f6ce3adf53e3cde0e7395e4"
     },
     {
       "name": "fig07_supplied_references",

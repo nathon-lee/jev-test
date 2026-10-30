@@ -78,3 +78,37 @@ def test_comparison_computes_average_precision_from_verified_scores_and_rejects_
     frame.to_csv(reference, index=False)
     with pytest.raises(ValueError, match="digest"):
         collect_rows(report, root, historical)
+
+
+def test_provider_failures_use_shared_successful_rows_for_every_quality_score(tmp_path):
+    from scripts.rerun_classification import digest
+    root = tmp_path / "rerun"
+    first = make_run(root)
+    second = make_run(root, provider="laya-ai.com")
+    historical = tmp_path / "historical"
+    historical.mkdir()
+    (historical / "hatecheck_v1_t0.5.csv").write_bytes(first.read_bytes())
+    frame = pd.read_csv(second)
+    # This false positive must disappear for *all* providers, including Jev.
+    frame.loc[1, ["score", "prediction"]] = [None, None]
+    frame["error"] = frame["error"].astype(object)
+    frame.loc[1, "error"] = "HTTPStatusError"
+    frame["http_status"] = 200
+    frame.loc[1, "http_status"] = 413
+    frame.to_csv(second, index=False)
+    manifest_path = second.with_suffix(".manifest.json")
+    manifest = json.loads(manifest_path.read_text())
+    manifest["result"].update(file_sha256=digest(second), valid=3, errors=1)
+    manifest_path.write_text(json.dumps(manifest))
+    report = build_report(root, historical)
+    rows, _, timings, _ = collect_rows(report, root, historical)
+    assert len(rows) == 3
+    assert {r["paired_rows"] for r in rows} == {3}
+    assert {r["f1"] for r in rows} == {1.0}
+    assert sum(r["errors"] for r in timings) == 1
+    # A digest-consistent input mismatch must still fail, not be hidden by alignment.
+    frame.loc[0, "text"] = "different request"
+    frame.to_csv(second, index=False)
+    report["runs"][1]["result"]["file_sha256"] = digest(second)
+    with pytest.raises(ValueError, match="mismatch"):
+        collect_rows(report, root, historical)

@@ -69,8 +69,8 @@
     ]
   },
   "laya-ai.com": {
-    "status": "running",
-    "detail": "Historical-row Laya rerun resumed from its saved checkpoints and runs in parallel with the separate official held-out evaluation.",
+    "status": "complete",
+    "detail": "All 16 configurations finished: 113630 successful requests of 113646; 16 persistent HTTP 413 request-too-large failures after retries. Quality compares shared successful rows; raw failed rows are retained.",
     "expected_configurations": [
       [
         "toxigen",
