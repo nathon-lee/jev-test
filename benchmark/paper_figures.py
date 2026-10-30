@@ -19,24 +19,31 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
 
 from benchmark.comparison import DATASETS, PROMPTS, STABILITY_METRICS, THRESHOLDS, baseline_rows
-from benchmark.external_summary import INTERNAL_IDENTITIES, METRICS, three_dataset_averages, v1_reference_scope_averages
+from benchmark.external_summary import (
+    FINE_TUNED_DISPLAY_NAME, INTERNAL_IDENTITIES, METRICS, category_reference_averages,
+    three_dataset_averages, v1_reference_scope_averages,
+)
 
 
 COLORS = {
     "fastino.ai": "#0072B2", "laya-ai.com": "#D55E00", "typesafe.ai": "#009E73",
     "openjev": "#CC79A7", "openjev-32b": "#6A3D9A", "microsoft-decision-1": "#B8860B",
+    "fastino-ft-gg6-r1-ml2048-s7": "#E7298A",
 }
 NAMES = {
     "fastino.ai": "Fastino", "laya-ai.com": "Laya", "typesafe.ai": "TypeSafe", "openjev": "OpenJev 4B",
     **{provider: identity["display_name"] for provider, identity in INTERNAL_IDENTITIES.items()},
+    "fastino-ft-gg6-r1-ml2048-s7": FINE_TUNED_DISPLAY_NAME,
 }
 MARKERS = {
     "fastino.ai": "o", "laya-ai.com": "s", "typesafe.ai": "D", "openjev": "^",
     "openjev-32b": "v", "microsoft-decision-1": "P",
+    "fastino-ft-gg6-r1-ml2048-s7": "D",
 }
 HATCHES = {
     "fastino.ai": "", "laya-ai.com": "///", "typesafe.ai": "...", "openjev": "xxx",
     "openjev-32b": "\\\\", "microsoft-decision-1": "++",
+    "fastino-ft-gg6-r1-ml2048-s7": "////",
 }
 DATASET_NAMES = {
     "aegis2": "AEGIS2",
@@ -69,6 +76,9 @@ STYLE = {
 
 
 def model_label(report, provider):
+    if provider in report.get("fine_tuned_models", {}):
+        model = report["fine_tuned_models"][provider]
+        return f"{model['display_name']}\nFine-tuned · 300M\nmodel ID: {model['model_id']}"
     if provider == "openjev":
         return "OpenJev 4B | supplied internal summary\nmodel / version: not supplied (not sample-paired)"
     if provider in INTERNAL_IDENTITIES:
@@ -80,6 +90,15 @@ def model_label(report, provider):
             value = identity[role] or "unconfirmed (API response required)"
             lines.append(f"{role.removesuffix('_model')}: {value}")
     return "\n".join(lines)
+
+
+def bar_style(report, provider):
+    fine_tuned = provider in report.get("fine_tuned_models", {})
+    return {
+        "edgecolor": "#172438" if fine_tuned else "#263238",
+        "linewidth": 1.5 if fine_tuned else 0.4,
+        "hatch": HATCHES[provider],
+    }
 
 
 def decorate(fig, report, title, subtitle, note, legend_style="markers", stacked=False):
@@ -94,8 +113,7 @@ def decorate(fig, report, title, subtitle, note, legend_style="markers", stacked
     for provider in report["providers"]:
         label = model_label(report, provider)
         if legend_style == "bars":
-            handle = Patch(facecolor=COLORS[provider], edgecolor="#263238",
-                           hatch=HATCHES[provider], linewidth=0.4, label=label)
+            handle = Patch(facecolor=COLORS[provider], **bar_style(report, provider), label=label)
         else:
             handle = Line2D(
                 [], [], color=COLORS[provider],
@@ -132,7 +150,7 @@ def quality_figure(report):
             positions = x + (index - (len(report["providers"]) - 1) / 2) * width
             bars = ax.bar(
                 positions, values, width=width * 0.92, color=COLORS[provider],
-                edgecolor="#263238", linewidth=0.4, hatch=HATCHES[provider],
+                **bar_style(report, provider),
             )
             for bar, value in zip(bars, values):
                 if math.isfinite(value):
@@ -357,7 +375,7 @@ def coverage_figure(report):
         fig, report, "Evaluation Coverage and Request Failures",
         "v1 | threshold = 0.5 | counts are successful / reference rows",
         "Gray = no saved predictions; hatched = complete CSV with no successful requests, not a missing run.\n"
-        "PII rows measure only evaluation coverage, not masking quality.",
+        "PII is ordinary binary classification (PII present vs absent); rows show coverage, not masking quality.",
         legend_style="identity",
     )
     fig.legends[0].remove()
@@ -381,7 +399,7 @@ def metric_bars(ax, report, labels, records, metric, title, latency=False,
         positions = x + (index - (len(report["providers"]) - 1) / 2) * width
         bars = ax.bar(
             positions, values, width=width * 0.92, color=COLORS[provider],
-            edgecolor="#263238", linewidth=0.4, hatch=HATCHES[provider],
+            **bar_style(report, provider),
         )
         for bar, value, record in zip(bars, values, records):
             available = math.isfinite(value)
@@ -454,7 +472,8 @@ def dataset_metrics_figure(report):
         fig, report, "Per-dataset classification metrics and average latency",
         "v1 | threshold = 0.5 | each model's own successful samples (not paired)",
         "N/A = missing result, no successful predictions, undefined metric, or no aligned complete timing log.\n"
-        "PII datasets contain positives only: detection metrics do not measure masking quality; AUROC is undefined.\n"
+        "PII is ordinary binary classification (PII present vs absent), not extraction or masking quality.\n"
+        "PII datasets contain positives only; AUROC is undefined.\n"
         "Latency = logged end-to-end elapsed / all processed rows, including failed requests; not pure inference time.\n"
         "Successful sample sets can differ between models; use the paired baseline for fair quality comparisons.",
         legend_style="bars",
@@ -583,9 +602,75 @@ def stability_averages_figure(report):
 def external_reference_providers(comparison, prompt):
     return [
         provider for provider in comparison["providers"]
-        if provider not in INTERNAL_IDENTITIES
+        if (provider not in INTERNAL_IDENTITIES and provider not in comparison.get("fine_tuned_models", {}))
         or any(row["provider"] == provider and row["prompt"] == prompt for row in comparison["runs"])
     ]
+
+
+def fine_tuned_note(report):
+    return "\n".join(
+        f"{model['display_name']} | model ID: {model['model_id']}\n"
+        f"{model['valid']:,} successful / {model['rows']:,} rows; {model['errors']} errors. "
+        + model["notes"]
+        for model in report.get("external_comparison", {}).get("fine_tuned_models", {}).values()
+    )
+
+
+def reference_latency_log_axis(fig):
+    latency_axis = fig.axes[-1]
+    positive = [
+        bar.get_height() for bar in latency_axis.patches
+        if math.isfinite(bar.get_height()) and bar.get_height() > 0
+    ]
+    lower = min(positive) / 1.8 if positive else 1
+    upper = max(positive) * 3 if positive else 10
+    latency_axis.set_yscale("log")
+    latency_axis.set_ylim(lower, upper)
+    latency_axis.set_ylabel("ms / sample (log scale; lower is better)", fontsize=12)
+    for annotation in latency_axis.texts:
+        if annotation.xy[1] <= 0:
+            annotation.xy = (annotation.xy[0], lower * 1.1)
+
+
+def highlight_pii_task(fig, stacked=False):
+    fig.text(
+        0.07, 0.078 if stacked else 0.25,
+        "PII = ordinary binary classification (present vs absent), NOT masking quality.",
+        fontsize=12, fontweight="bold", color="#78350F", va="top",
+        bbox={"facecolor": "#FFF3CD", "edgecolor": "#D97706", "linewidth": 1.2, "boxstyle": "round,pad=0.4"},
+    )
+
+
+def external_category_figure(report):
+    source = report["external_comparison"]
+    comparison = {**source, "providers": external_reference_providers(source, "v1")}
+    averages = category_reference_averages(report)
+    categories = (
+        ("harmful_content", "Harmful content\n(3 datasets)"),
+        ("jailbreak", "Jailbreak\n(3 datasets)"),
+        ("pii", "PII binary classification\n(2 datasets)"),
+    )
+    labels = [label for _, label in categories]
+    records = [
+        {row["provider"]: row for row in averages if row["category"] == category}
+        for category, _ in categories
+    ]
+    fig = six_metric_panels(comparison, labels, records, single_column=True)
+    reference_latency_log_axis(fig)
+    decorate(
+        fig, comparison, "Model reference averages by dataset category",
+        "v1 / threshold = 0.5 | equal dataset weights within each category | NOT sample-paired",
+        "Harmful content: ToxiGen, HateCheck, AEGIS2. Jailbreak: Detect-Jailbreak, Jailbreak-Classification, JailbreakHub.\n"
+        "PII: Nano-1K, Mini-10K; ordinary binary classification (present vs absent), not extraction or masking quality.\n"
+        "Current PII datasets contain positives only; AUROC is undefined.\n"
+        "Each metric is the arithmetic mean of per-dataset metrics, not pooled samples or F1 recomputed from means.\n"
+        "Missing required data or undefined metrics = N/A; category scopes are never reduced to available datasets.\n"
+        "Latency averages the same reference timings as the per-dataset chart; protocols differ and include failure waits.\n"
+        "Own successful samples / supplied aggregates; descriptive only, not a fair ranking.",
+        legend_style="bars", stacked=True,
+    )
+    highlight_pii_task(fig, stacked=True)
+    return fig
 
 
 def external_dataset_figure(report, prompt):
@@ -603,19 +688,7 @@ def external_dataset_figure(report, prompt):
     stacked = prompt == "v1"
     fig = six_metric_panels(comparison, labels, records, single_column=stacked)
     if stacked:
-        latency_axis = fig.axes[-1]
-        positive = [
-            bar.get_height() for bar in latency_axis.patches
-            if math.isfinite(bar.get_height()) and bar.get_height() > 0
-        ]
-        lower = min(positive) / 1.8 if positive else 1
-        upper = max(positive) * 3 if positive else 10
-        latency_axis.set_yscale("log")
-        latency_axis.set_ylim(lower, upper)
-        latency_axis.set_ylabel("ms / sample (log scale; lower is better)", fontsize=12)
-        for annotation in latency_axis.texts:
-            if annotation.xy[1] <= 0:
-                annotation.xy = (annotation.xy[0], lower * 1.1)
+        reference_latency_log_axis(fig)
     note = (
         "OpenJev 4B: four-run summary timing; local models prefer four-run log averages. 4B valid/error counts are unknown.\n"
     )
@@ -633,7 +706,7 @@ def external_dataset_figure(report, prompt):
             )
     note += (
         "N/A = missing quality, undefined metric, or incomplete timing; missing values are not zero.\n"
-        "Descriptive only, not a fair ranking. PII measures presence detection, not masking quality."
+        "Descriptive only, not a fair ranking. PII is ordinary binary classification (present vs absent), not masking quality."
     )
     decorate(
         fig, comparison, f"Model reference comparison: prompt {prompt}",
@@ -642,6 +715,7 @@ def external_dataset_figure(report, prompt):
         legend_style="bars",
         stacked=stacked,
     )
+    highlight_pii_task(fig, stacked=stacked)
     return fig
 
 
@@ -676,7 +750,7 @@ def external_averages_figure(report, datasets=None):
         + (", ".join(DATASET_NAMES[dataset] for dataset in timed_datasets) or "None")
         + ". Quality and latency dataset scopes can differ.\n"
         "APIs: v1 / 0.5 single-run timing. OpenJev 4B: supplied summary; 32B / Decision-1: supplied single-run timing.\n"
-        "PII positives-only metrics and eight-dataset supplementary means are reported separately on the page.\n"
+        "PII is ordinary binary classification (present vs absent), not masking quality; positives-only results are separate.\n"
         "Missing quality stays N/A; no shared timing subset = N/A latency. Timing protocols differ; not inference time.",
         legend_style="bars",
         stacked=True,
@@ -693,14 +767,21 @@ def three_dataset_averages_figure(report):
     }
     labels = [NAMES.get(row["provider"], row["provider"]) for row in rows]
     groups = [
-        "api" if row["provider"] in report["providers"]
+        "api" if (
+            row["provider"] in report["providers"]
+            or row["provider"] in report["external_comparison"].get("fine_tuned_models", {})
+        )
         else "internal" if row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
         else "dynamo" if row["provider"].startswith("Dynamo ") else "other"
         for row in rows
     ]
     boundaries = [index + 0.5 for index in range(len(rows) - 1) if groups[index] != groups[index + 1]]
-    fig, axes = plt.subplots(3, 2, figsize=(16, 20))
-    fig.subplots_adjust(left=0.16, right=0.98, top=0.91, bottom=0.14, hspace=0.38, wspace=0.6)
+    has_fine_tuned = bool(report["external_comparison"].get("fine_tuned_models"))
+    fig, axes = plt.subplots(3, 2, figsize=(20 if has_fine_tuned else 16, 20))
+    fig.subplots_adjust(
+        left=0.22 if has_fine_tuned else 0.16, right=0.98, top=0.91, bottom=0.14,
+        hspace=0.38, wspace=0.9 if has_fine_tuned else 0.6,
+    )
     for ax, metric, title in zip(
         axes.flat,
         METRICS,
@@ -717,6 +798,9 @@ def three_dataset_averages_figure(report):
                    else supplied_colors[row["provider"]] for row in rows],
             edgecolor="#263238", linewidth=0.4,
         )
+        for bar, row in zip(bars, rows):
+            if row["provider"] in report["external_comparison"].get("fine_tuned_models", {}):
+                bar.set(**bar_style(report["external_comparison"], row["provider"]))
         for bar, value in zip(bars, values):
             available = math.isfinite(value)
             ax.annotate(
@@ -754,6 +838,24 @@ def three_dataset_averages_figure(report):
         "Successful samples and timing protocols are not aligned; descriptive reference only, not a fair ranking.",
         fontsize=9, va="top",
     )
+    if report["external_comparison"].get("fine_tuned_models"):
+        models = report["external_comparison"]["fine_tuned_models"]
+        fig.legend(
+            handles=[
+                Patch(
+                    facecolor=COLORS[provider],
+                    **bar_style(report["external_comparison"], provider),
+                    label="Fine-tuned · 300M",
+                )
+                for provider in models
+            ],
+            loc="upper center", bbox_to_anchor=(0.5, 0.94), frameon=False, fontsize=10,
+        )
+        fig.text(
+            0.07, 0.025,
+            "\n".join(f"{model['display_name']} | model ID: {model['model_id']}" for model in models.values()),
+            fontsize=9, va="top",
+        )
     return fig
 
 
@@ -791,14 +893,16 @@ FIGURES = (
         "fig04_evaluation_coverage", coverage_figure, "Evaluation Coverage and Request Failures",
         "Coverage is successful samples / reference samples. Gray indicates an unavailable prediction file; "
         "hatching indicates a fully saved run in which every request failed. "
-        "PII rows show evaluation coverage only, not masking quality. Missing Laya results are not scored as zero.",
+        "PII is ordinary binary classification (PII present vs absent); rows show coverage, not masking quality. "
+        "Missing Laya results are not scored as zero.",
     ),
     (
         "fig05_dataset_metrics", dataset_metrics_figure, "Per-Dataset Performance Metrics",
         "Fixed prompt v1 and threshold 0.5; Accuracy, Precision, Recall, F1, AUROC and average latency (ms) "
         "are shown for all datasets. Quality metrics use each model's own successful samples, "
         "not a fair sample-aligned ranking; request errors are excluded from quality scores. "
-        "PII results measure presence detection, not masking quality; single-class AUROC is undefined. "
+        "PII is ordinary binary classification (PII present vs absent), not entity extraction or masking quality; "
+        "the current positives-only labels make AUROC undefined. "
         "Elapsed time is elapsed / processed from complete, matched logs, including network overhead and failure waits. "
         "Missing results, no successful predictions, undefined metrics or incomplete timing are N/A, never zero-filled. "
         "A run with all requests failed may still have recorded elapsed time.",
@@ -855,12 +959,29 @@ FIGURES = (
 
 EXTERNAL_FIGURES = (
     (
+        "fig14_category_reference_averages", external_category_figure,
+        "Dataset-Category Multi-Model Reference Averages (v1 / Threshold 0.5)",
+        "Fixed prompt v1 and threshold 0.5. Harmful content averages ToxiGen, HateCheck and AEGIS2; "
+        "Jailbreak averages Detect-Jailbreak, Jailbreak-Classification and JailbreakHub; "
+        "PII averages Nano-1K and Mini-10K. Every dataset within a category has equal weight. "
+        "All six metrics are averaged separately from per-dataset values; F1 is not recomputed from mean Precision/Recall. "
+        "Missing required data or undefined metrics remain N/A; no category drops datasets to fill missing values. "
+        "PII is ordinary binary classification (PII present vs absent), not entity extraction or masking quality. "
+        "Its current labels contain positives only, so AUROC is undefined. "
+        "Quality uses each model's own successful samples or supplied aggregates, not sample-aligned comparisons. "
+        "Latency averages the reference timings used in the per-dataset chart, including network and failure waits; "
+        "single-run and four-run timing protocols differ and are reference-only. "
+        "Historical PII and other models' snapshots are retained; categories need not share an evaluation date. "
+        "Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details.",
+    ),
+    (
         "fig10_openjev_reference_v1", lambda report: external_dataset_figure(report, "v1"),
         "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5)",
         "Fixed threshold 0.5. The original OpenJev is labeled 4B; OpenJev 32B and Microsoft Decision-1 have v1 summaries only. "
         "Internal models use user-supplied aggregate results; other models use their own successful samples. "
         "Sample-level alignment with OpenJev is unavailable, so this is not a fair ranking. "
-        "The Rows field counts total rows, not valid samples. PII measures presence detection only; single-class AUROC is N/A. "
+        "The Rows field counts total rows, not valid samples. "
+        "PII is ordinary binary classification (PII present vs absent), not extraction or masking quality; single-class AUROC is N/A. "
         "The original four models prefer complete four-run averages for timing. "
         "For local APIs in v1, when no complete four-run mean is available, elapsed/processed from a complete "
         "threshold-0.5 run is used only if log counts match the full CSV. "
@@ -888,6 +1009,7 @@ EXTERNAL_FIGURES = (
         "Multi-Model Reference Averages (v1 / Threshold 0.5)",
         "Fixed prompt v1 and threshold 0.5; only v1 is shown. "
         "The main charts give equal weight to six jointly tested non-PII datasets. "
+        "PII is ordinary binary classification (PII present vs absent), not extraction or masking quality. "
         "The two PII datasets are summarized separately, and the eight-dataset averages are supplementary only. "
         "AUROC is undefined for both the PII and all-eight-dataset scopes and remains N/A. "
         "Average Accuracy, Precision, Recall, F1, AUROC and latency are shown. "
@@ -993,6 +1115,8 @@ h1{margin-bottom:6px}
 .report-actions a{padding:8px 16px;border:1px solid #174c90;border-radius:6px;background:white;text-decoration:none;font-weight:600}
 .report-actions .primary-action{background:#174c90;color:white}
 .report-note{padding:10px 14px;border-left:3px solid #607d8b;background:white;font-size:14px}
+.pii-task-notice{margin:18px 0;padding:16px 20px;background:#FFF3CD;color:#78350F;border:1px solid #D97706;border-left:6px solid #D97706;border-radius:6px}
+.pii-task-notice strong{display:block;font-size:19px;font-weight:800;line-height:1.5}
 .report-resources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;margin:20px 0}
 .report-resources>details{padding:12px 16px;background:white;border:1px solid #D8DDE3;border-radius:6px;min-width:0}
 .report-resources p{font-size:14px}
@@ -1000,6 +1124,7 @@ summary{cursor:pointer;font-weight:600}
 .model-legend{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
 .model-legend li{display:flex;gap:8px;font-size:13px;white-space:pre-line}
 .legend-swatch{flex:0 0 14px;height:14px;margin-top:5px;border:1px solid #263238}
+.legend-swatch.fine-tuned-swatch{background-image:repeating-linear-gradient(135deg,#172438 0,#172438 1px,transparent 1px,transparent 5px);border:2px solid #172438}
 .metric-panel{margin:24px 0}.metric-downloads{font-size:14px}
 .reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
 .reference-grid .metric-panel{margin:0;min-width:0}
@@ -1086,8 +1211,14 @@ def write_paper_figures(report, output_dir, dpi=300):
         }
         if comparison.get("internal_source"):
             manifest["external_comparison"]["internal_source"] = comparison["internal_source"]
+        if comparison.get("fine_tuned_models"):
+            manifest["external_comparison"]["fine_tuned_models"] = comparison["fine_tuned_models"]
     with plt.rc_context(STYLE), PdfPages(output_dir / "paper_figures.pdf") as bundle:
         for stem, builder, title, caption in figures:
+            if stem in {item[0] for item in EXTERNAL_FIGURES} and stem != "fig11_openjev_reference_v2":
+                note = fine_tuned_note(report)
+                if note:
+                    caption += " " + note.replace("\n", " ")
             scoped_title = title
             if stem in (
                 "fig03_threshold_sensitivity", "fig05_dataset_metrics", "fig06_model_averages",
@@ -1105,7 +1236,10 @@ def write_paper_figures(report, output_dir, dpi=300):
                 for extension in ("png", "svg", "pdf"):
                     fig.savefig(output_dir / f"{stem}.{extension}", dpi=dpi)
                 bundle.savefig(fig)
-                if stem in ("fig10_openjev_reference_v1", "fig12_openjev_reference_averages", "fig13_three_dataset_averages"):
+                if stem in (
+                    "fig10_openjev_reference_v1", "fig12_openjev_reference_averages",
+                    "fig13_three_dataset_averages", "fig14_category_reference_averages",
+                ):
                     fig.canvas.draw()
                     renderer = fig.canvas.get_renderer()
                     axes = dict(zip(METRICS, fig.axes))
@@ -1132,6 +1266,40 @@ def write_paper_figures(report, output_dir, dpi=300):
     write_latex_table(report, output_dir / "table01_baseline.tex")
     scope_averages = []
     if report.get("external_comparison"):
+        category_averages = category_reference_averages(report)
+        with (output_dir / "category_reference_averages.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(category_averages[0]))
+            writer.writeheader()
+            writer.writerows({**row, "datasets": ",".join(row["datasets"])} for row in category_averages)
+        manifest["external_comparison"]["category_averages_csv"] = "category_reference_averages.csv"
+        if report["external_comparison"].get("fine_tuned_models"):
+            providers = report["external_comparison"]["fine_tuned_models"]
+            fine_tuned_runs = [
+                row for row in report["external_comparison"]["runs"] if row["provider"] in providers
+            ]
+            with (output_dir / "fine_tuned_model_runs.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+                writer = csv.DictWriter(stream, fieldnames=list(fine_tuned_runs[0]))
+                writer.writeheader()
+                writer.writerows(fine_tuned_runs)
+            averages = [
+                {
+                    **row, "model": providers[row["provider"]]["model_id"],
+                    "display_name": providers[row["provider"]]["display_name"],
+                }
+                for row in category_averages if row["provider"] in providers
+            ]
+            averages.extend(
+                {
+                    "category": "non_pii", **row, "model": providers[row["provider"]]["model_id"],
+                    "display_name": providers[row["provider"]]["display_name"], "threshold": 0.5,
+                }
+                for row in report["external_comparison"]["overview"]
+                if row["provider"] in providers and row["prompt"] == "v1"
+            )
+            with (output_dir / "fine_tuned_model_averages.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+                writer = csv.DictWriter(stream, fieldnames=list(averages[0]))
+                writer.writeheader()
+                writer.writerows({**row, "datasets": ",".join(row["datasets"])} for row in averages)
         scope_averages = v1_reference_scope_averages(report)
         with (output_dir / "v1_reference_scope_averages.csv").open("w", encoding="utf-8-sig", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=list(scope_averages[0]))
@@ -1145,6 +1313,12 @@ def write_paper_figures(report, output_dir, dpi=300):
         json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8",
     )
     cards, linked_figures = {}, []
+    pii_notice = (
+        '<aside class="pii-task-notice" aria-label="PII task definition">'
+        "<strong>PII = ordinary binary classification (PII present vs absent).</strong>"
+        "Not entity extraction or masking quality. "
+        "The current datasets contain positives only, so AUROC is undefined.</aside>"
+    )
     for figure in manifest["figures"]:
         downloads = " | ".join(
             f'<a href="{filename}">{extension.upper()}</a>'
@@ -1173,7 +1347,9 @@ def write_paper_figures(report, output_dir, dpi=300):
             focused = figure["name"] == "fig13_three_dataset_averages"
             averaged = figure["name"] == "fig12_openjev_reference_averages"
             legend = "" if focused else '<ul class="model-legend">' + "".join(
-                '<li><span class="legend-swatch" style="background:' + COLORS[provider] + '"></span>'
+                '<li><span class="legend-swatch'
+                + (" fine-tuned-swatch" if provider in report["external_comparison"].get("fine_tuned_models", {}) else "")
+                + '" style="background-color:' + COLORS[provider] + '"></span>'
                 + html.escape(model_label(report["external_comparison"], provider)) + "</li>"
                 for provider in report["external_comparison"]["providers"]
             ) + "</ul>"
@@ -1226,11 +1402,21 @@ def write_paper_figures(report, output_dir, dpi=300):
                     + "<details><summary>Methodology and data scope</summary><p>"
                     + html.escape(figure["caption"]) + "</p></details>"
                 )
+        if figure["name"] in {item[0] for item in EXTERNAL_FIGURES} and figure["name"] != "fig11_openjev_reference_v2":
+            note = fine_tuned_note(report)
+            if note:
+                content = '<p class="report-note">' + html.escape(note).replace("\n", "<br>") + "</p>" + content
+        if figure["name"] in (
+            "fig14_category_reference_averages", "fig10_openjev_reference_v1", "fig11_openjev_reference_v2",
+        ):
+            content = pii_notice + content
         if figure["name"] == "fig12_openjev_reference_averages":
             content += (
-                "<h3>PII presence detection — two-dataset averages (v1 / threshold 0.5)</h3>"
-                "<p>Positives-only datasets: AUROC is undefined. These results measure PII presence detection, "
-                "not masking quality, and are separate from the non-PII main chart.</p>"
+                "<h3>PII binary classification — two-dataset averages (v1 / threshold 0.5)</h3>"
+                + pii_notice +
+                "<p>Ordinary binary classification: PII present vs absent, not entity extraction or masking quality. "
+                "The current datasets contain positives only, so AUROC is undefined. "
+                "These results are separate from the non-PII main chart.</p>"
                 + reference_scope_table([row for row in scope_averages if row["scope"] == "pii"])
                 + "<details><summary>All eight datasets — supplementary averages (PII included)</summary>"
                 "<p>Supplementary only: combining PII and non-PII tasks can inflate classification averages. "
@@ -1253,6 +1439,23 @@ def write_paper_figures(report, output_dir, dpi=300):
             )
         else:
             card = "<section><h2>" + html.escape(card_title) + "</h2>" + content + "</section>"
+        if figure["name"] == "fig14_category_reference_averages":
+            content_link = (
+                '<p><a href="category_reference_comparison.html">Open dataset-category comparison page</a> | '
+                '<a href="category_reference_averages.csv">Download category averages CSV</a></p>'
+            )
+            card = card.replace("</h2>", "</h2>" + content_link, 1)
+            page = gallery_header(figure["title"])
+            page += '<p><a href="index.html">Back to the full figure gallery</a></p>'
+            page += "<p>Data snapshot (UTC): " + html.escape(report["generated_at"]) + "</p>"
+            standalone_card = card
+            for panel in figure["panels"]:
+                image_data = base64.b64encode((output_dir / panel["files"]["png"]).read_bytes()).decode("ascii")
+                standalone_card = standalone_card.replace(
+                    f'src="{panel["files"]["svg"]}"', f'src="data:image/png;base64,{image_data}"',
+                )
+            page += standalone_card + "</main></html>\n"
+            (output_dir / "category_reference_comparison.html").write_text(page, encoding="utf-8")
         if figure["name"] == "fig13_three_dataset_averages":
             averages = three_dataset_averages(report)
             with (output_dir / "three_dataset_averages.csv").open("w", encoding="utf-8-sig", newline="") as stream:
@@ -1282,7 +1485,7 @@ def write_paper_figures(report, output_dir, dpi=300):
         '<a class="primary-action" href="paper_figures.pdf">Download Figures (PDF)</a>'
         '<a href="../comparison.html">View Evaluation Report</a></nav>'
         '<p class="report-note">Reference comparisons use different successful samples and timing protocols; '
-        'they are not fair rankings.</p>'
+        'they are not fair rankings. PII is ordinary binary classification (present vs absent), not masking quality.</p>'
         '<div class="report-resources"><details><summary>Data &amp; Downloads</summary>'
         '<p>PDF and SVG are vector formats; PNG defaults to 300 DPI.</p>'
         '<p><a href="table01_baseline.tex">Download the LaTeX comparison table</a></p>'
@@ -1306,6 +1509,11 @@ def write_paper_figures(report, output_dir, dpi=300):
                 '<p>Additional internal models (v1 / 0.5 only): '
                 '<a href="../internal_model_summary.csv">OpenJev 32B / Microsoft Decision-1 summary CSV</a></p>'
             )
+        if report["external_comparison"].get("fine_tuned_models"):
+            gallery += (
+                '<p>Fine-tuned model: <a href="fine_tuned_model_runs.csv">Per-dataset summary CSV</a> | '
+                '<a href="fine_tuned_model_averages.csv">Category and six-dataset averages CSV</a></p>'
+            )
     gallery += (
         '</details><details><summary>Methodology &amp; Limitations</summary>'
         "<p>Model identities were supplied by the user; TypeSafe's resolved model must be confirmed by an API response.</p>"
@@ -1322,7 +1530,7 @@ def write_paper_figures(report, output_dir, dpi=300):
     card_order = list(cards)
     if report.get("external_comparison"):
         leading = [
-            "fig13_three_dataset_averages", "fig10_openjev_reference_v1",
+            "fig13_three_dataset_averages", "fig14_category_reference_averages", "fig10_openjev_reference_v1",
             "fig12_openjev_reference_averages", "fig04_evaluation_coverage",
         ]
         card_order = leading + [name for name in card_order if name not in leading]

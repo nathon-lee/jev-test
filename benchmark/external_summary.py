@@ -1,14 +1,26 @@
 """Reference-only comparisons with user-supplied aggregate results."""
 
 import csv
+import hashlib
+import json
 import math
+from pathlib import Path
 from statistics import mean
 
-from benchmark.comparison import DATASETS, PROMPTS, THRESHOLDS
+from benchmark.comparison import (
+    DATASETS, PROGRESS, PROMPTS, START, THRESHOLDS,
+    classification_metrics, read_predictions, read_reference,
+)
 
 
 METRICS = ("accuracy", "precision", "recall", "f1", "auroc", "mean_elapsed_ms")
+FINE_TUNED_DISPLAY_NAME = "gliguard-LLMGuardrails-300M-fine-tuned"
 FOCUSED_DATASETS = ("toxigen", "hatecheck", "aegis2")
+DATASET_CATEGORIES = {
+    "harmful_content": ("toxigen", "hatecheck", "aegis2"),
+    "jailbreak": ("detect-jailbreak", "jailbreak-classification", "jailbreakhub"),
+    "pii": ("pii_masking_nano_1k", "pii_masking_mini_10k"),
+}
 FOCUSED_SUPPLIED_AVERAGES = (
     ("Dynamo CPU", 0.8965, 0.8888, 0.9086, 0.9527, 20000.0),
     ("Dynamo GPU (A100)", 0.8941, 0.8869, 0.9106, 0.9524, 55.0),
@@ -153,6 +165,49 @@ def reference_averages(records, providers, datasets=None, include_pii=False):
     return overview
 
 
+def category_reference_averages(report):
+    comparison = report["external_comparison"]
+    records = [
+        row for row in comparison["runs"]
+        if row["prompt"] == "v1" and row["threshold"] == 0.5
+    ]
+    result = []
+    for category, datasets in DATASET_CATEGORIES.items():
+        for provider in comparison["providers"]:
+            rows = reference_averages(records, [provider], datasets, include_pii=True)
+            result.extend(
+                {"category": category, **row, "threshold": 0.5}
+                for row in rows if row["prompt"] == "v1"
+            )
+    return result
+
+
+def reference_comparison_averages(comparison, datasets=None, include_pii=False):
+    additional = comparison.get("fine_tuned_models", {})
+    providers = [provider for provider in comparison["providers"] if provider not in additional]
+    rows = reference_averages(comparison["runs"], providers, datasets, include_pii=include_pii)
+    if not additional:
+        return rows
+    for provider in additional:
+        prompts = {
+            row["prompt"] for row in comparison["runs"] if row["provider"] == provider
+        }
+        for prompt in prompts:
+            scope = next(row["datasets"] for row in rows if row["prompt"] == prompt)
+            if not scope:
+                continue
+            rows.extend(
+                row for row in reference_averages(
+                    comparison["runs"], [provider], scope, include_pii=include_pii,
+                ) if row["prompt"] == prompt
+            )
+    lookup = {(row["provider"], row["prompt"]): row for row in rows}
+    return [
+        lookup[(provider, prompt)] for prompt in PROMPTS for provider in comparison["providers"]
+        if (provider, prompt) in lookup
+    ]
+
+
 def v1_reference_scope_averages(report, datasets=None):
     comparison = report["external_comparison"]
     raw = {
@@ -164,7 +219,10 @@ def v1_reference_scope_averages(report, datasets=None):
         if row["prompt"] != "v1":
             continue
         key = (row["provider"], row["dataset"])
-        if row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES:
+        if (
+            row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
+            or row["provider"] in comparison.get("fine_tuned_models", {})
+        ):
             timing[key] = row["mean_elapsed_ms"]
         else:
             run = raw.get(key)
@@ -178,8 +236,8 @@ def v1_reference_scope_averages(report, datasets=None):
         ("all", list(DATASETS), True),
     ):
         rows = [
-            row for row in reference_averages(
-                comparison["runs"], comparison["providers"], selected, include_pii=include_pii,
+            row for row in reference_comparison_averages(
+                comparison, selected, include_pii=include_pii,
             ) if row["prompt"] == "v1"
         ]
         scope_datasets = rows[0]["datasets"] if rows else []
@@ -202,7 +260,7 @@ def v1_reference_scope_averages(report, datasets=None):
 def three_dataset_averages(report):
     comparison = report["external_comparison"]
     overview = [
-        row for row in reference_averages(comparison["runs"], comparison["providers"], FOCUSED_DATASETS)
+        row for row in reference_comparison_averages(comparison, FOCUSED_DATASETS)
         if row["prompt"] == "v1"
     ]
     timing = {
@@ -210,7 +268,10 @@ def three_dataset_averages(report):
         for row in report["runs"] if row["prompt"] == "v1" and row["threshold"] == 0.5
     }
     for row in overview:
-        if row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES:
+        if (
+            row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
+            or row["provider"] in comparison.get("fine_tuned_models", {})
+        ):
             continue
         runs = [timing.get((row["provider"], dataset)) for dataset in FOCUSED_DATASETS]
         row["mean_elapsed_ms"] = mean(run["mean_elapsed_ms"] for run in runs) if all(
@@ -224,6 +285,94 @@ def three_dataset_averages(report):
             "f1": None, "auroc": auroc, "mean_elapsed_ms": latency,
         })
     return overview
+
+
+def attach_finetuned_run(report, run_dir, log_path, data_dir=Path("data/prepared")):
+    from benchmark.provider_suite import resolve_provider
+
+    run_dir, log_path, data_dir = Path(run_dir), Path(log_path), Path(data_dir)
+    metadata = json.loads((run_dir / "run_metadata.json").read_text(encoding="utf-8"))
+    provider = metadata["provider"]
+    if provider != "fastino-ft-gg6-r1-ml2048-s7" or metadata["model"] != resolve_provider(provider)["model"]:
+        raise ValueError("Unsupported fine-tuned model identity.")
+    if (
+        metadata["prompt_version"] != "v1" or metadata["decision_threshold"] != 0.5
+        or metadata["datasets"] != list(DATASETS)[:6]
+    ):
+        raise ValueError("Fine-tuned comparison requires the first six datasets at v1 / 0.5.")
+    tasks, timings = {}, {}
+    text = log_path.read_text(encoding="utf-8")
+    if f"MODEL_ID={metadata['model']}" not in text:
+        raise ValueError("Fine-tuned log does not identify the requested model ID.")
+    for match in START.finditer(text):
+        name, dataset, prompt, threshold, total = match.groups()
+        if name != provider or prompt != "v1" or float(threshold) != 0.5 or dataset in tasks:
+            raise ValueError("Fine-tuned log must contain one unambiguous v1 / 0.5 task per dataset.")
+        tasks[dataset] = int(total)
+    for match in PROGRESS.finditer(text):
+        count, total, name, dataset, prompt, elapsed = match.groups()
+        if name != provider or prompt != "v1" or dataset not in tasks:
+            raise ValueError("Fine-tuned progress does not match the recorded tasks.")
+        current = int(count), int(total), float(elapsed)
+        previous = timings.get(dataset)
+        if (
+            current[1] != tasks[dataset] or not 0 < current[0] <= current[1]
+            or not math.isfinite(current[2]) or current[2] < 0
+            or (previous and (current[0] < previous[0] or current[2] < previous[2]))
+        ):
+            raise ValueError("Invalid fine-tuned log progress.")
+        timings[dataset] = current
+    if set(tasks) != set(metadata["datasets"]):
+        raise ValueError("Fine-tuned log does not cover the expected datasets.")
+    records = []
+    for dataset in metadata["datasets"]:
+        reference_path = data_dir / DATASETS[dataset]
+        expected_hash = metadata["input_sha256"][str(Path("data/prepared") / DATASETS[dataset])]
+        if hashlib.sha256(reference_path.read_bytes()).hexdigest() != expected_hash:
+            raise ValueError(f"{dataset}: fine-tuned run reference fingerprint mismatch.")
+        reference = read_reference(reference_path)
+        path = run_dir / provider / f"{dataset}_v1_t0.5.csv"
+        frame, count, errors = read_predictions(path, reference, provider, dataset, "v1", 0.5)
+        timing = timings.get(dataset)
+        if not timing or timing[0] != timing[1] or timing[0] != count or count != len(reference):
+            raise ValueError(f"{dataset}: fine-tuned result and complete log counts must match.")
+        records.append({
+            "provider": provider, "model": metadata["model"], "dataset": dataset,
+            "display_name": FINE_TUNED_DISPLAY_NAME,
+            "prompt": "v1", "threshold": 0.5, "file": str(path),
+            "status": "complete", "expected": len(reference), "rows": count,
+            "valid": len(frame), "errors": count - len(frame),
+            "error_categories": errors, "source_kind": "fine_tuned_predictions",
+            "mean_elapsed_ms": timing[2] * 1000 / count,
+            "latency_source_kind": "single_complete_run", "latency_log_file": str(log_path),
+            **classification_metrics(frame.values()),
+        })
+    comparison = report["external_comparison"]
+    comparison["runs"] = [
+        row for row in comparison["runs"] if row["provider"] != provider
+    ] + records
+    if provider not in comparison["providers"]:
+        comparison["providers"].insert(comparison["providers"].index("fastino.ai") + 1, provider)
+    comparison["model_identities"][provider] = {
+        "request_model": metadata["model"], "resolved_model": metadata["model"],
+        "display_name": FINE_TUNED_DISPLAY_NAME, "base_model": metadata["base_model"],
+    }
+    comparison.setdefault("display_names", {})[provider] = FINE_TUNED_DISPLAY_NAME
+    comparison.setdefault("fine_tuned_models", {})[provider] = {
+        "run_dir": str(run_dir), "log_file": str(log_path), "model_id": metadata["model"],
+        "display_name": FINE_TUNED_DISPLAY_NAME, "training_name": metadata["display_name"],
+        "rows": sum(row["rows"] for row in records),
+        "valid": sum(row["valid"] for row in records),
+        "errors": sum(row["errors"] for row in records),
+        "notes": (
+            "v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, "
+            "not GLiDE Noul. Quality excludes failed requests; no input truncation. "
+            "Single-run elapsed includes original failure waits but excludes post-run retries. "
+            "PII, v2 and repeat consistency were not tested. Training/evaluation overlap was not verified. "
+            "Not a sample-aligned ranking."
+        ),
+    }
+    comparison["overview"] = reference_comparison_averages(comparison)
 
 
 def attach_openjev_summary(report, path, internal_summary_path=None):

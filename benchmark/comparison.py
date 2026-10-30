@@ -725,7 +725,8 @@ def conclusions(report):
             + "。建议优先核对返回分数语义及接口解析；当前数据不能直接区分模型能力弱与分数映射问题，不自动翻转分数。"
         )
     notes.append(
-        "PII 数据全是正样本，恒预测“含 PII”即可获得 100% 检出率；"
+        "PII 是“是否含 PII”的普通二分类，不是实体抽取或脱敏任务。当前数据全是正样本，"
+        "恒预测“含 PII”即可获得 100% 检出率；"
         "现有输出没有脱敏文本，不能评价实体定位、泄露率或脱敏质量，不应据此选定脱敏模型。"
     )
     notes.append(
@@ -793,7 +794,8 @@ def report_sections(report):
         "Avg latency 则对共同基线各数据集的整轮平均耗时等权平均，缺少任一完整计时即不提供均值。"
         "它使用全部处理样本，质量指标则使用共同成功样本。没有单请求计时，不能计算请求 P50/P95/P99。"
         "报告不会从 50 条进度块伪造请求分位数。\n\n"
-        "PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无定义；"
+        "**PII 是“是否含 PII”的普通二分类，不是脱敏质量评测。** 当前数据只有正样本，仅报告正样本检出率，"
+        "单类 AUROC、误报率、平衡准确率无定义；"
         "没有预测脱敏文本，不计算 masking/span 指标。"
         "未输出原始文本、敏感字段或完整错误内容；报告可离线打开，无 CDN、无联网请求。"
     )))
@@ -920,7 +922,7 @@ def report_sections(report):
             ] for r in report["stability_overview"]],
         )
     )))
-    sections.append(("PII 检出（不是脱敏质量）", markdown_table(
+    sections.append(("PII 普通二分类（是否含 PII，不是脱敏质量）", markdown_table(
         ["数据集", "供应商 / 模型", "提示词 / 阈值", "状态", "有效/预期", "正样本检出率"],
         [[
             r["dataset"], f"{r['provider']} / {r['model']}", f"{r['prompt']} / {r['threshold']}",

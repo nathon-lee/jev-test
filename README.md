@@ -157,6 +157,25 @@ python scripts/run_model_suite.py --providers all --datasets all --prompt-versio
 - If provider-side rate limits are strict, lower this number
 
 `--limit` controls the maximum number of rows processed for each dataset in each benchmark task.
+
+Fine-tuned Fastino `gg6-r1-ml2048-s7 v1` uses the separate provider
+`fastino-ft-gg6-r1-ml2048-s7` and model ID `c94233af-98e6-4942-8e26-98ad204851bf`.
+It calls `/v1/chat/completions`, uses each dataset's prompt as the classification task,
+and reads the `unsafe` confidence directly from the `safe`/`unsafe` classification scores.
+Both scores are requested with API threshold zero; `--thresholds` controls the benchmark
+decision threshold, not the API's score filtering. Scores are not complemented or normalized.
+This schema-based encoder protocol differs from GLiDE's Noul questions.
+Use a new output root for each run to preserve earlier results:
+
+```bash
+python -m scripts.run_model_suite --providers fastino-ft-gg6-r1-ml2048-s7 \
+  --datasets toxigen,hatecheck,aegis2,detect-jailbreak,jailbreak-classification,jailbreakhub \
+  --prompt-versions v1 --thresholds 0.5 --max-workers 6 \
+  --output-dir "outputs/finetuned/$(date -u +%Y%m%dT%H%M%SZ)"
+```
+
+Results are saved below the specified root in a provider subdirectory.
+This provider is opt-in and is not included in `--providers all`.
 - Example: `--limit 100` means each dataset run uses at most 100 samples.
 
 Fastino and Laya classification scores are read strictly from `answers.score.noul`,
@@ -342,6 +361,14 @@ OpenJev 取所提供汇总表中对应配置的耗时。其他参考图仍保留
 报告入口为 `outputs/comparison/comparison.html`，图表入口为
 `outputs/comparison/figures/index.html`。
 
+图表入口在 v1 逐数据集参考对比之前提供按类别均值页，另可直接打开
+`outputs/comparison/figures/category_reference_comparison.html`。
+有害内容取 ToxiGen、HateCheck、AEGIS2，Jailbreak 取 Detect-Jailbreak、
+Jailbreak-Classification、JailbreakHub，PII 取 Nano-1K、Mini-10K；
+固定 v1 / 0.5，各类别内按数据集等权平均六项指标，不合并样本，也不从平均查准率、
+召回率反推 F1。缺失指标不缩减范围，PII AUROC 保持 N/A。
+`category_reference_averages.csv` 导出类别均值，PNG / SVG / PDF 与各指标下载沿用原参考页格式。
+
 如果只需要生成对比报告，不绘图：
 
 ```bash
@@ -378,7 +405,8 @@ python -m scripts.compare_models --providers fastino.ai,typesafe.ai --output-dir
 
 公平基线固定为 `v1 / 0.5`，只比较共同完整落盘的数据集及共同成功样本；缺测不计零分。
 报告还包含两两共同基线，让已完成模型利用更多共同数据集比较；不同配对的分数不混排。
-PII 目前只有全正样本分类输出，不能用于评价实际脱敏质量。
+PII 是“是否含 PII”的普通二分类，不是实体抽取或脱敏质量评测。
+当前数据只有正样本，AUROC、误报率和平衡准确率无定义，不能据此评价实际脱敏质量。
 日志只能给出整轮平均每样本耗时，不能据此计算单请求 P95。
 报告按用户补充的模型身份区分请求、解析、服务和路由名称：
 
@@ -397,6 +425,26 @@ PII 目前只有全正样本分类输出，不能用于评价实际脱敏质量�
 ```bash
 python -m scripts.plot_model_comparison
 ```
+
+将独立保存的 `gg6-r1-ml2048-s7 v1` 微调结果加入现有参考对比，不重读或替换其他模型快照：
+
+```bash
+python -m scripts.plot_model_comparison \
+  --fine-tuned-run outputs/finetuned/20261030T010837Z \
+  --fine-tuned-log logs/fastino_ft_gg6-r1-ml2048-s7_20261030T010837Z.log
+```
+
+微调模型显示为 `gliguard-LLMGuardrails-300M-fine-tuned`，图例及页面注明完整模型 ID
+`c94233af-98e6-4942-8e26-98ad204851bf`。仅加入 v1 / 0.5 的逐数据集、
+类别均值、六集均值和三集参考图，不加入原共同成功样本基线、v2 或重复调用一致性。
+微调柱统一使用紫红色、斜线纹理与 1.5 pt 深色边框，图例标注 Fine-tuned · 300M；
+其他柱保留原样，不改变柱宽或指标。
+PII 未测，保留 N/A，不影响其他模型的原 PII 均值。导出
+`figures/fine_tuned_model_runs.csv` 和 `figures/fine_tuned_model_averages.csv`，
+披露有效/错误行数；耗时为完整主轮 elapsed/processed，不包含主轮后补跑。
+分数为独立 `unsafe` confidence，与原 GLiDE Noul 协议不同；
+训练集与评估集是否重叠尚未核验，图表仅作参考。
+加入后可用无参数重绘命令保留该模型；增量比较命令也会从保存的来源重新合并微调结果。
 
 打开 `outputs/comparison/figures/index.html` 查看以下图表；页面说明、图注、链接及数据警告均使用英文：
 首页概览保留 PDF 与完整报告入口、UTC 数据快照及简短可比性提示；

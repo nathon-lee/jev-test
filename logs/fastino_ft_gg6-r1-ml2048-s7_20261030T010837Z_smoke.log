@@ -1,0 +1,37 @@
+Providers: ['fastino-ft-gg6-r1-ml2048-s7']
+Datasets: ['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']
+Prompt versions: ['v1']
+Thresholds: [0.5]
+Max workers: 6
+
+=== fastino-ft-gg6-r1-ml2048-s7 | toxigen | v1 | threshold=0.5 ===
+
+=== fastino-ft-gg6-r1-ml2048-s7 | hatecheck | v1 | threshold=0.5 ===
+
+=== fastino-ft-gg6-r1-ml2048-s7 | aegis2 | v1 | threshold=0.5 ===
+
+=== fastino-ft-gg6-r1-ml2048-s7 | detect-jailbreak | v1 | threshold=0.5 ===
+
+=== fastino-ft-gg6-r1-ml2048-s7 | jailbreak-classification | v1 | threshold=0.5 ===
+
+=== fastino-ft-gg6-r1-ml2048-s7 | jailbreakhub | v1 | threshold=0.5 ===
+Running benchmark for fastino-ft-gg6-r1-ml2048-s7 | aegis2 | v1 | threshold=0.5 | total_rows=1
+Running benchmark for fastino-ft-gg6-r1-ml2048-s7 | hatecheck | v1 | threshold=0.5 | total_rows=1
+Running benchmark for fastino-ft-gg6-r1-ml2048-s7 | jailbreak-classification | v1 | threshold=0.5 | total_rows=1
+Running benchmark for fastino-ft-gg6-r1-ml2048-s7 | toxigen | v1 | threshold=0.5 | total_rows=1
+Running benchmark for fastino-ft-gg6-r1-ml2048-s7 | detect-jailbreak | v1 | threshold=0.5 | total_rows=1
+Running benchmark for fastino-ft-gg6-r1-ml2048-s7 | jailbreakhub | v1 | threshold=0.5 | total_rows=1
+Progress: 1/1 (100.0%) | provider=fastino-ft-gg6-r1-ml2048-s7 | dataset=aegis2 | prompt=v1 | elapsed=0.60743193s
+[1/6] Saved: outputs/finetuned/20261030T010837Z/smoke/fastino-ft-gg6-r1-ml2048-s7/aegis2_v1_t0.5.csv (fastino-ft-gg6-r1-ml2048-s7 | aegis2 | v1 | t=0.5 | rows=1)
+Progress: 1/1 (100.0%) | provider=fastino-ft-gg6-r1-ml2048-s7 | dataset=jailbreak-classification | prompt=v1 | elapsed=0.78239794s
+[2/6] Saved: outputs/finetuned/20261030T010837Z/smoke/fastino-ft-gg6-r1-ml2048-s7/jailbreak-classification_v1_t0.5.csv (fastino-ft-gg6-r1-ml2048-s7 | jailbreak-classification | v1 | t=0.5 | rows=1)
+Progress: 1/1 (100.0%) | provider=fastino-ft-gg6-r1-ml2048-s7 | dataset=detect-jailbreak | prompt=v1 | elapsed=0.58658257s
+[3/6] Saved: outputs/finetuned/20261030T010837Z/smoke/fastino-ft-gg6-r1-ml2048-s7/detect-jailbreak_v1_t0.5.csv (fastino-ft-gg6-r1-ml2048-s7 | detect-jailbreak | v1 | t=0.5 | rows=1)
+Progress: 1/1 (100.0%) | provider=fastino-ft-gg6-r1-ml2048-s7 | dataset=toxigen | prompt=v1 | elapsed=0.84180383s
+Progress: 1/1 (100.0%) | provider=fastino-ft-gg6-r1-ml2048-s7 | dataset=jailbreakhub | prompt=v1 | elapsed=0.48167993s
+[4/6] Saved: outputs/finetuned/20261030T010837Z/smoke/fastino-ft-gg6-r1-ml2048-s7/toxigen_v1_t0.5.csv (fastino-ft-gg6-r1-ml2048-s7 | toxigen | v1 | t=0.5 | rows=1)
+[5/6] Saved: outputs/finetuned/20261030T010837Z/smoke/fastino-ft-gg6-r1-ml2048-s7/jailbreakhub_v1_t0.5.csv (fastino-ft-gg6-r1-ml2048-s7 | jailbreakhub | v1 | t=0.5 | rows=1)
+Progress: 1/1 (100.0%) | provider=fastino-ft-gg6-r1-ml2048-s7 | dataset=hatecheck | prompt=v1 | elapsed=28.36035164s
+[6/6] Saved: outputs/finetuned/20261030T010837Z/smoke/fastino-ft-gg6-r1-ml2048-s7/hatecheck_v1_t0.5.csv (fastino-ft-gg6-r1-ml2048-s7 | hatecheck | v1 | t=0.5 | rows=1)
+
+All benchmark runs are complete.

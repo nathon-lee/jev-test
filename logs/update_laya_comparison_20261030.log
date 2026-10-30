@@ -1,0 +1,29 @@
+fastino.ai/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+fastino.ai/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+fastino.ai/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+fastino.ai/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+fastino.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+fastino.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+fastino.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+laya-ai.com/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+laya-ai.com/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+laya-ai.com/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+laya-ai.com/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+laya-ai.com/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+laya-ai.com/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+typesafe.ai/detect-jailbreak_v1_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+typesafe.ai/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+typesafe.ai/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+typesafe.ai/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+typesafe.ai/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+typesafe.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+typesafe.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+typesafe.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+UPDATED: latest Laya v1/0.5; other model runs and reference records preserved.
+                 dataset  rows  valid  error  accuracy  precision   recall       f1    auroc
+                 toxigen  6789   6789      0  0.557667   0.908889 0.121329 0.214080 0.726583
+               hatecheck  3728   3728      0  0.701985   0.820106 0.725712 0.770027 0.772383
+                  aegis2  1964   1964      0  0.492872   0.811881 0.077432 0.141379 0.661411
+        detect-jailbreak 18258  18253      5  0.395880   0.144337 0.936354 0.250119 0.708369
+jailbreak-classification  1044   1044      0  0.996169   0.996205 0.996205 0.996205 0.999930
+            jailbreakhub 15140  15135      5  0.288272   0.111609 0.958689 0.199941 0.712603

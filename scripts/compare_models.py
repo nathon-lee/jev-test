@@ -31,6 +31,11 @@ def main():
         external = previous["external_comparison"]
         internal = args.internal_summary or (Path(external["internal_source"]) if external.get("internal_source") else None)
         attach_openjev_summary(report, Path(external["source"]), internal)
+    if previous and previous.get("external_comparison", {}).get("fine_tuned_models"):
+        from benchmark.external_summary import attach_finetuned_run
+
+        for model in previous["external_comparison"]["fine_tuned_models"].values():
+            attach_finetuned_run(report, Path(model["run_dir"]), Path(model["log_file"]), args.data_dir)
     write_report(report, args.output_dir)
     if args.paper_figures:
         from benchmark.paper_figures import write_paper_figures

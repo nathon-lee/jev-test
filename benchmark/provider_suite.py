@@ -1,3 +1,4 @@
+import json
 import math
 import os
 import re
@@ -46,6 +47,14 @@ PROVIDER_SPECS = {
         "base_url_env": "FASTINO_BASE_URL",
         "default_base_url": "https://api.fastino.ai/v1",
         "model": "fastino/GLiDE",
+        "auth": "bearer",
+    },
+    "fastino-ft-gg6-r1-ml2048-s7": {
+        "kind": "api_key",
+        "api_key_env": "FASTINO_API_KEY",
+        "base_url_env": "FASTINO_BASE_URL",
+        "default_base_url": "https://api.fastino.ai/v1",
+        "model": "c94233af-98e6-4942-8e26-98ad204851bf",
         "auth": "bearer",
     },
     "laya-ai.com": {
@@ -364,6 +373,79 @@ def _call_fastino_systemone(
     return _extract_systemone_noul(response_json, "fastino.ai")
 
 
+def _call_fastino_finetuned(
+    prompt: str,
+    text: str,
+    api_key: str | None,
+    base_url: str,
+    model: str,
+    timeout: float,
+    debug: bool = False,
+) -> float:
+    if not api_key:
+        raise RuntimeError("No API key configured for fine-tuned Fastino. Set FASTINO_API_KEY or pass --api-key.")
+    url = base_url.rstrip("/")
+    if not url.endswith("/chat/completions"):
+        url += "/chat/completions"
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": text}],
+        "schema": {
+            "classifications": [{
+                "task": prompt,
+                "labels": ["safe", "unsafe"],
+                "multi_label": True,
+                "cls_threshold": 0.0,
+                "top_k": 2,
+            }],
+        },
+        "threshold": 0.0,
+        "include_confidence": True,
+        "include_spans": True,
+        "store": False,
+    }
+    if debug:
+        print("[DEBUG][fastino-ft] URL:", url)
+        print("[DEBUG][fastino-ft] PAYLOAD:", payload)
+    response = httpx.post(
+        url,
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
+        json=payload,
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    result = response.json()
+    if not isinstance(result, dict) or result.get("model") != model:
+        raise ValueError("Fine-tuned Fastino response does not match the requested model ID.")
+    metadata = result.get("x_fastino")
+    if isinstance(metadata, dict) and metadata.get("truncated"):
+        raise ValueError("Fine-tuned Fastino truncated the input; full-input evaluation is required.")
+    choices = result.get("choices")
+    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+        raise ValueError("Fine-tuned Fastino response is missing choices[0].")
+    message = choices[0].get("message")
+    if not isinstance(message, dict) or not isinstance(message.get("content"), str):
+        raise ValueError("Fine-tuned Fastino response is missing JSON message content.")
+    content = json.loads(message["content"])
+    answers = content.get(prompt) if isinstance(content, dict) else None
+    if not isinstance(answers, list) or len(answers) != 2:
+        raise ValueError("Fine-tuned Fastino must return both safe and unsafe confidences.")
+    scores = {}
+    for answer in answers:
+        if not isinstance(answer, dict):
+            raise ValueError("Invalid fine-tuned Fastino classification answer.")
+        label, confidence = answer.get("label"), answer.get("confidence")
+        if not isinstance(label, str) or label not in ("safe", "unsafe") or label in scores:
+            raise ValueError("Fine-tuned Fastino must return distinct safe and unsafe labels.")
+        if (
+            isinstance(confidence, bool) or not isinstance(confidence, (int, float))
+            or not math.isfinite(confidence) or not 0 <= confidence <= 1
+        ):
+            raise ValueError("Fine-tuned Fastino confidence must be a finite number in [0, 1].")
+        scores[label] = float(confidence)
+    return scores["unsafe"]
+
+
 def _call_laya_systemone(
     prompt: str,
     text: str,
@@ -439,6 +521,17 @@ def call_provider(
             text=text,
             api_key=resolved_api_key,
             base_url=resolved_base_url,
+            timeout=timeout,
+            debug=debug,
+        )
+
+    if normalize_provider_name(provider_name) == "fastino-ft-gg6-r1-ml2048-s7":
+        return _call_fastino_finetuned(
+            prompt=prompt,
+            text=text,
+            api_key=resolved_api_key,
+            base_url=resolved_base_url,
+            model=provider["model"],
             timeout=timeout,
             debug=debug,
         )
@@ -573,8 +666,11 @@ def run_single_benchmark(
     return rows
 
 
-def save_rows(rows: list[dict[str, Any]], provider_name: str, dataset_name: str, prompt_version: str, threshold: float) -> Path:
-    provider_dir = OUTPUT_DIR / provider_name
+def save_rows(
+    rows: list[dict[str, Any]], provider_name: str, dataset_name: str,
+    prompt_version: str, threshold: float, output_dir: Path | None = None,
+) -> Path:
+    provider_dir = (OUTPUT_DIR if output_dir is None else output_dir) / provider_name
     provider_dir.mkdir(parents=True, exist_ok=True)
     file_name = f"{dataset_name}_{prompt_version}_t{threshold}.csv"
     path = provider_dir / file_name

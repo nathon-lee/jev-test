@@ -1,4 +1,5 @@
 import csv
+import json
 
 import httpx
 import pytest
@@ -145,6 +146,76 @@ def test_laya_uses_systemone_endpoint(monkeypatch):
     assert "state" in captured["json"]
     assert "questions" in captured["json"]
     assert "messages" not in captured["json"]
+
+
+@pytest.mark.parametrize("unsafe_score", [0.0, 0.1, 0.5, 1.0])
+def test_finetuned_fastino_uses_exact_model_and_direct_unsafe_confidence(monkeypatch, unsafe_score):
+    def fake_post(url, *, headers, json: dict, timeout):
+        assert url == "https://api.fastino.ai/v1/chat/completions"
+        assert headers["Authorization"] == "Bearer test-key"
+        assert json["model"] == "c94233af-98e6-4942-8e26-98ad204851bf"
+        assert json["messages"] == [{"role": "user", "content": "Example"}]
+        assert json["schema"]["classifications"] == [{
+            "task": "Is this text hateful?", "labels": ["safe", "unsafe"],
+            "multi_label": True, "cls_threshold": 0.0, "top_k": 2,
+        }]
+        assert json["threshold"] == 0.0 and json["store"] is False
+        return httpx.Response(200, request=httpx.Request("POST", url), json={
+            "model": json["model"], "x_fastino": None,
+            "choices": [{"message": {"content": (
+                '{"Is this text hateful?": [{"label": "safe", "confidence": 0.8},'
+                f'{{"label": "unsafe", "confidence": {unsafe_score}}}]}}'
+            )}}],
+        })
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    score = call_provider(
+        "fastino-ft-gg6-r1-ml2048-s7", "Is this text hateful?", "Example",
+        api_key="test-key", base_url="https://api.fastino.ai/v1",
+    )
+    assert score == unsafe_score
+
+
+@pytest.mark.parametrize("answer", [
+    [{"label": "safe", "confidence": 0.9}],
+    [{"label": "safe", "confidence": 0.9}, {"label": "safe", "confidence": 0.2}],
+    [{"label": "safe", "confidence": 0.9}, {"label": "unsafe", "confidence": True}],
+    [{"label": "safe", "confidence": 0.9}, {"label": "unsafe", "confidence": "0.5"}],
+    [{"label": "safe", "confidence": 0.9}, {"label": "unsafe", "confidence": float("nan")}],
+    [{"label": "safe", "confidence": 0.9}, {"label": "unsafe", "confidence": 1.1}],
+])
+def test_finetuned_fastino_rejects_missing_or_invalid_scores(monkeypatch, answer):
+    monkeypatch.setattr(httpx, "post", lambda url, **kwargs: httpx.Response(
+        200, request=httpx.Request("POST", url), json={
+            "model": "c94233af-98e6-4942-8e26-98ad204851bf",
+            "choices": [{"message": {"content": json.dumps({"question": answer})}}],
+        },
+    ))
+    with pytest.raises(ValueError):
+        call_provider("fastino-ft-gg6-r1-ml2048-s7", "question", "Example", api_key="test-key")
+
+
+@pytest.mark.parametrize("response", [
+    {"model": "fastino/GLiDE"},
+    {"model": "c94233af-98e6-4942-8e26-98ad204851bf", "x_fastino": {"truncated": True}},
+])
+def test_finetuned_fastino_rejects_wrong_model_or_truncated_inputs(monkeypatch, response):
+    monkeypatch.setattr(httpx, "post", lambda url, **kwargs: httpx.Response(
+        200, request=httpx.Request("POST", url), json=response,
+    ))
+    with pytest.raises(ValueError):
+        call_provider("fastino-ft-gg6-r1-ml2048-s7", "question", "Example", api_key="test-key")
+
+
+def test_save_rows_custom_output_root_preserves_existing_results(monkeypatch, tmp_path):
+    monkeypatch.setattr("benchmark.provider_suite.OUTPUT_DIR", tmp_path / "old")
+    old = save_rows([{"score": 0.1}], "fastino.ai", "toxigen", "v1", 0.5)
+    new = save_rows(
+        [{"score": 0.9}], "fastino-ft-gg6-r1-ml2048-s7", "toxigen", "v1", 0.5,
+        output_dir=tmp_path / "new",
+    )
+    assert new.parent == tmp_path / "new" / "fastino-ft-gg6-r1-ml2048-s7"
+    assert "0.1" in old.read_text() and "0.9" in new.read_text()
 
 
 @pytest.mark.parametrize("provider", ["fastino.ai", "laya-ai.com"])

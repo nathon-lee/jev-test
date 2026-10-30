@@ -1,23 +1,29 @@
 import base64
 import csv
+import copy
+import hashlib
 import html
 import json
 import re
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
 import numpy as np
 import pytest
 
 from benchmark.comparison import DATASETS, MODEL_IDENTITIES, MODELS
 from benchmark.external_summary import (
-    attach_openjev_summary, reference_averages, three_dataset_averages, v1_reference_scope_averages,
+    DATASET_CATEGORIES, attach_finetuned_run, attach_openjev_summary, category_reference_averages,
+    reference_averages, three_dataset_averages, v1_reference_scope_averages,
 )
 from benchmark.paper_figures import (
     coverage_figure,
     dataset_metrics_figure,
     english_warning,
     external_averages_figure,
+    external_category_figure,
     external_dataset_figure,
+    external_reference_providers,
     model_averages_figure,
     quality_figure,
     stability_averages_figure,
@@ -586,11 +592,11 @@ def test_openjev_reference_exports_preserve_original_baselines_and_stability_lin
         plt.close(baseline)
     destination = tmp_path / "figures"
     manifest = write_paper_figures(report, destination, dpi=72)
-    assert len(manifest["figures"]) == 13
+    assert len(manifest["figures"]) == 14
     assert manifest["external_comparison"]["source_kind"] == "user_supplied_aggregate"
     assert manifest["model_identities"] == report["model_identities"]
     gallery = (destination / "index.html").read_text()
-    assert gallery.count("<img ") == 25
+    assert gallery.count("<img ") == 31
     assert "not a sample-aligned baseline" in gallery
     assert '<html lang="en">' in gallery
     assert not re.search(r"[\u3400-\u9fff]", gallery)
@@ -598,8 +604,8 @@ def test_openjev_reference_exports_preserve_original_baselines_and_stability_lin
     for figure in manifest["figures"][6:9]:
         assert f'<img src="{figure["files"]["svg"]}"' not in gallery
         assert f'<a href="{figure["files"]["svg"]}">{figure["title"]}</a>' in gallery
-    for figure in manifest["figures"][9:12]:
-        if figure["name"] in ("fig10_openjev_reference_v1", "fig12_openjev_reference_averages"):
+    for figure in manifest["figures"][9:13]:
+        if figure.get("panels"):
             assert f'<img src="{figure["files"]["svg"]}"' not in gallery
         else:
             assert f'<img src="{figure["files"]["svg"]}"' in gallery
@@ -628,12 +634,36 @@ def test_openjev_reference_exports_preserve_original_baselines_and_stability_lin
     )
     coverage_title = "Evaluation Coverage and Request Failures"
     assert manifest["figures"][3]["title"] == coverage_title
-    assert re.findall(r"<section><(?:h2>|details><summary>)([^<]+)", gallery)[:4] == [
-        focused["title"], v1_reference["title"], reference_averages_title, coverage_title,
+    category = next(figure for figure in manifest["figures"] if figure["name"] == "fig14_category_reference_averages")
+    assert re.findall(r"<section><(?:h2>|details><summary>)([^<]+)", gallery)[:5] == [
+        focused["title"], category["title"], v1_reference["title"], reference_averages_title, coverage_title,
     ]
+    assert len(category["panels"]) == 6
+    category_page = (destination / "category_reference_comparison.html").read_text()
+    assert category_page.count("<img ") == 6
+    assert 'src="data:image/png;base64,' in category_page
+    assert 'href="category_reference_averages.csv"' in category_page
+    assert "equal weight" in category_page
+    assert 'href="category_reference_comparison.html"' in gallery
+    category_card = gallery.split("<section><h2>" + category["title"] + "</h2>", 1)[1].split("</section>", 1)[0]
+    primary, details = category_card.split("<details>", 1)
+    assert '<aside class="pii-task-notice"' in primary
+    assert primary.index('class="pii-task-notice"') < primary.index("<img ")
+    assert re.findall(r'data-metric="([^"]+)"', primary) == ["accuracy", "f1", "mean_elapsed_ms"]
+    assert re.findall(r'data-metric="([^"]+)"', details) == ["precision", "recall", "auroc"]
+    with (destination / "category_reference_averages.csv").open(encoding="utf-8-sig") as stream:
+        category_rows = list(csv.DictReader(stream))
+    assert len(category_rows) == 12
+    assert {row["category"] for row in category_rows} == set(DATASET_CATEGORIES)
+    assert all(row["datasets"] == ",".join(DATASET_CATEGORIES[row["category"]]) for row in category_rows)
+    assert all(row["prompt"] == "v1" and row["threshold"] == "0.5" for row in category_rows)
+    assert all(row["auroc"] == "" for row in category_rows if row["category"] == "pii")
     assert len(v1_reference["panels"]) == 6
     v1_card = gallery.split("<section><h2>" + v1_reference["title"] + "</h2>", 1)[1].split("</section>", 1)[0]
     primary, detailed = v1_card.split("<details>", 1)
+    assert '<aside class="pii-task-notice"' in primary
+    assert "<strong>PII = ordinary binary classification" in primary
+    assert primary.index('class="pii-task-notice"') < primary.index("<img ")
     detailed, methodology = detailed.split("<details>", 1)
     assert re.findall(r'data-metric="([^"]+)"', primary) == ["accuracy", "f1", "mean_elapsed_ms"]
     assert re.findall(r'data-metric="([^"]+)"', detailed) == ["precision", "recall", "auroc"]
@@ -705,10 +735,12 @@ def test_openjev_reference_exports_preserve_original_baselines_and_stability_lin
     assert "ToxiGen, HateCheck, AEGIS2: Multi-model Reference Averages" in page
     assert "timing protocols were not supplied" in page
     assert "Whether that dataset contributed to their supplied averages has not been confirmed" in html.unescape(page)
+    averages_figure = next(figure for figure in manifest["figures"] if figure["name"] == "fig12_openjev_reference_averages")
     reference_card = gallery.split(
-        "<section><h2>" + manifest["figures"][11]["title"] + "</h2>", 1,
+        "<section><h2>" + averages_figure["title"] + "</h2>", 1,
     )[1].split("</section>", 1)[0]
-    assert "PII presence detection" in reference_card
+    assert "PII binary classification" in reference_card
+    assert "Ordinary binary classification: PII present vs absent" in reference_card
     assert "All eight datasets" in reference_card
     assert 'href="v1_reference_scope_averages.csv"' in reference_card
     assert re.findall(r'data-metric="([^"]+)"', reference_card.split("<details>", 1)[0]) == [
@@ -717,15 +749,15 @@ def test_openjev_reference_exports_preserve_original_baselines_and_stability_lin
     assert 'class="reference-grid"' in reference_card.split("<details>", 1)[0]
     assert reference_card.index('class="model-legend"') < reference_card.index("<img ")
     assert reference_card.count('class="model-legend"') == 1
-    assert len(manifest["figures"][11]["panels"]) == 6
-    for panel in manifest["figures"][11]["panels"]:
+    assert len(averages_figure["panels"]) == 6
+    for panel in averages_figure["panels"]:
         assert f'<img src="{panel["files"]["svg"]}"' in reference_card
         for filename in panel["files"].values():
             assert (destination / filename).stat().st_size > 1000
     before_methodology, methodology = reference_card.rsplit("<details>", 1)
     assert methodology.startswith("<summary>Methodology and data scope</summary>")
-    assert html.escape(manifest["figures"][11]["caption"]) in methodology
-    assert html.escape(manifest["figures"][11]["caption"]) not in before_methodology
+    assert html.escape(averages_figure["caption"]) in methodology
+    assert html.escape(averages_figure["caption"]) not in before_methodology
     assert reference_card.endswith("</p></details>")
     with (destination / "v1_reference_scope_averages.csv").open(encoding="utf-8-sig") as stream:
         scopes = list(csv.DictReader(stream))
@@ -842,6 +874,252 @@ def test_external_averages_use_v1_half_threshold_shared_timing_without_changing_
             label.get_window_extent(renderer).y0 for ax in figure.axes for label in ax.get_xticklabels()
         )
         assert json.dumps(report) == saved
+    finally:
+        plt.close(figure)
+
+
+@pytest.mark.parametrize("missing_jailbreak", [False, True])
+def test_category_reference_averages_use_fixed_equal_dataset_weights(missing_jailbreak):
+    records = []
+    for provider in ("fastino.ai", "openjev"):
+        for category, datasets in DATASET_CATEGORIES.items():
+            for index, dataset in enumerate(datasets):
+                row = {
+                    "provider": provider, "dataset": dataset, "prompt": "v1", "threshold": 0.5,
+                    "status": "complete", "rows": 10 ** (index + 1), "valid": 10,
+                    "accuracy": 0.2 + 0.2 * index, "precision": 0.9, "recall": 0.4,
+                    "f1": 0.1 + 0.2 * index,
+                    "auroc": None if category == "pii" else 0.8,
+                    "mean_elapsed_ms": None if category == "harmful_content" and index == 1 else 100 * (index + 1),
+                }
+                if not (missing_jailbreak and provider == "fastino.ai" and dataset == "jailbreakhub"):
+                    records.append(row)
+                records.extend([{**row, "prompt": "v2", "accuracy": 0.99},
+                                {**row, "threshold": 0.7, "accuracy": 0.99}])
+    report = {
+        "external_comparison": {
+            "providers": ["fastino.ai", "openjev"], "runs": records,
+            "model_identities": MODEL_IDENTITIES,
+        },
+    }
+    averages = category_reference_averages(report)
+    grouped = {(row["category"], row["provider"]): row for row in averages}
+    assert len(averages) == 6
+    for provider in ("fastino.ai", "openjev"):
+        harmful = grouped[("harmful_content", provider)]
+        assert harmful["accuracy"] == pytest.approx(0.4)
+        assert harmful["f1"] == pytest.approx(0.3)
+        assert harmful["mean_elapsed_ms"] is None
+        assert harmful["datasets"] == list(DATASET_CATEGORIES["harmful_content"])
+        pii = grouped[("pii", provider)]
+        assert pii["accuracy"] == pytest.approx(0.3)
+        assert pii["mean_elapsed_ms"] == 150
+        assert pii["auroc"] is None
+        jailbreak = grouped[("jailbreak", provider)]
+        if missing_jailbreak and provider == "fastino.ai":
+            assert jailbreak["accuracy"] is jailbreak["f1"] is jailbreak["mean_elapsed_ms"] is None
+        else:
+            assert jailbreak["accuracy"] == pytest.approx(0.4)
+            assert jailbreak["mean_elapsed_ms"] == 200
+        assert jailbreak["datasets"] == list(DATASET_CATEGORIES["jailbreak"])
+    figure = external_category_figure(report)
+    try:
+        assert len(figure.axes) == 6
+        assert [bar.get_height() for bar in figure.axes[0].patches[:3]] == pytest.approx(
+            [40, np.nan if missing_jailbreak else 40, 30], nan_ok=True,
+        )
+        assert figure.axes[-1].get_yscale() == "log"
+        assert any("ordinary binary classification (present vs absent)" in text.get_text() for text in figure.texts)
+        notice = next(text for text in figure.texts if text.get_text().startswith("PII = ordinary binary classification"))
+        assert notice.get_fontweight() == "bold" and notice.get_fontsize() == 12
+        assert notice.get_bbox_patch().get_facecolor() == to_rgba("#FFF3CD")
+        assert [text.get_text() for text in figure.axes[0].get_xticklabels()] == [
+            "Harmful content\n(3 datasets)", "Jailbreak\n(3 datasets)", "PII binary classification\n(2 datasets)",
+        ]
+    finally:
+        plt.close(figure)
+
+
+@pytest.fixture
+def fine_tuned_run(report, tmp_path):
+    provider = "fastino-ft-gg6-r1-ml2048-s7"
+    model = "c94233af-98e6-4942-8e26-98ad204851bf"
+    data = tmp_path / "data"
+    data.mkdir()
+    run = tmp_path / "run"
+    (run / provider).mkdir(parents=True)
+    samples = [
+        {"sample_id": 0, "text": "Clean example", "label": 0},
+        {"sample_id": 1, "text": "Unsafe example", "label": 1},
+        {"sample_id": 2, "text": "Another example", "label": 1},
+    ]
+    hashes = {}
+    for dataset, filename in DATASETS.items():
+        path = data / filename
+        with path.open("w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(samples[0]))
+            writer.writeheader()
+            writer.writerows(samples)
+        hashes["data/prepared/" + filename] = hashlib.sha256(path.read_bytes()).hexdigest()
+        if dataset.startswith("pii_"):
+            continue
+        rows = []
+        for sample, score in zip(samples, [0.1, 0.2, 0.9]):
+            failed = dataset == "jailbreakhub" and sample["sample_id"] == 1
+            rows.append({
+                **sample, "dataset": dataset, "provider": provider,
+                "prompt_version": "v1", "threshold": 0.5,
+                "score": "" if failed else score,
+                "prediction": "" if failed else int(score >= 0.5),
+                "error": "HTTPStatusError('400')" if failed else "",
+            })
+        with (run / provider / f"{dataset}_v1_t0.5.csv").open("w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+    metadata = {
+        "provider": provider, "model": model, "display_name": "gg6-r1-ml2048-s7 v1",
+        "base_model": "Gliguard LLMGuardrails 300M",
+        "datasets": list(DATASETS)[:6], "prompt_version": "v1", "decision_threshold": 0.5,
+        "input_sha256": hashes,
+    }
+    (run / "run_metadata.json").write_text(json.dumps(metadata))
+    lines = [f"MODEL_ID={model}"]
+    lines.extend(
+        f"Running benchmark for {provider} | {dataset} | v1 | threshold=0.5 | total_rows=3"
+        for dataset in metadata["datasets"]
+    )
+    for count in (1, 3):
+        lines.extend(
+            f"Progress: {count}/3 (100%) | provider={provider} | dataset={dataset} | prompt=v1 | elapsed={count * 2}.0s"
+            for dataset in metadata["datasets"]
+        )
+    log = tmp_path / "run.log"
+    log.write_text("\n".join(lines))
+    providers = [*report["providers"], "openjev"]
+    report["external_comparison"] = {
+        "providers": providers, "model_identities": {**MODEL_IDENTITIES, "openjev": {}},
+        "runs": [
+            {
+                "provider": name, "dataset": dataset, "prompt": prompt, "threshold": 0.5,
+                "rows": 3, "valid": 3, "errors": 0, "status": "complete",
+                "accuracy": 0.5, "precision": 0.5, "recall": 0.5, "f1": 0.5,
+                "auroc": None if dataset.startswith("pii_") else 0.5,
+                "mean_elapsed_ms": 1000,
+            }
+            for name in providers for dataset in DATASETS for prompt in ("v1", "v2")
+        ],
+        "source": "summary.csv", "source_kind": "user_supplied_aggregate", "notes": "",
+        "classification_threshold": 0.5, "latency_method": "reference",
+        "repeat_thresholds": [0.5, 0.6, 0.7, 0.8],
+    }
+    return report, run, log, data
+
+
+def test_finetuned_reference_preserves_existing_models_and_untested_scopes(fine_tuned_run):
+    report, run, log, data = fine_tuned_run
+    before = copy.deepcopy(report)
+    pii_before = [row for row in v1_reference_scope_averages(report) if row["scope"] == "pii"]
+    attach_finetuned_run(report, run, log, data)
+    comparison = report["external_comparison"]
+    provider = "fastino-ft-gg6-r1-ml2048-s7"
+    assert report["runs"] == before["runs"]
+    assert report["providers"] == before["providers"]
+    assert [row for row in comparison["runs"] if row["provider"] != provider] == before["external_comparison"]["runs"]
+    records = [row for row in comparison["runs"] if row["provider"] == provider]
+    assert len(records) == 6 and sum(row["errors"] for row in records) == 1
+    assert all(row["mean_elapsed_ms"] == 2000 for row in records)
+    assert provider in external_reference_providers(comparison, "v1")
+    assert provider not in external_reference_providers(comparison, "v2")
+    scopes = v1_reference_scope_averages(report)
+    assert [row for row in scopes if row["scope"] == "pii" and row["provider"] != provider] == pii_before
+    for scope in ("pii", "all"):
+        row = next(row for row in scopes if row["scope"] == scope and row["provider"] == provider)
+        assert row["accuracy"] is row["f1"] is row["auroc"] is None
+    main = next(row for row in scopes if row["scope"] == "non_pii" and row["provider"] == provider)
+    assert main["f1"] == pytest.approx((5 * 2 / 3 + 1) / 6)
+    focused = next(row for row in three_dataset_averages(report) if row["provider"] == provider)
+    assert focused["f1"] == pytest.approx(2 / 3) and focused["mean_elapsed_ms"] == 2000
+    attach_finetuned_run(report, run, log, data)
+    assert len([row for row in comparison["runs"] if row["provider"] == provider]) == 6
+
+
+@pytest.mark.parametrize("invalid", ["model", "reference", "incomplete_log"])
+def test_finetuned_reference_rejects_mismatched_sources(fine_tuned_run, invalid):
+    report, run, log, data = fine_tuned_run
+    if invalid == "model":
+        path = run / "run_metadata.json"
+        metadata = json.loads(path.read_text())
+        metadata["model"] = "fastino/GLiDE"
+        path.write_text(json.dumps(metadata))
+    elif invalid == "reference":
+        (data / DATASETS["toxigen"]).write_text("different reference")
+    else:
+        log.write_text(log.read_text().replace("Progress: 3/3", "Progress: 2/3"))
+    with pytest.raises(ValueError):
+        attach_finetuned_run(report, run, log, data)
+
+
+def test_finetuned_reference_exports_identity_counts_and_category_summaries(fine_tuned_run, tmp_path):
+    report, run, log, data = fine_tuned_run
+    attach_finetuned_run(report, run, log, data)
+    destination = tmp_path / "figures"
+    manifest = write_paper_figures(report, destination, dpi=72)
+    provider = "fastino-ft-gg6-r1-ml2048-s7"
+    model = "c94233af-98e6-4942-8e26-98ad204851bf"
+    assert manifest["external_comparison"]["fine_tuned_models"][provider]["model_id"] == model
+    for name in ("index.html", "category_reference_comparison.html", "three_dataset_comparison.html"):
+        page = (destination / name).read_text()
+        assert model in page and "1 errors" in page and "not GLiDE Noul" in page
+        assert "gliguard-LLMGuardrails-300M-fine-tuned" in page
+    for name in ("index.html", "category_reference_comparison.html"):
+        assert '<span class="legend-swatch fine-tuned-swatch"' in (destination / name).read_text()
+    with (destination / "fine_tuned_model_runs.csv").open(encoding="utf-8-sig") as stream:
+        rows = list(csv.DictReader(stream))
+    assert len(rows) == 6 and sum(int(row["errors"]) for row in rows) == 1
+    assert all(row["model"] == model for row in rows)
+    assert all(row["display_name"] == "gliguard-LLMGuardrails-300M-fine-tuned" for row in rows)
+    with (destination / "fine_tuned_model_averages.csv").open(encoding="utf-8-sig") as stream:
+        rows = list(csv.DictReader(stream))
+    assert {row["category"] for row in rows} == {"harmful_content", "jailbreak", "pii", "non_pii"}
+    assert all(row["model"] == model for row in rows)
+    assert all(row["display_name"] == "gliguard-LLMGuardrails-300M-fine-tuned" for row in rows)
+    assert next(row for row in rows if row["category"] == "pii")["accuracy"] == ""
+
+
+@pytest.mark.parametrize("kind", ["dataset", "category", "averages", "three_dataset"])
+def test_finetuned_bars_have_distinct_style_without_resizing_other_bars(fine_tuned_run, kind):
+    report, run, log, data = fine_tuned_run
+    attach_finetuned_run(report, run, log, data)
+    if kind == "dataset":
+        figure, groups = external_dataset_figure(report, "v1"), 8
+    elif kind == "category":
+        figure, groups = external_category_figure(report), 3
+    elif kind == "averages":
+        figure, groups = external_averages_figure(report), 1
+    else:
+        figure, groups = three_dataset_averages_figure(report), 1
+    try:
+        for ax in figure.axes:
+            fine_tuned = ax.patches[groups:groups * 2]
+            for bar in fine_tuned:
+                assert bar.get_hatch() == "////"
+                assert bar.get_linewidth() == 1.5
+                assert bar.get_edgecolor() == to_rgba("#172438")
+                assert bar.get_facecolor() == to_rgba("#E7298A")
+                if kind == "three_dataset":
+                    assert bar.get_height() == ax.patches[0].get_height()
+                else:
+                    assert bar.get_width() == ax.patches[0].get_width()
+            assert all(bar.get_linewidth() == 0.4 for bar in [
+                *ax.patches[:groups], *ax.patches[groups * 2:],
+            ])
+        legend = figure.legends[0]
+        handle = legend.get_patches()[0 if kind == "three_dataset" else 1]
+        assert handle.get_hatch() == "////" and handle.get_linewidth() == 1.5
+        assert any("Fine-tuned · 300M" in text.get_text() for text in legend.get_texts())
+        first = figure.axes[0].patches[0]
+        assert (first.get_width() if kind == "three_dataset" else first.get_height()) == 50
     finally:
         plt.close(figure)
 

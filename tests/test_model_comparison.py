@@ -442,6 +442,8 @@ def test_external_summary_keeps_raw_baselines_separate_and_matches_timing_method
     assert "OpenJev 内部汇总结果" in document
     assert "不参与上述共同成功样本基线" in document
     assert "有效样本数" in document and "未知" in document
+    assert "PII 普通二分类（是否含 PII，不是脱敏质量）" in document
+    assert "当前数据只有正样本" in document
     for name in ("openjev_summary", "external_comparison_runs", "external_comparison_overview"):
         assert (destination / f"{name}.csv").is_file()
     saved = json.loads((destination / "comparison.json").read_text())

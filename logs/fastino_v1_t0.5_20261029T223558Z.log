@@ -1,0 +1,1048 @@
+Started UTC: 2026-10-29T22:35:58Z
+Providers: ['fastino.ai']
+Datasets: ['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']
+Prompt versions: ['v1']
+Thresholds: [0.5]
+Max workers: 6
+
+=== fastino.ai | toxigen | v1 | threshold=0.5 ===
+=== fastino.ai | hatecheck | v1 | threshold=0.5 ===
+
+=== fastino.ai | aegis2 | v1 | threshold=0.5 ===
+
+
+=== fastino.ai | detect-jailbreak | v1 | threshold=0.5 ===
+
+=== fastino.ai | jailbreak-classification | v1 | threshold=0.5 ===
+=== fastino.ai | jailbreakhub | v1 | threshold=0.5 ===
+
+Running benchmark for fastino.ai | jailbreak-classification | v1 | threshold=0.5 | total_rows=1044Running benchmark for fastino.ai | hatecheck | v1 | threshold=0.5 | total_rows=3728
+
+Running benchmark for fastino.ai | toxigen | v1 | threshold=0.5 | total_rows=6789
+Running benchmark for fastino.ai | aegis2 | v1 | threshold=0.5 | total_rows=1964
+Running benchmark for fastino.ai | detect-jailbreak | v1 | threshold=0.5 | total_rows=18258
+Running benchmark for fastino.ai | jailbreakhub | v1 | threshold=0.5 | total_rows=15140
+Progress: 50/1044 (4.8%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=11.18824157s
+Progress: 50/1964 (2.5%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=11.27449212s
+Progress: 50/6789 (0.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=11.58793903s
+Progress: 50/18258 (0.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=11.37612351s
+Progress: 50/3728 (1.3%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=11.99720331s
+Progress: 50/15140 (0.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=12.86480756s
+Progress: 100/18258 (0.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=22.14623503s
+Progress: 100/6789 (1.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=22.51459368s
+Progress: 100/1964 (5.1%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=22.84074948s
+Progress: 100/3728 (2.7%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=22.90130135s
+Progress: 100/1044 (9.6%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=23.12849653s
+Progress: 100/15140 (0.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=24.55007962s
+Progress: 150/6789 (2.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=33.41965992s
+Progress: 150/18258 (0.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=33.24484823s
+Progress: 150/3728 (4.0%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=33.53974323s
+Progress: 150/1044 (14.4%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=34.01722442s
+Progress: 150/1964 (7.6%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=34.09963267s
+Progress: 150/15140 (1.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=35.61052630s
+Progress: 200/6789 (2.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=44.21708082s
+Progress: 200/1044 (19.2%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=44.53672647s
+Progress: 200/3728 (5.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=44.66707576s
+Progress: 200/1964 (10.2%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=44.73510540s
+Progress: 200/18258 (1.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=44.75031697s
+Progress: 200/15140 (1.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=46.47161860s
+Progress: 250/6789 (3.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=55.24576173s
+Progress: 250/3728 (6.7%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=55.30469587s
+Progress: 250/1044 (23.9%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=55.33704144s
+Progress: 250/1964 (12.7%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=55.36769104s
+Progress: 250/18258 (1.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=55.84045492s
+Progress: 250/15140 (1.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=57.48376136s
+Progress: 300/1964 (15.3%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=66.19180942s
+Progress: 300/6789 (4.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=66.31225123s
+Progress: 300/1044 (28.7%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=66.34725614s
+Progress: 300/3728 (8.0%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=66.98582397s
+Progress: 300/18258 (1.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=67.08141099s
+Progress: 300/15140 (2.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=68.35430687s
+Progress: 350/1044 (33.5%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=76.96407140s
+Progress: 350/1964 (17.8%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=77.02903788s
+Progress: 350/6789 (5.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=77.08954542s
+Progress: 350/3728 (9.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=77.60275994s
+Progress: 350/18258 (1.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=78.54209821s
+Progress: 350/15140 (2.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=80.03553713s
+Progress: 400/1964 (20.4%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=87.33551479s
+Progress: 400/6789 (5.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=88.02384276s
+Progress: 400/3728 (10.7%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=88.28073552s
+Progress: 400/1044 (38.3%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=88.38789343s
+Progress: 400/18258 (2.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=90.18520670s
+Progress: 400/15140 (2.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=91.13857991s
+Progress: 450/3728 (12.1%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=98.34832554s
+Progress: 450/6789 (6.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=98.58036285s
+Progress: 450/1964 (22.9%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=98.67210415s
+Progress: 450/1044 (43.1%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=99.26211775s
+Progress: 450/18258 (2.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=101.15711652s
+Progress: 450/15140 (3.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=102.25772937s
+Progress: 500/3728 (13.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=108.95681158s
+Progress: 500/1964 (25.5%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=109.00114864s
+Progress: 500/1044 (47.9%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=110.11190878s
+Progress: 500/6789 (7.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=110.38694136s
+Progress: 500/18258 (2.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=113.24930847s
+Progress: 500/15140 (3.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=113.21134308s
+Progress: 550/1964 (28.0%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=119.71040178s
+Progress: 550/3728 (14.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=120.69993392s
+Progress: 550/1044 (52.7%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=121.39256179s
+Progress: 550/6789 (8.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=121.41820583s
+Progress: 550/18258 (3.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=124.56708036s
+Progress: 550/15140 (3.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=124.72178510s
+Progress: 600/3728 (16.1%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=131.34446603s
+Progress: 600/1044 (57.5%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=132.19166993s
+Progress: 600/6789 (8.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=132.19932851s
+Progress: 600/1964 (30.5%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=132.29351474s
+Progress: 600/18258 (3.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=136.39152574s
+Progress: 600/15140 (4.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=136.79653950s
+Progress: 650/3728 (17.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=142.42276512s
+Progress: 650/6789 (9.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=142.91040723s
+Progress: 650/1044 (62.3%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=143.71430571s
+Progress: 650/1964 (33.1%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=144.47806659s
+Progress: 650/18258 (3.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=148.04484267s
+Progress: 650/15140 (4.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=148.25069515s
+Progress: 700/3728 (18.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=153.34031183s
+Progress: 700/6789 (10.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=153.71878175s
+Progress: 700/1964 (35.6%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=155.02619985s
+Progress: 700/1044 (67.0%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=155.17529977s
+Progress: 700/18258 (3.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=159.87262750s
+Progress: 700/15140 (4.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=159.71865088s
+Progress: 750/3728 (20.1%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=164.04286919s
+Progress: 750/6789 (11.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=164.53165572s
+Progress: 750/1964 (38.2%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=165.85966943s
+Progress: 750/1044 (71.8%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=166.57905440s
+Progress: 750/15140 (5.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=170.87512603s
+Progress: 750/18258 (4.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=171.66638784s
+Progress: 800/6789 (11.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=176.09724827s
+Progress: 800/1964 (40.7%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=176.78536649s
+Progress: 800/1044 (76.6%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=178.58802699s
+Progress: 800/3728 (21.5%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=178.60397400s
+Progress: 800/18258 (4.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=183.36842048s
+Progress: 800/15140 (5.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=183.34289437s
+Progress: 850/6789 (12.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=186.41884835s
+Progress: 850/1964 (43.3%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=187.31732903s
+Progress: 850/3728 (22.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=189.37752849s
+Progress: 850/1044 (81.4%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=189.75972824s
+Progress: 850/15140 (5.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=194.39887816s
+Progress: 850/18258 (4.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=194.75719057s
+Progress: 900/6789 (13.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=197.00059119s
+Progress: 900/1964 (45.8%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=198.17395785s
+Progress: 900/3728 (24.1%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=200.19128418s
+Progress: 900/1044 (86.2%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=200.85324659s
+Progress: 900/15140 (5.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=205.75950746s
+Progress: 900/18258 (4.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=207.15315185s
+Progress: 950/6789 (14.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=207.86179403s
+Progress: 950/1964 (48.4%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=209.54854198s
+Progress: 950/3728 (25.5%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=210.56626159s
+Progress: 950/1044 (91.0%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=212.26596580s
+Progress: 950/15140 (6.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=217.10943649s
+Progress: 950/18258 (5.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=219.21489267s
+Progress: 1000/6789 (14.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=219.80350613s
+Progress: 1000/1964 (50.9%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=220.33922353s
+Progress: 1000/3728 (26.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=221.03550441s
+Progress: 1000/1044 (95.8%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=222.79578944s
+Progress: 1000/15140 (6.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=228.76713921s
+Progress: 1000/18258 (5.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=231.15186932s
+Progress: 1050/3728 (28.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=231.77832585s
+Progress: 1050/1964 (53.5%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=231.90681971s
+Progress: 1050/6789 (15.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=232.25021759s
+Progress: 1044/1044 (100.0%) | provider=fastino.ai | dataset=jailbreak-classification | prompt=v1 | elapsed=232.45729944s
+[1/6] Saved: outputs/fastino.ai/jailbreak-classification_v1_t0.5.csv (fastino.ai | jailbreak-classification | v1 | t=0.5 | rows=1044)
+Progress: 1050/15140 (6.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=240.07761491s
+Progress: 1100/3728 (29.5%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=242.71112441s
+Progress: 1100/1964 (56.0%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=243.05441960s
+Progress: 1100/6789 (16.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=243.43222600s
+Progress: 1050/18258 (5.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=243.18685776s
+Progress: 1100/15140 (7.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=251.99059270s
+Progress: 1150/3728 (30.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=253.02964263s
+Progress: 1150/1964 (58.6%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=253.74619057s
+Progress: 1150/6789 (16.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=255.27786408s
+Progress: 1100/18258 (6.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=255.94703740s
+Progress: 1200/3728 (32.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=263.76933901s
+Progress: 1200/1964 (61.1%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=264.54841546s
+Progress: 1150/15140 (7.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=265.09342917s
+Progress: 1200/6789 (17.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=265.68819038s
+Progress: 1150/18258 (6.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=267.63788354s
+Progress: 1250/3728 (33.5%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=275.47092237s
+Progress: 1250/6789 (18.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=276.44724960s
+Progress: 1250/1964 (63.6%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=276.45495247s
+Progress: 1200/15140 (7.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=276.45364546s
+Progress: 1200/18258 (6.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=280.01599526s
+Progress: 1300/3728 (34.9%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=287.02306759s
+Progress: 1300/1964 (66.2%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=287.42136900s
+Progress: 1300/6789 (19.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=287.85006779s
+Progress: 1250/15140 (8.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=289.08720985s
+Progress: 1250/18258 (6.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=291.60531928s
+Progress: 1350/3728 (36.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=297.37560441s
+Progress: 1350/1964 (68.7%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=298.37457408s
+Progress: 1350/6789 (19.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=298.60570255s
+Progress: 1300/15140 (8.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=302.54856558s
+Progress: 1300/18258 (7.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=304.03940715s
+Progress: 1400/1964 (71.3%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=308.82261967s
+Progress: 1400/6789 (20.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=308.93551672s
+Progress: 1400/3728 (37.6%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=309.02722633s
+Progress: 1350/15140 (8.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=314.98515184s
+Progress: 1350/18258 (7.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=316.60725985s
+Progress: 1450/6789 (21.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=319.96712862s
+Progress: 1450/1964 (73.8%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=320.03610809s
+Progress: 1450/3728 (38.9%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=320.42891179s
+Progress: 1400/18258 (7.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=327.50931613s
+Progress: 1400/15140 (9.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=328.68421653s
+Progress: 1500/6789 (22.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=330.85910201s
+Progress: 1500/3728 (40.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=331.23882547s
+Progress: 1500/1964 (76.4%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=332.23863949s
+Progress: 1450/15140 (9.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=339.55019180s
+Progress: 1450/18258 (7.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=339.76591124s
+Progress: 1550/6789 (22.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=341.93606461s
+Progress: 1550/3728 (41.6%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=342.36828142s
+Progress: 1550/1964 (78.9%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=342.88081907s
+Progress: 1500/15140 (9.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=350.51845297s
+Progress: 1500/18258 (8.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=350.91083671s
+Progress: 1600/6789 (23.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=352.46008873s
+Progress: 1600/3728 (42.9%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=353.11449976s
+Progress: 1600/1964 (81.5%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=353.40045648s
+Progress: 1550/15140 (10.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=361.74048237s
+Progress: 1550/18258 (8.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=362.22476558s
+Progress: 1650/6789 (24.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=363.52688577s
+Progress: 1650/1964 (84.0%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=364.81054994s
+Progress: 1650/3728 (44.3%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=365.04692574s
+Progress: 1600/18258 (8.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=373.67448841s
+Progress: 1600/15140 (10.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=374.56923228s
+Progress: 1700/6789 (25.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=375.11541630s
+Progress: 1700/3728 (45.6%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=375.65966169s
+Progress: 1700/1964 (86.6%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=375.67004361s
+Progress: 1650/18258 (9.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=385.18653026s
+Progress: 1750/3728 (46.9%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=386.06399586s
+Progress: 1750/1964 (89.1%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=386.55822326s
+Progress: 1750/6789 (25.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=387.15886469s
+Progress: 1650/15140 (10.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=387.10089263s
+Progress: 1800/3728 (48.3%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=396.74536932s
+Progress: 1700/18258 (9.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=396.68298679s
+Progress: 1800/1964 (91.6%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=397.44495455s
+Progress: 1800/6789 (26.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=397.72928916s
+Progress: 1700/15140 (11.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=398.99189007s
+Progress: 1850/3728 (49.6%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=407.43778001s
+Progress: 1750/18258 (9.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=407.87306880s
+Progress: 1850/6789 (27.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=408.26534868s
+Progress: 1850/1964 (94.2%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=408.44977234s
+Progress: 1750/15140 (11.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=410.13935977s
+Progress: 1900/3728 (51.0%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=418.45724733s
+Progress: 1900/1964 (96.7%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=419.71969467s
+Progress: 1900/6789 (28.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=419.94011825s
+Progress: 1800/18258 (9.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=419.79679339s
+Progress: 1800/15140 (11.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=422.25144725s
+Progress: 1950/3728 (52.3%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=430.38986131s
+Progress: 1950/1964 (99.3%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=431.10417240s
+Progress: 1950/6789 (28.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=431.26308628s
+Progress: 1850/18258 (10.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=432.41395904s
+Progress: 1964/1964 (100.0%) | provider=fastino.ai | dataset=aegis2 | prompt=v1 | elapsed=434.23626735s
+[2/6] Saved: outputs/fastino.ai/aegis2_v1_t0.5.csv (fastino.ai | aegis2 | v1 | t=0.5 | rows=1964)
+Progress: 1850/15140 (12.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=434.05759979s
+Progress: 2000/3728 (53.6%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=442.27159441s
+Progress: 2000/6789 (29.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=442.50291645s
+Progress: 1900/18258 (10.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=443.78000602s
+Progress: 1900/15140 (12.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=445.48442153s
+Progress: 2050/3728 (55.0%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=453.32374926s
+Progress: 2050/6789 (30.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=455.01719404s
+Progress: 1950/18258 (10.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=455.00352562s
+Progress: 1950/15140 (12.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=457.67740144s
+Progress: 2100/3728 (56.3%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=465.36484446s
+Progress: 2100/6789 (30.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=466.05833202s
+Progress: 2000/18258 (11.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=467.11241077s
+Progress: 2000/15140 (13.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=469.12608655s
+Progress: 2150/3728 (57.7%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=476.61923608s
+Progress: 2150/6789 (31.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=477.19609450s
+Progress: 2050/18258 (11.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=478.74576457s
+Progress: 2050/15140 (13.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=480.74417143s
+Progress: 2200/3728 (59.0%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=489.67580113s
+Progress: 2100/18258 (11.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=491.92444454s
+Progress: 2200/6789 (32.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=492.27515227s
+Progress: 2100/15140 (13.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=494.63571825s
+Progress: 2250/3728 (60.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=500.73410527s
+Progress: 2250/6789 (33.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=503.54868983s
+Progress: 2150/18258 (11.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=503.85521209s
+Progress: 2150/15140 (14.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=505.95093302s
+Progress: 2300/3728 (61.7%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=512.16339390s
+Progress: 2300/6789 (33.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=514.55567778s
+Progress: 2200/18258 (12.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=515.05975297s
+Progress: 2200/15140 (14.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=518.55973315s
+Progress: 2350/3728 (63.0%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=523.57610941s
+Progress: 2250/18258 (12.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=525.98741287s
+Progress: 2350/6789 (34.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=526.48772651s
+Progress: 2250/15140 (14.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=528.96608501s
+Progress: 2400/3728 (64.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=535.07727066s
+Progress: 2300/18258 (12.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=536.41823434s
+Progress: 2400/6789 (35.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=538.54909352s
+Progress: 2300/15140 (15.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=538.89234592s
+Progress: 2450/3728 (65.7%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=546.58370792s
+Progress: 2450/6789 (36.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=548.68329275s
+Progress: 2350/18258 (12.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=548.45402996s
+Progress: 2350/15140 (15.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=549.53427621s
+Progress: 2500/3728 (67.1%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=557.44021964s
+Progress: 2500/6789 (36.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=559.00944153s
+Progress: 2400/18258 (13.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=558.94208050s
+Progress: 2400/15140 (15.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=560.22472218s
+Progress: 2550/3728 (68.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=568.00662501s
+Progress: 2550/6789 (37.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=569.30310358s
+Progress: 2450/15140 (16.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=570.36912912s
+Progress: 2450/18258 (13.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=570.59607317s
+Progress: 2600/3728 (69.7%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=578.15515384s
+Progress: 2600/6789 (38.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=581.00771104s
+Progress: 2500/15140 (16.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=581.08794135s
+Progress: 2500/18258 (13.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=581.56731548s
+Progress: 2650/3728 (71.1%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=588.77035332s
+Progress: 2550/15140 (16.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=591.96695015s
+Progress: 2650/6789 (39.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=595.08574678s
+Progress: 2550/18258 (14.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=595.47224868s
+Progress: 2700/3728 (72.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=600.95624108s
+Progress: 2600/15140 (17.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=602.47645259s
+Progress: 2600/18258 (14.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=606.13086410s
+Progress: 2700/6789 (39.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=607.75063227s
+Progress: 2750/3728 (73.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=613.81590468s
+Progress: 2650/15140 (17.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=613.53480139s
+Progress: 2650/18258 (14.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=617.49444049s
+Progress: 2750/6789 (40.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=619.40216642s
+Progress: 2800/3728 (75.1%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=624.96950035s
+Progress: 2700/15140 (17.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=624.64973505s
+Progress: 2700/18258 (14.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=627.98122203s
+Progress: 2800/6789 (41.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=630.33000756s
+Progress: 2850/3728 (76.4%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=634.97103071s
+Progress: 2750/15140 (18.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=636.85233905s
+Progress: 2750/18258 (15.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=638.95623417s
+Progress: 2850/6789 (42.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=640.77802617s
+Progress: 2900/3728 (77.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=647.98627204s
+Progress: 2800/15140 (18.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=648.01994801s
+Progress: 2800/18258 (15.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=651.89658382s
+Progress: 2900/6789 (42.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=652.40268786s
+Progress: 2950/3728 (79.1%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=659.76825201s
+Progress: 2850/18258 (15.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=662.02784238s
+Progress: 2850/15140 (18.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=662.99476392s
+Progress: 2950/6789 (43.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=664.43603864s
+Progress: 3000/3728 (80.5%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=671.76968341s
+Progress: 2900/18258 (15.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=672.53349162s
+Progress: 2900/15140 (19.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=673.21781310s
+Progress: 3000/6789 (44.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=675.07367515s
+Progress: 3050/3728 (81.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=682.83921560s
+Progress: 2950/18258 (16.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=687.20494219s
+Progress: 2950/15140 (19.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=687.55531214s
+Progress: 3050/6789 (44.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=689.22542310s
+Progress: 3100/3728 (83.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=693.03013510s
+Progress: 3000/15140 (19.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=699.57525913s
+Progress: 3000/18258 (16.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=703.17949870s
+Progress: 3100/6789 (45.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=704.20575301s
+Progress: 3150/3728 (84.5%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=705.34913453s
+Progress: 3050/15140 (20.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=710.02965812s
+Progress: 3050/18258 (16.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=712.54209132s
+Progress: 3150/6789 (46.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=715.94664521s
+Progress: 3200/3728 (85.8%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=721.30334488s
+Progress: 3100/15140 (20.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=720.91796893s
+Progress: 3100/18258 (17.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=721.58045859s
+Progress: 3200/6789 (47.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=725.43425896s
+Progress: 3150/15140 (20.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=730.64293391s
+Progress: 3150/18258 (17.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=731.10009162s
+Progress: 3250/6789 (47.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=733.85753182s
+Progress: 3250/3728 (87.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=734.14260262s
+Progress: 3300/3728 (88.5%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=742.96600345s
+Progress: 3200/18258 (17.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=742.90984283s
+Progress: 3200/15140 (21.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=743.46626405s
+Progress: 3300/6789 (48.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=744.36130248s
+Progress: 3250/18258 (17.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=752.44358198s
+Progress: 3350/3728 (89.9%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=752.70350618s
+Progress: 3250/15140 (21.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=752.60331955s
+Progress: 3350/6789 (49.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=754.94351955s
+Progress: 3300/18258 (18.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=761.04820812s
+Progress: 3400/3728 (91.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=762.06215935s
+Progress: 3300/15140 (21.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=761.90115329s
+Progress: 3400/6789 (50.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=763.72656481s
+Progress: 3350/15140 (22.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=772.90323139s
+Progress: 3350/18258 (18.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=773.47562108s
+Progress: 3450/3728 (92.5%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=774.60167588s
+Progress: 3450/6789 (50.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=777.03540202s
+Progress: 3400/15140 (22.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=782.64483535s
+Progress: 3400/18258 (18.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=783.31908305s
+Progress: 3500/3728 (93.9%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=783.93068548s
+Progress: 3500/6789 (51.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=785.85166308s
+Progress: 3450/15140 (22.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=792.53013464s
+Progress: 3450/18258 (18.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=792.88423712s
+Progress: 3550/3728 (95.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=794.37034985s
+Progress: 3550/6789 (52.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=796.88476868s
+Progress: 3500/18258 (19.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=801.78960488s
+Progress: 3500/15140 (23.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=802.62980728s
+Progress: 3600/3728 (96.6%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=805.35202161s
+Progress: 3600/6789 (53.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=807.11341755s
+Progress: 3550/15140 (23.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=811.89954563s
+Progress: 3550/18258 (19.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=812.43833128s
+Progress: 3650/3728 (97.9%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=815.50753121s
+Progress: 3650/6789 (53.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=816.45235536s
+Progress: 3600/15140 (23.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=821.08495535s
+Progress: 3600/18258 (19.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=822.34032773s
+Progress: 3700/6789 (54.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=825.59135230s
+Progress: 3700/3728 (99.2%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=826.22307603s
+Progress: 3728/3728 (100.0%) | provider=fastino.ai | dataset=hatecheck | prompt=v1 | elapsed=831.63316650s
+[3/6] Saved: outputs/fastino.ai/hatecheck_v1_t0.5.csv (fastino.ai | hatecheck | v1 | t=0.5 | rows=3728)
+Progress: 3650/15140 (24.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=831.80590928s
+Progress: 3750/6789 (55.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=833.93077696s
+Progress: 3650/18258 (20.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=833.75089634s
+Progress: 3700/15140 (24.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=841.13882930s
+Progress: 3800/6789 (56.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=842.29643307s
+Progress: 3700/18258 (20.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=843.90054244s
+Progress: 3750/15140 (24.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=850.18239202s
+Progress: 3850/6789 (56.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=852.11677734s
+Progress: 3750/18258 (20.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=853.22620791s
+Progress: 3800/15140 (25.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=859.86412627s
+Progress: 3900/6789 (57.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=861.28044248s
+Progress: 3800/18258 (20.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=863.17746756s
+Progress: 3850/15140 (25.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=868.90811018s
+Progress: 3950/6789 (58.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=870.06662821s
+Progress: 3850/18258 (21.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=872.64107069s
+Progress: 3900/15140 (25.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=878.30363469s
+Progress: 4000/6789 (58.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=878.84429033s
+Progress: 3900/18258 (21.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=882.21412693s
+Progress: 4050/6789 (59.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=888.39790846s
+Progress: 3950/15140 (26.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=888.46234371s
+Progress: 3950/18258 (21.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=892.53296095s
+Progress: 4100/6789 (60.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=897.67721357s
+Progress: 4000/15140 (26.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=897.28567050s
+Progress: 4000/18258 (21.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=902.46447786s
+Progress: 4050/15140 (26.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=906.61538089s
+Progress: 4150/6789 (61.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=907.56012400s
+Progress: 4050/18258 (22.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=912.12847320s
+Progress: 4200/6789 (61.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=916.73841515s
+Progress: 4100/15140 (27.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=916.37966187s
+Progress: 4100/18258 (22.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=921.71557358s
+Progress: 4250/6789 (62.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=925.62602995s
+Progress: 4150/15140 (27.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=925.97947169s
+Progress: 4150/18258 (22.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=930.92799813s
+Progress: 4300/6789 (63.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=938.62069944s
+Progress: 4200/15140 (27.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=940.29244814s
+Progress: 4200/18258 (23.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=947.07757706s
+Progress: 4350/6789 (64.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=947.77741868s
+Progress: 4250/15140 (28.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=950.54420346s
+Progress: 4250/18258 (23.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=956.73792902s
+Progress: 4400/6789 (64.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=958.29530148s
+Progress: 4300/15140 (28.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=960.47167185s
+Progress: 4300/18258 (23.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=965.98124270s
+Progress: 4450/6789 (65.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=969.34182997s
+Progress: 4350/15140 (28.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=970.78536573s
+Progress: 4350/18258 (23.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=975.42384360s
+Progress: 4500/6789 (66.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=979.72023534s
+Progress: 4400/15140 (29.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=980.85890106s
+Progress: 4400/18258 (24.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=986.08787823s
+Progress: 4550/6789 (67.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=988.77100523s
+Progress: 4450/15140 (29.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=990.65597873s
+Progress: 4450/18258 (24.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=995.95637696s
+Progress: 4600/6789 (67.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=998.26221528s
+Progress: 4500/15140 (29.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1000.80665468s
+Progress: 4500/18258 (24.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1005.41206118s
+Progress: 4650/6789 (68.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1007.35453995s
+Progress: 4550/15140 (30.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1010.21884774s
+Progress: 4550/18258 (24.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1015.99283559s
+Progress: 4700/6789 (69.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1017.76055371s
+Progress: 4600/15140 (30.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1019.82415694s
+Progress: 4600/18258 (25.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1026.94289566s
+Progress: 4750/6789 (70.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1028.54811416s
+Progress: 4650/15140 (30.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1030.64823112s
+Progress: 4650/18258 (25.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1037.92153688s
+Progress: 4800/6789 (70.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1041.46654807s
+Progress: 4700/15140 (31.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1042.39539997s
+Progress: 4700/18258 (25.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1049.97237695s
+Progress: 4850/6789 (71.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1051.53891743s
+Progress: 4750/15140 (31.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1052.78216560s
+Progress: 4750/18258 (26.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1060.38481724s
+Progress: 4900/6789 (72.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1063.42349182s
+Progress: 4800/15140 (31.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1063.41529541s
+Progress: 4800/18258 (26.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1071.06715277s
+Progress: 4950/6789 (72.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1073.98190373s
+Progress: 4850/15140 (32.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1074.53806902s
+Progress: 4850/18258 (26.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1082.04397562s
+Progress: 5000/6789 (73.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1084.10117167s
+Progress: 4900/15140 (32.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1085.33427307s
+Progress: 4900/18258 (26.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1093.43268885s
+Progress: 5050/6789 (74.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1093.98552619s
+Progress: 4950/15140 (32.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1095.45198235s
+Progress: 4950/18258 (27.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1104.14442963s
+Progress: 5100/6789 (75.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1105.48093243s
+Progress: 5000/15140 (33.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1107.46198463s
+Progress: 5000/18258 (27.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1118.39851095s
+Progress: 5150/6789 (75.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1118.77840552s
+Progress: 5050/15140 (33.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1120.09548678s
+Progress: 5200/6789 (76.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1129.25671732s
+Progress: 5100/15140 (33.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1130.88200417s
+Progress: 5050/18258 (27.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1131.89762061s
+Progress: 5100/18258 (27.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1142.01525955s
+Progress: 5250/6789 (77.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1149.79404153s
+Progress: 5150/15140 (34.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1149.41785206s
+Progress: 5150/18258 (28.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1152.83678376s
+Progress: 5200/15140 (34.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1159.63365136s
+Progress: 5300/6789 (78.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1160.76946795s
+Progress: 5200/18258 (28.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1166.82916745s
+Progress: 5350/6789 (78.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1180.75657784s
+Progress: 5250/15140 (34.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1184.80416814s
+Progress: 5400/6789 (79.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1190.37855220s
+Progress: 5250/18258 (28.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1190.23738193s
+Progress: 5300/15140 (35.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1195.78646159s
+Progress: 5300/18258 (29.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1199.84014335s
+Progress: 5450/6789 (80.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1200.29062448s
+Progress: 5350/15140 (35.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1206.51638471s
+Progress: 5500/6789 (81.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1211.65018718s
+Progress: 5350/18258 (29.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1212.81041712s
+Progress: 5400/15140 (35.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1218.16624498s
+Progress: 5550/6789 (81.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1221.29791276s
+Progress: 5450/15140 (36.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1228.08604242s
+Progress: 5600/6789 (82.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1231.31607508s
+Progress: 5500/15140 (36.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1238.18675155s
+Progress: 5400/18258 (29.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1241.06134927s
+Progress: 5650/6789 (83.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1241.41091990s
+Progress: 5550/15140 (36.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1252.06169135s
+Progress: 5700/6789 (84.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1253.53616648s
+Progress: 5450/18258 (29.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1253.77849240s
+Progress: 5600/15140 (37.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1262.49182370s
+Progress: 5500/18258 (30.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1264.30354731s
+Progress: 5750/6789 (84.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1264.56610560s
+Progress: 5650/15140 (37.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1273.83591484s
+Progress: 5800/6789 (85.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1275.26565158s
+Progress: 5550/18258 (30.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1275.41563195s
+Progress: 5700/15140 (37.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1284.15214611s
+Progress: 5850/6789 (86.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1285.23776007s
+Progress: 5600/18258 (30.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1287.02432185s
+Progress: 5900/6789 (86.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1295.06105730s
+Progress: 5750/15140 (38.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1296.40168108s
+Progress: 5650/18258 (30.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1297.52655908s
+Progress: 5950/6789 (87.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1305.99214293s
+Progress: 5800/15140 (38.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1307.71131756s
+Progress: 5700/18258 (31.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1308.34191134s
+Progress: 6000/6789 (88.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1317.37894875s
+Progress: 5850/15140 (38.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1320.92962664s
+Progress: 5750/18258 (31.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1322.21994272s
+Progress: 6050/6789 (89.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1328.78035148s
+Progress: 5900/15140 (39.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1332.84269699s
+Progress: 5800/18258 (31.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1334.55793281s
+Progress: 6100/6789 (89.9%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1339.56365111s
+Progress: 5950/15140 (39.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1344.15184728s
+Progress: 5850/18258 (32.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1346.01259314s
+Progress: 6150/6789 (90.6%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1350.31424744s
+Progress: 6000/15140 (39.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1356.17158905s
+Progress: 5900/18258 (32.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1356.64898604s
+Progress: 6200/6789 (91.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1360.79967592s
+Progress: 6050/15140 (40.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1366.61962635s
+Progress: 5950/18258 (32.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1368.71175570s
+Progress: 6250/6789 (92.1%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1371.31896125s
+Progress: 6100/15140 (40.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1376.99067186s
+Progress: 6000/18258 (32.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1380.29501519s
+Progress: 6300/6789 (92.8%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1382.03992307s
+Progress: 6150/15140 (40.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1388.92783510s
+Progress: 6050/18258 (33.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1391.86842283s
+Progress: 6350/6789 (93.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1393.77957683s
+Progress: 6200/15140 (41.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1399.42765186s
+Progress: 6100/18258 (33.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1402.06658358s
+Progress: 6400/6789 (94.3%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1404.42383527s
+Progress: 6250/15140 (41.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1410.95333749s
+Progress: 6150/18258 (33.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1412.77532823s
+Progress: 6450/6789 (95.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1414.81546992s
+Progress: 6300/15140 (41.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1422.18800706s
+Progress: 6200/18258 (34.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1424.11420014s
+Progress: 6500/6789 (95.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1424.92609506s
+Progress: 6350/15140 (41.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1433.01987161s
+Progress: 6250/18258 (34.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1434.97294731s
+Progress: 6550/6789 (96.5%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1435.45470790s
+Progress: 6400/15140 (42.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1444.92015502s
+Progress: 6300/18258 (34.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1446.04616897s
+Progress: 6600/6789 (97.2%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1446.59176948s
+Progress: 6650/6789 (98.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1457.08253398s
+Progress: 6450/15140 (42.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1457.31885644s
+Progress: 6350/18258 (34.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1458.32943746s
+Progress: 6500/15140 (42.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1468.67238169s
+Progress: 6400/18258 (35.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1469.34582453s
+Progress: 6700/6789 (98.7%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1469.59739868s
+Progress: 6550/15140 (43.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1479.65157360s
+Progress: 6450/18258 (35.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1479.88210021s
+Progress: 6750/6789 (99.4%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1480.56783460s
+Progress: 6789/6789 (100.0%) | provider=fastino.ai | dataset=toxigen | prompt=v1 | elapsed=1489.31097898s
+[4/6] Saved: outputs/fastino.ai/toxigen_v1_t0.5.csv (fastino.ai | toxigen | v1 | t=0.5 | rows=6789)
+Progress: 6600/15140 (43.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1490.78744952s
+Progress: 6500/18258 (35.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1491.34133021s
+Progress: 6550/18258 (35.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1502.38841375s
+Progress: 6650/15140 (43.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1502.68203127s
+Progress: 6700/15140 (44.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1512.95297492s
+Progress: 6600/18258 (36.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1513.31666264s
+Progress: 6750/15140 (44.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1527.29761518s
+Progress: 6650/18258 (36.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1527.48745709s
+Progress: 6700/18258 (36.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1537.91485161s
+Progress: 6800/15140 (44.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1539.50440577s
+Progress: 6750/18258 (37.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1548.54678920s
+Progress: 6850/15140 (45.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1550.61815796s
+Progress: 6800/18258 (37.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1559.85039224s
+Progress: 6900/15140 (45.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1562.66933718s
+Progress: 6850/18258 (37.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1572.95712145s
+Progress: 6950/15140 (45.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1575.14303453s
+Progress: 6900/18258 (37.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1585.26296032s
+Progress: 7000/15140 (46.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1588.34594308s
+Progress: 6950/18258 (38.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1597.53547386s
+Progress: 7050/15140 (46.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1600.55875039s
+Progress: 7000/18258 (38.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1610.70320899s
+Progress: 7100/15140 (46.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1613.54013020s
+Progress: 7050/18258 (38.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1622.62309308s
+Progress: 7150/15140 (47.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1625.49839413s
+Progress: 7100/18258 (38.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1634.18399466s
+Progress: 7200/15140 (47.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1638.55115602s
+Progress: 7150/18258 (39.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1645.49404718s
+Progress: 7250/15140 (47.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1651.25275754s
+Progress: 7200/18258 (39.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1656.92955570s
+Progress: 7300/15140 (48.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1664.14694733s
+Progress: 7250/18258 (39.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1668.43329684s
+Progress: 7350/15140 (48.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1675.52825168s
+Progress: 7300/18258 (40.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1679.77412933s
+Progress: 7400/15140 (48.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1687.11523175s
+Progress: 7350/18258 (40.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1691.94645869s
+Progress: 7450/15140 (49.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1698.63316736s
+Progress: 7400/18258 (40.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1703.39872756s
+Progress: 7500/15140 (49.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1709.90283401s
+Progress: 7450/18258 (40.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1714.68137483s
+Progress: 7550/15140 (49.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1721.28446854s
+Progress: 7500/18258 (41.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1725.85683576s
+Progress: 7600/15140 (50.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1732.60653266s
+Progress: 7550/18258 (41.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1737.93479367s
+Progress: 7650/15140 (50.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1744.75756923s
+Progress: 7600/18258 (41.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1754.22850504s
+Progress: 7700/15140 (50.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1760.89569477s
+Progress: 7650/18258 (41.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1765.83834914s
+Progress: 7750/15140 (51.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1772.94957452s
+Progress: 7700/18258 (42.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1777.37415407s
+Progress: 7800/15140 (51.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1784.21504913s
+Progress: 7750/18258 (42.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1788.93414971s
+Progress: 7850/15140 (51.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1796.16259285s
+Progress: 7800/18258 (42.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1800.24746825s
+Progress: 7900/15140 (52.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1808.16007325s
+Progress: 7850/18258 (43.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1812.48992123s
+Progress: 7950/15140 (52.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1820.35310741s
+Progress: 7900/18258 (43.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1826.33110391s
+Progress: 8000/15140 (52.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1831.97267179s
+Progress: 7950/18258 (43.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1837.92111363s
+Progress: 8050/15140 (53.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1843.37774560s
+Progress: 8000/18258 (43.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1850.43539969s
+Progress: 8100/15140 (53.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1855.91928787s
+Progress: 8050/18258 (44.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1862.98233096s
+Progress: 8150/15140 (53.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1867.41135101s
+Progress: 8100/18258 (44.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1874.20177159s
+Progress: 8200/15140 (54.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1879.05306907s
+Progress: 8150/18258 (44.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1885.82930065s
+Progress: 8250/15140 (54.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1890.74984898s
+Progress: 8200/18258 (44.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1897.26814682s
+Progress: 8300/15140 (54.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1902.54495101s
+Progress: 8250/18258 (45.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1908.83802044s
+Progress: 8350/15140 (55.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1914.35474242s
+Progress: 8300/18258 (45.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1920.48396131s
+Progress: 8400/15140 (55.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1926.36919214s
+Progress: 8350/18258 (45.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1932.37761292s
+Progress: 8450/15140 (55.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1938.45988938s
+Progress: 8400/18258 (46.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1944.48624905s
+Progress: 8500/15140 (56.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1949.93327293s
+Progress: 8450/18258 (46.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1955.97239213s
+Progress: 8550/15140 (56.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1961.64245323s
+Progress: 8500/18258 (46.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1967.60171105s
+Progress: 8600/15140 (56.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1974.46548770s
+Progress: 8550/18258 (46.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1979.31316266s
+Progress: 8650/15140 (57.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=1986.55245283s
+Progress: 8600/18258 (47.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=1992.46751125s
+Progress: 8700/15140 (57.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2003.17958041s
+Progress: 8650/18258 (47.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2009.13806230s
+Progress: 8750/15140 (57.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2015.93372368s
+Progress: 8700/18258 (47.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2021.36650528s
+Progress: 8800/15140 (58.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2029.21958038s
+Progress: 8750/18258 (47.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2032.94543588s
+Progress: 8850/15140 (58.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2042.72458410s
+Progress: 8800/18258 (48.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2047.39582421s
+Progress: 8900/15140 (58.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2053.34744417s
+Progress: 8850/18258 (48.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2057.43626622s
+Progress: 8950/15140 (59.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2063.02654645s
+Progress: 8900/18258 (48.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2067.67045692s
+Progress: 9000/15140 (59.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2073.65369333s
+Progress: 8950/18258 (49.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2077.80752163s
+Progress: 9050/15140 (59.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2084.11439592s
+Progress: 9000/18258 (49.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2087.80668833s
+Progress: 9100/15140 (60.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2094.52687363s
+Progress: 9050/18258 (49.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2098.81349368s
+Progress: 9150/15140 (60.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2105.64537447s
+Progress: 9100/18258 (49.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2111.16999002s
+Progress: 9200/15140 (60.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2116.14316318s
+Progress: 9150/18258 (50.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2123.77780503s
+Progress: 9250/15140 (61.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2127.75849813s
+Progress: 9200/18258 (50.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2134.73196951s
+Progress: 9300/15140 (61.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2138.07546818s
+Progress: 9250/18258 (50.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2146.70733303s
+Progress: 9350/15140 (61.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2149.68743976s
+Progress: 9300/18258 (50.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2157.19796282s
+Progress: 9400/15140 (62.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2160.88014641s
+Progress: 9350/18258 (51.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2168.74897465s
+Progress: 9450/15140 (62.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2174.11371274s
+Progress: 9400/18258 (51.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2179.43933066s
+Progress: 9500/15140 (62.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2185.42600644s
+Progress: 9450/18258 (51.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2191.00407928s
+Progress: 9550/15140 (63.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2196.08118400s
+Progress: 9500/18258 (52.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2203.22556049s
+Progress: 9600/15140 (63.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2207.51982644s
+Progress: 9550/18258 (52.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2213.38285242s
+Progress: 9650/15140 (63.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2217.89073529s
+Progress: 9600/18258 (52.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2225.62293739s
+Progress: 9700/15140 (64.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2228.52742601s
+Progress: 9650/18258 (52.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2236.08564666s
+Progress: 9750/15140 (64.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2238.86663305s
+Progress: 9700/18258 (53.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2245.91228341s
+Progress: 9800/15140 (64.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2249.96165883s
+Progress: 9750/18258 (53.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2256.27156729s
+Progress: 9850/15140 (65.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2259.50954625s
+Progress: 9800/18258 (53.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2265.23095677s
+Progress: 9900/15140 (65.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2269.71556301s
+Progress: 9850/18258 (53.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2275.35789981s
+Progress: 9950/15140 (65.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2278.97663750s
+Progress: 9900/18258 (54.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2286.03598078s
+Progress: 10000/15140 (66.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2288.70769818s
+Progress: 9950/18258 (54.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2295.49409666s
+Progress: 10050/15140 (66.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2298.70884592s
+Progress: 10000/18258 (54.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2307.20905981s
+Progress: 10100/15140 (66.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2308.11442720s
+Progress: 10050/18258 (55.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2316.75638975s
+Progress: 10150/15140 (67.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2318.76367733s
+Progress: 10200/15140 (67.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2328.05206811s
+Progress: 10100/18258 (55.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2328.34241299s
+Progress: 10150/18258 (55.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2338.02492382s
+Progress: 10250/15140 (67.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2338.09791637s
+Progress: 10300/15140 (68.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2347.55147087s
+Progress: 10200/18258 (55.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2347.79781911s
+Progress: 10250/18258 (56.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2358.44261805s
+Progress: 10350/15140 (68.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2358.71874124s
+Progress: 10400/15140 (68.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2370.13387534s
+Progress: 10300/18258 (56.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2370.50160424s
+Progress: 10350/18258 (56.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2380.47778904s
+Progress: 10450/15140 (69.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2380.65043572s
+Progress: 10400/18258 (57.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2390.34204692s
+Progress: 10500/15140 (69.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2391.08824544s
+Progress: 10450/18258 (57.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2401.83135955s
+Progress: 10550/15140 (69.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2402.06691871s
+Progress: 10600/15140 (70.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2411.51528203s
+Progress: 10500/18258 (57.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2411.97498110s
+Progress: 10550/18258 (57.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2421.90869795s
+Progress: 10650/15140 (70.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2422.48516838s
+Progress: 10700/15140 (70.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2432.40887178s
+Progress: 10600/18258 (58.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2433.46537566s
+Progress: 10750/15140 (71.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2443.52193960s
+Progress: 10650/18258 (58.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2444.85330225s
+Progress: 10700/18258 (58.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2454.95793969s
+Progress: 10800/15140 (71.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2455.33481842s
+Progress: 10750/18258 (58.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2466.03516084s
+Progress: 10850/15140 (71.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2466.33482920s
+Progress: 10900/15140 (72.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2477.08436300s
+Progress: 10800/18258 (59.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2477.33159704s
+Progress: 10850/18258 (59.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2487.67381122s
+Progress: 10950/15140 (72.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2487.56021873s
+Progress: 10900/18258 (59.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2497.49685672s
+Progress: 11000/15140 (72.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2498.13641645s
+Progress: 10950/18258 (60.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2508.32057501s
+Progress: 11050/15140 (73.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2509.45215985s
+Progress: 11000/18258 (60.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2518.63817352s
+Progress: 11100/15140 (73.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2519.48975726s
+Progress: 11050/18258 (60.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2529.56959235s
+Progress: 11150/15140 (73.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2529.74659788s
+Progress: 11200/15140 (74.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2539.71014383s
+Progress: 11100/18258 (60.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2540.78401880s
+Progress: 11250/15140 (74.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2549.49249497s
+Progress: 11150/18258 (61.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2550.85255133s
+Progress: 11200/18258 (61.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2560.89844915s
+Progress: 11300/15140 (74.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2561.93812856s
+Progress: 11350/15140 (75.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2574.53739359s
+Progress: 11250/18258 (61.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2575.33718610s
+Progress: 11300/18258 (61.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2585.35195212s
+Progress: 11400/15140 (75.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2586.47166915s
+Progress: 11350/18258 (62.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2596.17291839s
+Progress: 11450/15140 (75.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2596.17677525s
+Progress: 11400/18258 (62.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2606.47472954s
+Progress: 11500/15140 (76.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2606.94315562s
+Progress: 11450/18258 (62.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2616.81600920s
+Progress: 11550/15140 (76.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2617.33558879s
+Progress: 11500/18258 (63.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2627.29146706s
+Progress: 11600/15140 (76.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2630.07479912s
+Progress: 11550/18258 (63.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2637.58522278s
+Progress: 11650/15140 (76.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2640.70747677s
+Progress: 11600/18258 (63.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2647.80235392s
+Progress: 11700/15140 (77.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2650.06773840s
+Progress: 11650/18258 (63.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2658.50038710s
+Progress: 11750/15140 (77.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2660.59825283s
+Progress: 11700/18258 (64.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2668.88817269s
+Progress: 11800/15140 (77.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2670.98011397s
+Progress: 11750/18258 (64.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2679.12687570s
+Progress: 11850/15140 (78.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2682.79719604s
+Progress: 11800/18258 (64.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2690.16564357s
+Progress: 11900/15140 (78.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2692.69599650s
+Progress: 11850/18258 (64.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2700.45040559s
+Progress: 11950/15140 (78.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2703.63820224s
+Progress: 11900/18258 (65.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2711.79851199s
+Progress: 12000/15140 (79.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2716.44124327s
+Progress: 11950/18258 (65.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2724.40605830s
+Progress: 12050/15140 (79.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2726.57314268s
+Progress: 12000/18258 (65.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2734.26343614s
+Progress: 12100/15140 (79.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2736.87117454s
+Progress: 12050/18258 (66.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2744.52448049s
+Progress: 12150/15140 (80.3%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2747.84241456s
+Progress: 12100/18258 (66.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2754.82775096s
+Progress: 12200/15140 (80.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2759.24324385s
+Progress: 12150/18258 (66.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2764.99677257s
+Progress: 12250/15140 (80.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2769.44467334s
+Progress: 12200/18258 (66.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2774.77513516s
+Progress: 12300/15140 (81.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2781.87405270s
+Progress: 12250/18258 (67.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2784.70623904s
+Progress: 12350/15140 (81.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2792.35184689s
+Progress: 12300/18258 (67.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2794.61945639s
+Progress: 12400/15140 (81.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2802.76020141s
+Progress: 12350/18258 (67.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2805.00405551s
+Progress: 12450/15140 (82.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2813.26164755s
+Progress: 12400/18258 (67.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2815.29561801s
+Progress: 12500/15140 (82.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2824.80661954s
+Progress: 12450/18258 (68.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2825.72709852s
+Progress: 12500/18258 (68.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2835.54382864s
+Progress: 12550/15140 (82.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2836.77876824s
+Progress: 12550/18258 (68.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2846.55631039s
+Progress: 12600/15140 (83.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2850.00739562s
+Progress: 12600/18258 (69.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2857.58877704s
+Progress: 12650/15140 (83.6%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2861.07677974s
+Progress: 12650/18258 (69.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2868.26054572s
+Progress: 12700/15140 (83.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2871.62295433s
+Progress: 12700/18258 (69.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2878.69689463s
+Progress: 12750/15140 (84.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2884.78526911s
+Progress: 12750/18258 (69.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2890.82288988s
+Progress: 12800/15140 (84.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2895.20556637s
+Progress: 12800/18258 (70.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2901.09785986s
+Progress: 12850/15140 (84.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2905.09195343s
+Progress: 12850/18258 (70.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2914.33166040s
+Progress: 12900/15140 (85.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2918.39745189s
+Progress: 12900/18258 (70.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2924.77050300s
+Progress: 12950/15140 (85.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2929.83653018s
+Progress: 12950/18258 (70.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2935.35514680s
+Progress: 13000/15140 (85.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2940.34131259s
+Progress: 13000/18258 (71.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2946.20025648s
+Progress: 13050/15140 (86.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2950.20790245s
+Progress: 13050/18258 (71.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2956.49296361s
+Progress: 13100/15140 (86.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2960.84395596s
+Progress: 13100/18258 (71.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2967.10100088s
+Progress: 13150/15140 (86.9%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2972.54567763s
+Progress: 13150/18258 (72.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2978.43298528s
+Progress: 13200/15140 (87.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2982.52466884s
+Progress: 13200/18258 (72.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=2989.25598969s
+Progress: 13250/15140 (87.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=2994.33828849s
+Progress: 13250/18258 (72.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3000.74445230s
+Progress: 13300/15140 (87.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3005.35174546s
+Progress: 13300/18258 (72.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3012.98545236s
+Progress: 13350/15140 (88.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3015.86059952s
+Progress: 13350/18258 (73.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3024.78902623s
+Progress: 13400/15140 (88.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3026.56245775s
+Progress: 13400/18258 (73.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3036.32694526s
+Progress: 13450/15140 (88.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3036.83897588s
+Progress: 13500/15140 (89.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3047.16957023s
+Progress: 13450/18258 (73.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3047.46056800s
+Progress: 13550/15140 (89.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3057.97058243s
+Progress: 13600/15140 (89.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3069.26007068s
+Progress: 13500/18258 (73.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3073.72581880s
+Progress: 13650/15140 (90.2%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3080.51803989s
+Progress: 13550/18258 (74.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3084.11394358s
+Progress: 13700/15140 (90.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3092.25065980s
+Progress: 13600/18258 (74.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3099.95067804s
+Progress: 13750/15140 (90.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3104.58148521s
+Progress: 13650/18258 (74.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3110.67707846s
+Progress: 13800/15140 (91.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3114.93714857s
+Progress: 13700/18258 (75.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3121.26375002s
+Progress: 13850/15140 (91.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3126.02216387s
+Progress: 13750/18258 (75.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3133.08247687s
+Progress: 13900/15140 (91.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3137.59463003s
+Progress: 13800/18258 (75.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3145.06646015s
+Progress: 13950/15140 (92.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3149.85520090s
+Progress: 13850/18258 (75.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3156.22716168s
+Progress: 14000/15140 (92.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3162.33738181s
+Progress: 13900/18258 (76.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3166.40251575s
+Progress: 14050/15140 (92.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3173.82247912s
+Progress: 13950/18258 (76.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3177.71949088s
+Progress: 14100/15140 (93.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3185.07741367s
+Progress: 14000/18258 (76.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3188.97755184s
+Progress: 14150/15140 (93.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3196.13773241s
+Progress: 14050/18258 (77.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3200.65441078s
+Progress: 14200/15140 (93.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3207.90000462s
+Progress: 14100/18258 (77.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3210.99631849s
+Progress: 14250/15140 (94.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3220.57751396s
+Progress: 14150/18258 (77.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3221.96896230s
+Progress: 14300/15140 (94.5%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3231.96457136s
+Progress: 14200/18258 (77.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3232.69226101s
+Progress: 14350/15140 (94.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3243.02284633s
+Progress: 14250/18258 (78.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3243.91705184s
+Progress: 14400/15140 (95.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3254.87691242s
+Progress: 14300/18258 (78.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3255.28094505s
+Progress: 14450/15140 (95.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3266.47134901s
+Progress: 14350/18258 (78.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3267.05884369s
+Progress: 14500/15140 (95.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3277.24371114s
+Progress: 14400/18258 (78.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3278.10418633s
+Progress: 14550/15140 (96.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3288.13998593s
+Progress: 14450/18258 (79.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3289.27825407s
+Progress: 14600/15140 (96.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3298.91228708s
+Progress: 14500/18258 (79.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3300.63807530s
+Progress: 14650/15140 (96.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3311.43296017s
+Progress: 14550/18258 (79.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3311.93055314s
+Progress: 14600/18258 (80.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3322.65566313s
+Progress: 14700/15140 (97.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3327.03189735s
+Progress: 14650/18258 (80.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3333.18382697s
+Progress: 14750/15140 (97.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3337.46691657s
+Progress: 14700/18258 (80.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3344.02536220s
+Progress: 14800/15140 (97.8%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3347.96825488s
+Progress: 14750/18258 (80.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3354.36290606s
+Progress: 14850/15140 (98.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3358.68204160s
+Progress: 14800/18258 (81.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3364.49900042s
+Progress: 14900/15140 (98.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3370.51923306s
+Progress: 14850/18258 (81.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3374.63216025s
+Progress: 14950/15140 (98.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3381.38645368s
+Progress: 14900/18258 (81.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3387.18624077s
+Progress: 15000/15140 (99.1%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3392.58022162s
+Progress: 14950/18258 (81.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3397.09090012s
+Progress: 15050/15140 (99.4%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3402.86706388s
+Progress: 15000/18258 (82.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3408.92509232s
+Progress: 15100/15140 (99.7%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3415.29379640s
+Progress: 15050/18258 (82.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3419.60468679s
+Progress: 15140/15140 (100.0%) | provider=fastino.ai | dataset=jailbreakhub | prompt=v1 | elapsed=3424.81172433s
+[5/6] Saved: outputs/fastino.ai/jailbreakhub_v1_t0.5.csv (fastino.ai | jailbreakhub | v1 | t=0.5 | rows=15140)
+Progress: 15100/18258 (82.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3430.28742020s
+Progress: 15150/18258 (83.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3441.07212929s
+Progress: 15200/18258 (83.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3452.15061619s
+Progress: 15250/18258 (83.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3462.84114507s
+Progress: 15300/18258 (83.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3474.15078624s
+Progress: 15350/18258 (84.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3485.09221110s
+Progress: 15400/18258 (84.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3496.87390575s
+Progress: 15450/18258 (84.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3508.77063809s
+Progress: 15500/18258 (84.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3519.46984527s
+Progress: 15550/18258 (85.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3530.01539571s
+Progress: 15600/18258 (85.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3540.32941271s
+Progress: 15650/18258 (85.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3550.99097787s
+Progress: 15700/18258 (86.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3562.25603154s
+Progress: 15750/18258 (86.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3573.27490043s
+Progress: 15800/18258 (86.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3585.65997134s
+Progress: 15850/18258 (86.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3596.87260578s
+Progress: 15900/18258 (87.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3628.94050549s
+Progress: 15950/18258 (87.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3641.01904457s
+Progress: 16000/18258 (87.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3652.51164526s
+Progress: 16050/18258 (87.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3664.21902366s
+Progress: 16100/18258 (88.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3675.95890861s
+Progress: 16150/18258 (88.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3687.37642335s
+Progress: 16200/18258 (88.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3699.61461212s
+Progress: 16250/18258 (89.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3711.25858611s
+Progress: 16300/18258 (89.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3722.78754386s
+Progress: 16350/18258 (89.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3734.30014661s
+Progress: 16400/18258 (89.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3746.08020634s
+Progress: 16450/18258 (90.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3757.81771039s
+Progress: 16500/18258 (90.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3769.37400092s
+Progress: 16550/18258 (90.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3780.98641056s
+Progress: 16600/18258 (90.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3792.89626765s
+Progress: 16650/18258 (91.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3804.33339854s
+Progress: 16700/18258 (91.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3816.58698477s
+Progress: 16750/18258 (91.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3827.81086485s
+Progress: 16800/18258 (92.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3839.05907903s
+Progress: 16850/18258 (92.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3850.52059432s
+Progress: 16900/18258 (92.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3862.75081520s
+Progress: 16950/18258 (92.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3874.67158452s
+Progress: 17000/18258 (93.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3886.25591529s
+Progress: 17050/18258 (93.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3898.16826542s
+Progress: 17100/18258 (93.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3909.87806332s
+Progress: 17150/18258 (93.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3921.36546542s
+Progress: 17200/18258 (94.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3933.50367665s
+Progress: 17250/18258 (94.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3945.37148173s
+Progress: 17300/18258 (94.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3956.93730037s
+Progress: 17350/18258 (95.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3969.37190075s
+Progress: 17400/18258 (95.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3980.92122848s
+Progress: 17450/18258 (95.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=3992.45697500s
+Progress: 17500/18258 (95.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4004.05019868s
+Progress: 17550/18258 (96.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4015.97964584s
+Progress: 17600/18258 (96.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4027.65647582s
+Progress: 17650/18258 (96.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4039.01042407s
+Progress: 17700/18258 (96.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4050.66503958s
+Progress: 17750/18258 (97.2%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4062.49081696s
+Progress: 17800/18258 (97.5%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4074.02010181s
+Progress: 17850/18258 (97.8%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4085.76918753s
+Progress: 17900/18258 (98.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4097.29477427s
+Progress: 17950/18258 (98.3%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4108.77742165s
+Progress: 18000/18258 (98.6%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4121.36149780s
+Progress: 18050/18258 (98.9%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4133.90537180s
+Progress: 18100/18258 (99.1%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4146.38588051s
+Progress: 18150/18258 (99.4%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4158.04807499s
+Progress: 18200/18258 (99.7%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4170.20639726s
+Progress: 18250/18258 (100.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4186.85187794s
+Progress: 18258/18258 (100.0%) | provider=fastino.ai | dataset=detect-jailbreak | prompt=v1 | elapsed=4189.81384536s
+[6/6] Saved: outputs/fastino.ai/detect-jailbreak_v1_t0.5.csv (fastino.ai | detect-jailbreak | v1 | t=0.5 | rows=18258)
+
+All benchmark runs are complete.
+
+RUN_EXIT_CODE=0
+Finished UTC: 2026-10-29T23:45:50Z
+<stdin>:8: Pandas4Warning: 'str' is not supported as a fill value for float64 dtype. In a future version, calling fillna with an incompatible value will raise. Explicitly cast to a common dtype before filling.
+RESULT toxigen: rows=6789/6789 successful=6789 errors=0 path=outputs/fastino.ai/toxigen_v1_t0.5.csv
+RESULT hatecheck: rows=3728/3728 successful=3728 errors=0 path=outputs/fastino.ai/hatecheck_v1_t0.5.csv
+RESULT aegis2: rows=1964/1964 successful=1964 errors=0 path=outputs/fastino.ai/aegis2_v1_t0.5.csv
+RESULT detect-jailbreak: rows=18258/18258 successful=18257 errors=1 path=outputs/fastino.ai/detect-jailbreak_v1_t0.5.csv
+<stdin>:8: Pandas4Warning: 'str' is not supported as a fill value for float64 dtype. In a future version, calling fillna with an incompatible value will raise. Explicitly cast to a common dtype before filling.
+RESULT jailbreak-classification: rows=1044/1044 successful=1044 errors=0 path=outputs/fastino.ai/jailbreak-classification_v1_t0.5.csv
+RESULT jailbreakhub: rows=15140/15140 successful=15139 errors=1 path=outputs/fastino.ai/jailbreakhub_v1_t0.5.csv
+RETRY_STAGE_STARTED UTC: 2026-10-29T23:48:58.703461+00:00
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/frame.py", line 4934, in _set_value
+    self._mgr.column_setitem(icol, iindex, value, inplace_only=True)
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/internals/managers.py", line 1566, in column_setitem
+    col_mgr.setitem_inplace(idx, value)
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/internals/managers.py", line 2284, in setitem_inplace
+    arr[indexer] = value
+    ~~~^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/arrays/string_.py", line 876, in __setitem__
+    value = self._validate_setitem_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/arrays/string_.py", line 850, in _validate_setitem_value
+    raise TypeError(
+TypeError: Invalid value '0.06211028769476421' for dtype 'str'. Value should be a string or missing value, got 'float' instead.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<stdin>", line 14, in <module>
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/indexing.py", line 3473, in __setitem__
+    return super().__setitem__(key, value)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/indexing.py", line 3318, in __setitem__
+    self.obj._set_value(*key, value=value, takeable=self._takeable)
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/frame.py", line 4945, in _set_value
+    self.loc[index, col] = value
+    ~~~~~~~~^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/indexing.py", line 1010, in __setitem__
+    iloc._setitem_with_indexer(indexer, value, self.name)
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/indexing.py", line 2651, in _setitem_with_indexer
+    self._setitem_with_indexer_split_path(indexer, value, name)
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/indexing.py", line 2741, in _setitem_with_indexer_split_path
+    self._setitem_single_column(loc, value, pi)
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/indexing.py", line 2898, in _setitem_single_column
+    self.obj._mgr.column_setitem(loc, plane_indexer, value)
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/internals/managers.py", line 1568, in column_setitem
+    new_mgr = col_mgr.setitem((idx,), value)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/internals/managers.py", line 625, in setitem
+    return self.apply("setitem", indexer=indexer, value=value)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/internals/managers.py", line 456, in apply
+    applied = getattr(b, f)(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/internals/blocks.py", line 1793, in setitem
+    target[indexer] = value
+    ~~~~~~^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/arrays/string_.py", line 876, in __setitem__
+    value = self._validate_setitem_value(value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/pandas/core/arrays/string_.py", line 850, in _validate_setitem_value
+    raise TypeError(
+TypeError: Invalid value '0.06211028769476421' for dtype 'str'. Value should be a string or missing value, got 'float' instead.
+RETRY_STAGE_STARTED UTC: 2026-10-29T23:52:01.621694+00:00
+RETRY_OK dataset=detect-jailbreak sample_id=5192 elapsed=0.29072307s original_error=HTTP_503
+RETRY_OK dataset=jailbreakhub sample_id=5621 elapsed=0.23896848s original_error=HTTP_503
+FINAL_RESULT toxigen: rows=6789/6789 successful=6789 errors=0
+FINAL_RESULT hatecheck: rows=3728/3728 successful=3728 errors=0
+FINAL_RESULT aegis2: rows=1964/1964 successful=1964 errors=0
+FINAL_RESULT detect-jailbreak: rows=18258/18258 successful=18258 errors=0
+FINAL_RESULT jailbreak-classification: rows=1044/1044 successful=1044 errors=0
+FINAL_RESULT jailbreakhub: rows=15140/15140 successful=15140 errors=0
+FINAL_VALIDATION=SUCCESS (two transient HTTP 503 requests retried after main benchmark; original timing unchanged)

@@ -1,0 +1,20 @@
+Evaluator: scripts.evaluate_model_suite.summarize_file / benchmark.evaluation.evaluate_predictions
+Scope: first six datasets, prompt v1, threshold 0.5
+
+                 dataset  rows  valid  error  accuracy  precision   recall       f1    auroc
+                 toxigen  6789   6789      0  0.654883   0.947735 0.322753 0.481522 0.839971
+               hatecheck  3728   3728      0  0.976931   0.976163 0.990636 0.983346 0.996627
+                  aegis2  1964   1964      0  0.837067   0.892667 0.793201 0.840000 0.919827
+        detect-jailbreak 18258  18258      0  0.682441   0.249313 0.969975 0.396670 0.941926
+jailbreak-classification  1044   1044      0  0.947318   0.921429 0.979127 0.949402 0.993173
+            jailbreakhub 15140  15140      0  0.654557   0.204816 0.944484 0.336631 0.914205
+
+MACRO_AVERAGE (equal dataset weights):
+accuracy=0.792200
+precision=0.698687
+recall=0.833363
+f1=0.664595
+auroc=0.934288
+
+CSV: outputs/fastino.ai/evaluation/v1_t0.5_first6_20261029T235320Z.csv
+Latency: unavailable in prediction CSVs; no latency values inferred.
