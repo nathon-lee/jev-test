@@ -1,5 +1,5 @@
 {
-  "source_generated_at": "2026-10-30T00:01:13.666530+00:00",
+  "source_generated_at": "2026-10-30T03:55:14.909883+00:00",
   "model_identities": {
     "fastino.ai": {
       "request_model": "fastino/GLiDE",
@@ -68,7 +68,7 @@
     {
       "name": "fig04_evaluation_coverage",
       "title": "Evaluation Coverage and Request Failures",
-      "caption": "Coverage is successful samples / reference samples. Gray indicates an unavailable prediction file; hatching indicates a fully saved run in which every request failed. PII rows show evaluation coverage only, not masking quality. Missing Laya results are not scored as zero.",
+      "caption": "Coverage is successful samples / reference samples. Gray indicates an unavailable prediction file; hatching indicates a fully saved run in which every request failed. PII is ordinary binary classification (PII present vs absent); rows show coverage, not masking quality. Missing Laya results are not scored as zero.",
       "files": {
         "png": "fig04_evaluation_coverage.png",
         "svg": "fig04_evaluation_coverage.svg",
@@ -78,7 +78,7 @@
     {
       "name": "fig05_dataset_metrics",
       "title": "Per-Dataset Performance Metrics (Fastino, Laya, TypeSafe)",
-      "caption": "Fixed prompt v1 and threshold 0.5; Accuracy, Precision, Recall, F1, AUROC and average latency (ms) are shown for all datasets. Quality metrics use each model's own successful samples, not a fair sample-aligned ranking; request errors are excluded from quality scores. PII results measure presence detection, not masking quality; single-class AUROC is undefined. Elapsed time is elapsed / processed from complete, matched logs, including network overhead and failure waits. Missing results, no successful predictions, undefined metrics or incomplete timing are N/A, never zero-filled. A run with all requests failed may still have recorded elapsed time.",
+      "caption": "Fixed prompt v1 and threshold 0.5; Accuracy, Precision, Recall, F1, AUROC and average latency (ms) are shown for all datasets. Quality metrics use each model's own successful samples, not a fair sample-aligned ranking; request errors are excluded from quality scores. PII is ordinary binary classification (PII present vs absent), not entity extraction or masking quality; the current positives-only labels make AUROC undefined. Elapsed time is elapsed / processed from complete, matched logs, including network overhead and failure waits. Missing results, no successful predictions, undefined metrics or incomplete timing are N/A, never zero-filled. A run with all requests failed may still have recorded elapsed time.",
       "files": {
         "png": "fig05_dataset_metrics.png",
         "svg": "fig05_dataset_metrics.svg",
@@ -128,7 +128,7 @@
     {
       "name": "fig14_category_reference_averages",
       "title": "Dataset-Category Multi-Model Reference Averages (v1 / Threshold 0.5)",
-      "caption": "Fixed prompt v1 and threshold 0.5. Harmful content averages ToxiGen, HateCheck and AEGIS2; Jailbreak averages Detect-Jailbreak, Jailbreak-Classification and JailbreakHub; PII averages Nano-1K and Mini-10K. Every dataset within a category has equal weight. All six metrics are averaged separately from per-dataset values; F1 is not recomputed from mean Precision/Recall. Missing required data or undefined metrics remain N/A; no category drops datasets to fill missing values. PII measures presence detection, not masking quality, and its single-class AUROC is undefined. Quality uses each model's own successful samples or supplied aggregates, not sample-aligned comparisons. Latency averages the reference timings used in the per-dataset chart, including network and failure waits; single-run and four-run timing protocols differ and are reference-only. Historical PII and other models' snapshots are retained; categories need not share an evaluation date. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details.",
+      "caption": "Fixed prompt v1 and threshold 0.5. Harmful content averages ToxiGen, HateCheck and AEGIS2; Jailbreak averages Detect-Jailbreak, Jailbreak-Classification and JailbreakHub; PII averages Nano-1K and Mini-10K. Every dataset within a category has equal weight. All six metrics are averaged separately from per-dataset values; F1 is not recomputed from mean Precision/Recall. Missing required data or undefined metrics remain N/A; no category drops datasets to fill missing values. PII is ordinary binary classification (PII present vs absent), not entity extraction or masking quality. Its current labels contain positives only, so AUROC is undefined. Quality uses each model's own successful samples or supplied aggregates, not sample-aligned comparisons. Latency averages the reference timings used in the per-dataset chart, including network and failure waits; single-run and four-run timing protocols differ and are reference-only. Historical PII and other models' snapshots are retained; categories need not share an evaluation date. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details. gliguard-LLMGuardrails-300M-fine-tuned | model ID: c94233af-98e6-4942-8e26-98ad204851bf 46,907 successful / 46,923 rows; 16 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; no input truncation. Single-run elapsed includes original failure waits but excludes post-run retries. PII, v2 and repeat consistency were not tested. Training/evaluation overlap was not verified. Not a sample-aligned ranking.",
       "files": {
         "png": "fig14_category_reference_averages.png",
         "svg": "fig14_category_reference_averages.svg",
@@ -194,7 +194,7 @@
     {
       "name": "fig10_openjev_reference_v1",
       "title": "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5)",
-      "caption": "Fixed threshold 0.5. The original OpenJev is labeled 4B; OpenJev 32B and Microsoft Decision-1 have v1 summaries only. Internal models use user-supplied aggregate results; other models use their own successful samples. Sample-level alignment with OpenJev is unavailable, so this is not a fair ranking. The Rows field counts total rows, not valid samples. PII measures presence detection only; single-class AUROC is N/A. The original four models prefer complete four-run averages for timing. For local APIs in v1, when no complete four-run mean is available, elapsed/processed from a complete threshold-0.5 run is used only if log counts match the full CSV. The two added models use supplied single-run timing. Asterisks mark single-run timings, not four-run means; protocols differ. Timing includes failure waits, client and network overhead; unverifiable timing is N/A. All five ToxiGen quality metrics for 32B are now supplied; tasks with many errors reflect successful samples only. The original sample-aligned baseline and stability analyses are unchanged and exclude aggregate-only internal models. One enlarged metric chart is shown per row, with a shared model legend at the top. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details. Latency uses a logarithmic vertical axis with actual ms/sample labels. The complete six-metric figure and each individual metric are available for download.",
+      "caption": "Fixed threshold 0.5. The original OpenJev is labeled 4B; OpenJev 32B and Microsoft Decision-1 have v1 summaries only. Internal models use user-supplied aggregate results; other models use their own successful samples. Sample-level alignment with OpenJev is unavailable, so this is not a fair ranking. The Rows field counts total rows, not valid samples. PII is ordinary binary classification (PII present vs absent), not extraction or masking quality; single-class AUROC is N/A. The original four models prefer complete four-run averages for timing. For local APIs in v1, when no complete four-run mean is available, elapsed/processed from a complete threshold-0.5 run is used only if log counts match the full CSV. The two added models use supplied single-run timing. Asterisks mark single-run timings, not four-run means; protocols differ. Timing includes failure waits, client and network overhead; unverifiable timing is N/A. All five ToxiGen quality metrics for 32B are now supplied; tasks with many errors reflect successful samples only. The original sample-aligned baseline and stability analyses are unchanged and exclude aggregate-only internal models. One enlarged metric chart is shown per row, with a shared model legend at the top. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details. Latency uses a logarithmic vertical axis with actual ms/sample labels. The complete six-metric figure and each individual metric are available for download. gliguard-LLMGuardrails-300M-fine-tuned | model ID: c94233af-98e6-4942-8e26-98ad204851bf 46,907 successful / 46,923 rows; 16 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; no input truncation. Single-run elapsed includes original failure waits but excludes post-run retries. PII, v2 and repeat consistency were not tested. Training/evaluation overlap was not verified. Not a sample-aligned ranking.",
       "files": {
         "png": "fig10_openjev_reference_v1.png",
         "svg": "fig10_openjev_reference_v1.svg",
@@ -270,7 +270,7 @@
     {
       "name": "fig12_openjev_reference_averages",
       "title": "Multi-Model Reference Averages (v1 / Threshold 0.5)",
-      "caption": "Fixed prompt v1 and threshold 0.5; only v1 is shown. The main charts give equal weight to six jointly tested non-PII datasets. The two PII datasets are summarized separately, and the eight-dataset averages are supplementary only. AUROC is undefined for both the PII and all-eight-dataset scopes and remains N/A. Average Accuracy, Precision, Recall, F1, AUROC and latency are shown. Only dataset names are shared; successful samples are not aligned across models, so these results must not be ranked together with the original sample-aligned model averages. Quality averages retain the full shared dataset scope; a missing metric on any dataset makes that average N/A. Latency gives equal weight to the shared subset with available timing for every model; the figure states its scope and count. Latency is N/A only when no shared timing subset exists; datasets are never dropped separately for individual models. The three APIs use single-run v1 / 0.5 logs, without substituting other thresholds or four-run averages. OpenJev 4B retains supplied summary timing; 32B and Decision-1 use supplied single-run timing. Protocols differ, so timing is reference-only. 32B's ToxiGen metrics are now complete and included normally in quality averages. All six metrics are visible in two columns and three rows: Accuracy / F1, Precision / Recall, AUROC / Latency. Narrow screens use one column; the shared model color legend appears at the top.",
+      "caption": "Fixed prompt v1 and threshold 0.5; only v1 is shown. The main charts give equal weight to six jointly tested non-PII datasets. PII is ordinary binary classification (PII present vs absent), not extraction or masking quality. The two PII datasets are summarized separately, and the eight-dataset averages are supplementary only. AUROC is undefined for both the PII and all-eight-dataset scopes and remains N/A. Average Accuracy, Precision, Recall, F1, AUROC and latency are shown. Only dataset names are shared; successful samples are not aligned across models, so these results must not be ranked together with the original sample-aligned model averages. Quality averages retain the full shared dataset scope; a missing metric on any dataset makes that average N/A. Latency gives equal weight to the shared subset with available timing for every model; the figure states its scope and count. Latency is N/A only when no shared timing subset exists; datasets are never dropped separately for individual models. The three APIs use single-run v1 / 0.5 logs, without substituting other thresholds or four-run averages. OpenJev 4B retains supplied summary timing; 32B and Decision-1 use supplied single-run timing. Protocols differ, so timing is reference-only. 32B's ToxiGen metrics are now complete and included normally in quality averages. All six metrics are visible in two columns and three rows: Accuracy / F1, Precision / Recall, AUROC / Latency. Narrow screens use one column; the shared model color legend appears at the top. gliguard-LLMGuardrails-300M-fine-tuned | model ID: c94233af-98e6-4942-8e26-98ad204851bf 46,907 successful / 46,923 rows; 16 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; no input truncation. Single-run elapsed includes original failure waits but excludes post-run retries. PII, v2 and repeat consistency were not tested. Training/evaluation overlap was not verified. Not a sample-aligned ranking.",
       "files": {
         "png": "fig12_openjev_reference_averages.png",
         "svg": "fig12_openjev_reference_averages.svg",
@@ -336,7 +336,7 @@
     {
       "name": "fig13_three_dataset_averages",
       "title": "ToxiGen, HateCheck, AEGIS2: Multi-model Reference Averages",
-      "caption": "For Fastino, Laya, TypeSafe, OpenJev 4B, OpenJev 32B and Microsoft Decision-1, Accuracy, Precision, Recall, F1, AUROC and average latency are reported for ToxiGen, HateCheck and AEGIS2, with equal weights of one third per dataset; Detect-Jailbreak and all other datasets are excluded from these means. These six models use prompt v1 at threshold 0.5, each with its own successful samples; OpenJev 4B, OpenJev 32B and Microsoft Decision-1 results are supplied internal summaries. Local model latency is elapsed/processed from each dataset's v1 / 0.5 run, averaged equally across datasets; OpenJev latency comes from the corresponding supplied summary entries. Missing quality results or complete timing for any required dataset make the corresponding mean N/A; the dataset scope is not reduced. Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied averages retained as provided. These means are not averaged again; their prompts, thresholds and timing protocols were not supplied. Unreported F1 or AUROC values are N/A; F1 is not inferred from average Precision/Recall. The latency axis uses a logarithmic scale above 1 ms. Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking. All six metrics are visible together in a two-column grid (one column on narrow screens). Model order is fixed across panels, with light group separators; methodology can be expanded separately. Additional dataset-scope limitation: no internal dataset was available when the six models above were evaluated, so their averages use only the three shared datasets. Other model evaluations may also have included an additional internal dataset. Whether that dataset contributed to their supplied averages has not been confirmed; their dataset coverage must not be assumed identical to the six-model three-dataset scope.",
+      "caption": "For Fastino, Laya, TypeSafe, OpenJev 4B, OpenJev 32B and Microsoft Decision-1, Accuracy, Precision, Recall, F1, AUROC and average latency are reported for ToxiGen, HateCheck and AEGIS2, with equal weights of one third per dataset; Detect-Jailbreak and all other datasets are excluded from these means. These six models use prompt v1 at threshold 0.5, each with its own successful samples; OpenJev 4B, OpenJev 32B and Microsoft Decision-1 results are supplied internal summaries. Local model latency is elapsed/processed from each dataset's v1 / 0.5 run, averaged equally across datasets; OpenJev latency comes from the corresponding supplied summary entries. Missing quality results or complete timing for any required dataset make the corresponding mean N/A; the dataset scope is not reduced. Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied averages retained as provided. These means are not averaged again; their prompts, thresholds and timing protocols were not supplied. Unreported F1 or AUROC values are N/A; F1 is not inferred from average Precision/Recall. The latency axis uses a logarithmic scale above 1 ms. Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking. All six metrics are visible together in a two-column grid (one column on narrow screens). Model order is fixed across panels, with light group separators; methodology can be expanded separately. Additional dataset-scope limitation: no internal dataset was available when the six models above were evaluated, so their averages use only the three shared datasets. Other model evaluations may also have included an additional internal dataset. Whether that dataset contributed to their supplied averages has not been confirmed; their dataset coverage must not be assumed identical to the six-model three-dataset scope. gliguard-LLMGuardrails-300M-fine-tuned | model ID: c94233af-98e6-4942-8e26-98ad204851bf 46,907 successful / 46,923 rows; 16 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; no input truncation. Single-run elapsed includes original failure waits but excludes post-run retries. PII, v2 and repeat consistency were not tested. Training/evaluation overlap was not verified. Not a sample-aligned ranking.",
       "files": {
         "png": "fig13_three_dataset_averages.png",
         "svg": "fig13_three_dataset_averages.svg",
@@ -403,8 +403,6 @@
   "warnings": [
     "outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
     "outputs/laya-ai.com/run_model_suite_2026-10-21_084817.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
-    "outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
-    "outputs/laya-ai.com/run_model_suite_2026-10-21_084817.log: interleaved task starts cannot be assigned to progress; the entire log is excluded from per-configuration timing comparisons; threshold assignments are not inferred from interleaved progress. Verifiable complete four-run averages are used only in the four-model reference figures.",
     "fastino.ai/jailbreak-classification_v1_t0.5.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
     "fastino.ai/jailbreak-classification_v1_t0.8.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
     "fastino.ai/jailbreak-classification_v2_t0.5.csv: the prediction file associated with the historical log has been replaced by new results. Timing from that old log is not reused; quality metrics still use the new CSV.",
@@ -412,7 +410,6 @@
     "本次为增量更新：未提供历史逐样本 CSV 的配置保留旧报告汇总，不代表重新测试。新 CSV 替换同配置旧结果，缺少新日志时不沿用旧耗时。只有配置均未变更、原始预测可对齐，或各模型均在全量参考样本上成功时，才保留或补充共同样本指标；无法核验的交集不参与公平均值。",
     "detect-jailbreak/v1/0.5：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。",
     "fastino.ai vs laya-ai.com/detect-jailbreak：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。",
-    "本次仅更新 Fastino 前六个数据集的 v1 / 0.5；Laya 保留本轮重跑前的结果快照，未混入进行中的部分结果。",
     "Fastino 本次六个配置使用 2026-10-29 六数据集并发运行日志；comparison 日志仅按数据集重排原始记录，未改变 elapsed。两个 HTTP 503 样本已补跑成功，质量指标包含补跑结果；主轮 elapsed 不含随后补跑耗时，不能解释为单请求延迟。",
     "fastino.ai/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
     "fastino.ai/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
@@ -421,7 +418,6 @@
     "fastino.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
     "fastino.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
     "fastino.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
-    "laya-ai.com/detect-jailbreak_v1_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
     "laya-ai.com/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
     "laya-ai.com/detect-jailbreak_v1_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
     "laya-ai.com/detect-jailbreak_v1_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
@@ -435,7 +431,9 @@
     "typesafe.ai/detect-jailbreak_v2_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
     "typesafe.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
     "typesafe.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
-    "typesafe.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。"
+    "typesafe.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。",
+    "laya-ai.com vs typesafe.ai/detect-jailbreak：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。",
+    "本次更新 Laya 前六个数据集的 v1 / 0.5：46,923 行，46,913 行成功、10 行失败。质量指标排除错误行；六个参考配置使用本轮完整单次 elapsed/processed，不混入历史其他阈值耗时。PII、v2、其他阈值及其他模型保留历史结果；提示词与重复调用探索混合历史轮次，不能把差异仅归因于提示词、阈值或随机性。"
   ],
   "external_comparison": {
     "source": "data/external/openjev_summary.csv",
@@ -443,6 +441,7 @@
     "notes": "OpenJev 4B 数值取自用户最初提供的清晰汇总表，分类阈值均为 0.5；补充 OCR 文本有错字，不据此修正数值或推断混淆矩阵。Rows 为总测试行数，有效样本数和错误数未可靠录入，保持未知，不将 Rows 当作有效样本数。OpenJev 只提供汇总指标，未提供逐样本 score、预测或模型版本；不能核验相同输入、共同成功样本或计算重复调用稳定性，不加入原有公平基线与排名。参考图按各模型自身成功样本统计，仅作描述性对照。原四模型优先使用每个数据集/提示词四轮完整运行的 elapsed/processed 算术平均。v1 缺少完整四轮计时时，仅在阈值 0.5 的完整单轮日志与全量 CSV 行数一致时，使用该单轮的 elapsed/processed，并标记为 single_complete_run；v2 不使用该回退。包含失败请求、等待、客户端及网络开销，不是纯推理时间；无可核验的完整计时标 N/A。并发日志无法逐阈值归属时，仅在四个阈值各启动一次、四次全量完成及保存均可核验，且无后续重跑时使用四轮耗时均值；不据此回填任一阈值的耗时。新增 OpenJev 32B、Microsoft Decision-1 为用户提供的内部 v1 / 0.5 汇总，耗时来自每个数据集一次完整运行的 elapsed/processed（max workers=8），不是原四模型的四轮均值，计时协议不同，仅作参考。OpenJev 32B 的原文件标记为 apus-openjev-35b-a3b，显示名称按用户确认使用 32B，不从文件名推断实际模型版本。其 ToxiGen 五项质量指标均已由用户补全，Accuracy 为 0.693975；按完整数据集范围计算均值，不缩减范围或反推指标。新增模型质量指标排除错误行，尤其 OpenJev 32B 的部分任务请求错误较多，不能将成功样本分数当作全量表现。Microsoft 日志在八个完整任务后中断，提供的耗时仅取已完成任务；均无单请求 P95。没有逐样本预测，不加入共同成功样本排名或重复调用一致性。",
     "providers": [
       "fastino.ai",
+      "fastino-ft-gg6-r1-ml2048-s7",
       "laya-ai.com",
       "typesafe.ai",
       "openjev",
@@ -477,6 +476,12 @@
         "request_model": "not supplied",
         "resolved_model": null,
         "display_name": "Microsoft Decision-1"
+      },
+      "fastino-ft-gg6-r1-ml2048-s7": {
+        "request_model": "c94233af-98e6-4942-8e26-98ad204851bf",
+        "resolved_model": "c94233af-98e6-4942-8e26-98ad204851bf",
+        "display_name": "gliguard-LLMGuardrails-300M-fine-tuned",
+        "base_model": "Gliguard LLMGuardrails 300M"
       }
     },
     "classification_threshold": 0.5,
@@ -488,6 +493,19 @@
       0.8
     ],
     "internal_source": "data/external/internal_model_summary.csv",
+    "fine_tuned_models": {
+      "fastino-ft-gg6-r1-ml2048-s7": {
+        "run_dir": "outputs/finetuned/20261030T010837Z",
+        "log_file": "logs/fastino_ft_gg6-r1-ml2048-s7_20261030T010837Z.log",
+        "model_id": "c94233af-98e6-4942-8e26-98ad204851bf",
+        "display_name": "gliguard-LLMGuardrails-300M-fine-tuned",
+        "training_name": "gg6-r1-ml2048-s7 v1",
+        "rows": 46923,
+        "valid": 46907,
+        "errors": 16,
+        "notes": "v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; no input truncation. Single-run elapsed includes original failure waits but excludes post-run retries. PII, v2 and repeat consistency were not tested. Training/evaluation overlap was not verified. Not a sample-aligned ranking."
+      }
+    },
     "category_averages_csv": "category_reference_averages.csv",
     "v1_scope_averages_csv": "v1_reference_scope_averages.csv"
   }

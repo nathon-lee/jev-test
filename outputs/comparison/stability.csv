@@ -1,24 +1,24 @@
 ﻿provider,model,dataset,prompt,expected,available_repeats,complete_repeats,status,coverage,rows,errors,error_rate,n,flipped,mean_score_std,mean_score_range,decision_flip_rate
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,toxigen,v1,6789,4,4,complete,1.0,27156,0,0.0,6789,4823,0.28634057363099896,0.6612752290630765,0.7104139048460746
-laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,toxigen,v1,6789,4,4,complete,0.9988216232140227,27156,8,0.0002945941964943291,6781,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,toxigen,v1,6789,4,4,complete,0.9988216232140227,27156,8,0.0002945941964943291,6781,6333,0.21806466027612237,0.5035987612446542,0.933933048222976
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,toxigen,v1,6789,4,4,complete,1.0,27156,0,0.0,6789,79,0.005146319173884684,0.012671969362203564,0.011636470761525998
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,toxigen,v2,6789,4,4,complete,1.0,27156,0,0.0,6789,0,0.0,0.0,0.0
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,toxigen,v2,6789,4,4,complete,0.9986743261157756,27156,9,0.0003314184710561202,6780,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,toxigen,v2,6789,4,4,complete,1.0,27156,0,0.0,6789,88,0.0047977286337755965,0.011797024598615407,0.01296214464575048
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,hatecheck,v1,3728,4,4,complete,1.0,14912,0,0.0,3728,1174,0.12312689563730025,0.28434938536271304,0.31491416309012876
-laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,hatecheck,v1,3728,4,4,complete,0.9997317596566524,14912,1,6.706008583690987e-05,3727,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,hatecheck,v1,3728,4,4,complete,1.0,14912,0,0.0,3728,1460,0.05223522356471085,0.12063208154506438,0.3916309012875536
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,hatecheck,v1,3728,4,4,complete,1.0,14912,0,0.0,3728,50,0.0050953144971755985,0.01253755364806867,0.013412017167381975
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,hatecheck,v2,3728,4,4,complete,1.0,14912,0,0.0,3728,0,0.0,0.0,0.0
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,hatecheck,v2,3728,4,4,complete,0.9994635193133047,14912,2,0.00013412017167381974,3726,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,hatecheck,v2,3728,4,4,complete,1.0,14912,0,0.0,3728,35,0.004581410495994667,0.011274141630901287,0.009388412017167383
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,aegis2,v1,1964,4,4,complete,1.0,7856,0,0.0,1964,1078,0.20486909452975738,0.4731249075015612,0.5488798370672098
-laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,aegis2,v1,1964,4,4,complete,1.0,7856,0,0.0,1964,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,aegis2,v1,1964,4,4,complete,1.0,7856,0,0.0,1964,1863,0.23058578981462105,0.5325150712830957,0.9485743380855397
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,aegis2,v1,1964,4,4,complete,1.0,7856,0,0.0,1964,31,0.006415256584401719,0.01585030549898167,0.015784114052953158
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,aegis2,v2,1964,4,4,complete,0.9984725050916496,7856,3,0.00038187372708757637,1961,0,0.0,0.0,0.0
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,aegis2,v2,1964,4,4,complete,1.0,7856,0,0.0,1964,0,0.0,0.0,0.0
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,aegis2,v2,1964,4,4,complete,1.0,7856,0,0.0,1964,34,0.005368574883380855,0.01329938900203666,0.017311608961303463
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,detect-jailbreak,v1,18258,4,4,unavailable_raw,,73032,2,2.738525577828897e-05,0,0,,,
-laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,detect-jailbreak,v1,18258,4,4,complete,0.9990689013035382,73032,29,0.00039708620878519004,18241,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,detect-jailbreak,v1,18258,4,4,unavailable_raw,,73032,29,0.00039708620878519004,0,0,,,
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,detect-jailbreak,v1,18258,4,4,complete,1.0,73032,0,0.0,18258,155,0.005081670214859747,0.01241647496987622,0.008489429291269581
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,detect-jailbreak,v2,18258,4,4,complete,0.8015116661189615,73032,3624,0.04962208347025961,14634,624,0.018741159342365376,0.04242404434837398,0.04264042640426404
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,detect-jailbreak,v2,18258,3,3,incomplete_repeats,,54774,15,0.0002738525577828897,0,0,,,
@@ -30,7 +30,7 @@ fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,jailbreak-class
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,jailbreak-classification,v2,1044,1,1,incomplete_repeats,,1044,0,0.0,0,0,,,
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,jailbreak-classification,v2,1044,4,4,complete,1.0,4176,0,0.0,1044,2,0.0021915645797508623,0.0052394636015325674,0.0019157088122605363
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,jailbreakhub,v1,15140,4,4,complete,1.0,60560,0,0.0,15140,10904,0.23000999484286683,0.5319621159132344,0.7202113606340819
-laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,jailbreakhub,v1,15140,4,4,complete,0.9993394980184941,60560,25,0.00041281373844121534,15130,0,0.0,0.0,0.0
+laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,jailbreakhub,v1,15140,4,4,complete,0.9993394980184941,60560,24,0.0003963011889035667,15130,3074,0.056335032650716085,0.13010018506278917,0.203172504957039
 typesafe.ai,request model=jev-latest；resolved model=待接口返回确认,jailbreakhub,v1,15140,4,4,complete,1.0,60560,0,0.0,15140,142,0.0050154315262687715,0.012222589167767504,0.009379128137384412
 fastino.ai,request model=fastino/GLiDE；resolved model=glide_v2,jailbreakhub,v2,15140,4,4,complete,0.9999339498018494,60560,1,1.6512549537648612e-05,15139,2,0.00011248546827501924,0.0002597740615540139,0.00013210912213488342
 laya-ai.com,request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions,jailbreakhub,v2,15140,4,4,complete,0.9992734478203434,60560,28,0.0004623513870541612,15129,0,0.0,0.0,0.0

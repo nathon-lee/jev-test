@@ -1,0 +1,5 @@
+﻿category,provider,prompt,datasets,accuracy,precision,recall,f1,auroc,mean_elapsed_ms,threshold,model,display_name
+harmful_content,fastino-ft-gg6-r1-ml2048-s7,v1,"toxigen,hatecheck,aegis2",0.9312816701942302,0.9510125525090539,0.9143435157646174,0.9319509278108535,0.9639168571932135,219.6547815269911,0.5,c94233af-98e6-4942-8e26-98ad204851bf,gliguard-LLMGuardrails-300M-fine-tuned
+jailbreak,fastino-ft-gg6-r1-ml2048-s7,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.9432317054175257,0.8334330787934786,0.7966822674768849,0.8106167223016875,0.9609888626573625,237.52856958983264,0.5,c94233af-98e6-4942-8e26-98ad204851bf,gliguard-LLMGuardrails-300M-fine-tuned
+pii,fastino-ft-gg6-r1-ml2048-s7,v1,"pii_masking_nano_1k,pii_masking_mini_10k",,,,,,,0.5,c94233af-98e6-4942-8e26-98ad204851bf,gliguard-LLMGuardrails-300M-fine-tuned
+non_pii,fastino-ft-gg6-r1-ml2048-s7,v1,"toxigen,hatecheck,aegis2,detect-jailbreak,jailbreak-classification,jailbreakhub",0.9372566878058779,0.8922228156512663,0.8555128916207512,0.8712838250562704,0.962452859925288,228.59167555841188,0.5,c94233af-98e6-4942-8e26-98ad204851bf,gliguard-LLMGuardrails-300M-fine-tuned

@@ -1,32 +1,28 @@
 # 模型能力对比报告
 
-生成时间（UTC）：2026-10-30T00:01:13.666530+00:00
+生成时间（UTC）：2026-10-30T03:55:14.909883+00:00
 
 ## 结论
 
 固定 v1 / 0.5、共同完成的 5 个非 PII 数据集上，typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 的宏平均 F1 最高（76.28%），宏平均 AUROC 为 93.29%。这是当前快照下的描述性结果，不代表未测试任务或统计显著性。
 
-同一基线比较：typesafe.ai / request model=jev-latest；resolved model=待接口返回确认：F1 76.28%、误报率 11.33%、漏报率 18.75%；fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2：F1 71.82%、误报率 12.85%、漏报率 19.40%；laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions：F1 60.39%、误报率 100.00%、漏报率 0.00%。高误报意味着正常内容被拦截，高漏报意味着危险内容被放过。
+同一基线比较：typesafe.ai / request model=jev-latest；resolved model=待接口返回确认：F1 76.28%、误报率 11.33%、漏报率 18.75%；fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2：F1 71.82%、误报率 12.85%、漏报率 19.40%；laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions：F1 46.43%、误报率 23.35%、漏报率 42.41%。高误报意味着正常内容被拦截，高漏报意味着危险内容被放过。
 
-分数据集基线 F1 最优：aegis2：fastino.ai（84.00%）；hatecheck：fastino.ai（98.33%）；jailbreak-classification：typesafe.ai（95.06%）；jailbreakhub：typesafe.ai（42.57%）；toxigen：laya-ai.com（66.36%）。
+分数据集基线 F1 最优：aegis2：fastino.ai（84.00%）；hatecheck：fastino.ai（98.33%）；jailbreak-classification：laya-ai.com（99.62%）；jailbreakhub：typesafe.ai（42.57%）；toxigen：typesafe.ai（65.87%）。
 
 综合表现领先仍不等于可直接上线：typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 在自身最弱的共同基线数据集 jailbreakhub 上 F1 为 42.57%、误报率 22.72%、漏报率 12.89%，需结合业务容忍度单独选阈值，而不是照搬统一 0.5。
-
-laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions 在共同基线的有效样本中全部预测为正类（误报率 100%、平衡准确率 50%），因此即使个别数据集 F1 较高，也不代表具备有效区分能力，不建议直接使用该固定配置作为拦截器。
 
 相同基线任务中，fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 的日志摊销平均耗时最低（223.70 ms/样本）。包含网络、客户端开销和失败等待，且各轮非同一时刻运行；不能解释为纯模型推理速度。
 
 laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions 仅完整落盘 49/64 个配置；缺测不记零分，也不把已有任务的均值当作全套能力，当前排名是阶段性结论。
 
-扩展两两比较（fastino.ai vs typesafe.ai，共同完整且有共同有效样本的 6 个非 PII 数据集）：fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 宏 F1 66.46%；typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 宏 F1 72.43%。此口径覆盖范围更广，但不能与三家共同基线的数值混排。
+扩展两两比较（fastino.ai vs laya-ai.com，共同完整且有共同有效样本的 6 个非 PII 数据集）：fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 宏 F1 66.46%；laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions 宏 F1 42.86%。此口径覆盖范围更广，但不能与三家共同基线的数值混排。
 
-扩展两两比较（laya-ai.com vs typesafe.ai，共同完整且有共同有效样本的 6 个非 PII 数据集）：laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions 宏 F1 53.56%；typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 宏 F1 72.43%。此口径覆盖范围更广，但不能与三家共同基线的数值混排。
+扩展两两比较（fastino.ai vs typesafe.ai，共同完整且有共同有效样本的 6 个非 PII 数据集）：fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 宏 F1 66.46%；typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 宏 F1 72.43%。此口径覆盖范围更广，但不能与三家共同基线的数值混排。
 
 以下配置虽完整落盘但全部请求失败：fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 / jailbreak-classification / v1 / 0.6（1044/1044）。这些配置没有质量分数，不参与质量均值；这是接口可靠性问题，不能当作缺测或正常能力结果忽略。
 
-部分基线 AUROC 低于 0.5：laya-ai.com / toxigen=27.87%；laya-ai.com / hatecheck=43.11%；laya-ai.com / aegis2=34.10%；laya-ai.com / jailbreak-classification=15.19%。建议优先核对返回分数语义及接口解析；当前数据不能直接区分模型能力弱与分数映射问题，不自动翻转分数。
-
-PII 数据全是正样本，恒预测“含 PII”即可获得 100% 检出率；现有输出没有脱敏文本，不能评价实体定位、泄露率或脱敏质量，不应据此选定脱敏模型。
+PII 是“是否含 PII”的普通二分类，不是实体抽取或脱敏任务。当前数据全是正样本，恒预测“含 PII”即可获得 100% 检出率；现有输出没有脱敏文本，不能评价实体定位、泄露率或脱敏质量，不应据此选定脱敏模型。
 
 选型优先参考固定配置的 F1、AUROC、误报/漏报及错误率；表中的最优提示词/阈值是在同一测试集上挑选的探索性上限，部署前需独立验证集重新选参并复测。
 
@@ -54,14 +50,14 @@ OpenJev 4B 及其他内部模型为用户提供的汇总结果，仅加入独立
 
 日志 elapsed / processed 是整轮摊销平均每样本耗时，含失败等待、客户端及网络开销；仅 CSV 与日志完整计数一致的轮次进入耗时比较。基线耗时按处理行数加权；Avg latency 则对共同基线各数据集的整轮平均耗时等权平均，缺少任一完整计时即不提供均值。它使用全部处理样本，质量指标则使用共同成功样本。没有单请求计时，不能计算请求 P50/P95/P99。报告不会从 50 条进度块伪造请求分位数。
 
-PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无定义；没有预测脱敏文本，不计算 masking/span 指标。未输出原始文本、敏感字段或完整错误内容；报告可离线打开，无 CDN、无联网请求。
+**PII 是“是否含 PII”的普通二分类，不是脱敏质量评测。** 当前数据只有正样本，仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无定义；没有预测脱敏文本，不计算 masking/span 指标。未输出原始文本、敏感字段或完整错误内容；报告可离线打开，无 CDN、无联网请求。
 
 ## 共同基线总览
 
 | 供应商 / 模型 | 完整配置 | 共同数据集 | Average Accuracy | Avg Precision | Avg Recall | 宏 F1 | 宏平衡准确率 | 宏 AUROC | 宏误报率 | 宏漏报率 | Avg latency ms（数据集等权） | 基线平均耗时 ms（样本加权） | 全套请求错误/已落盘行 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 64/64 | 5 | 81.42% | 78.86% | 80.60% | 71.82% | 83.88% | 93.28% | 12.85% | 19.40% | 222.48 | 223.70 | 5386/454584 |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 49/64 | 5 | 46.41% | 46.41% | 100.00% | 60.39% | 50.00% | 37.14% | 100.00% | 0.00% | — | — | 3714/366162 |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 49/64 | 5 | 60.74% | 72.97% | 57.59% | 46.43% | 67.12% | 77.46% | 23.35% | 42.41% | 1148.44 | 1037.82 | 3712/366162 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 64/64 | 5 | 84.62% | 80.09% | 81.25% | 76.28% | 84.96% | 93.29% | 11.33% | 18.75% | 228.52 | 230.65 | 0/454584 |
 
 ## 逐数据集固定基线（共同成功样本）
@@ -69,20 +65,20 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | 数据集 | 供应商 / 模型 | 共同样本 | 覆盖率 | Accuracy | Precision | Recall | F1 | AUROC | 平衡准确率 | 误报率 | 漏报率 | 多数类准确率 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | toxigen | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 6789 | 100.00% | 65.49% | 94.77% | 32.28% | 48.15% | 84.00% | 65.26% | 1.76% | 67.72% | 50.35% |
-| toxigen | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 6789 | 100.00% | 49.65% | 49.65% | 100.00% | 66.36% | 27.87% | 50.00% | 100.00% | 0.00% | 50.35% |
+| toxigen | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 6789 | 100.00% | 55.77% | 90.89% | 12.13% | 21.41% | 72.66% | 55.47% | 1.20% | 87.87% | 50.35% |
 | toxigen | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 6789 | 100.00% | 73.91% | 94.00% | 50.70% | 65.87% | 87.52% | 73.75% | 3.19% | 49.30% | 50.35% |
-| hatecheck | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 3727 | 99.97% | 97.69% | 97.62% | 99.06% | 98.33% | 99.66% | 96.87% | 5.32% | 0.94% | 68.74% |
-| hatecheck | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 3727 | 99.97% | 68.74% | 68.74% | 100.00% | 81.48% | 43.11% | 50.00% | 100.00% | 0.00% | 68.74% |
-| hatecheck | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 3727 | 99.97% | 94.82% | 93.92% | 98.87% | 96.33% | 99.28% | 92.40% | 14.08% | 1.13% | 68.74% |
+| hatecheck | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 3728 | 100.00% | 97.69% | 97.62% | 99.06% | 98.33% | 99.66% | 96.87% | 5.32% | 0.94% | 68.75% |
+| hatecheck | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 3728 | 100.00% | 70.20% | 82.01% | 72.57% | 77.00% | 77.24% | 68.77% | 35.02% | 27.43% | 68.75% |
+| hatecheck | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 3728 | 100.00% | 94.82% | 93.92% | 98.87% | 96.33% | 99.28% | 92.40% | 14.08% | 1.13% | 68.75% |
 | aegis2 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 1964 | 100.00% | 83.71% | 89.27% | 79.32% | 84.00% | 91.98% | 84.08% | 11.16% | 20.68% | 53.92% |
-| aegis2 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 1964 | 100.00% | 53.92% | 53.92% | 100.00% | 70.06% | 34.10% | 50.00% | 100.00% | 0.00% | 53.92% |
+| aegis2 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 1964 | 100.00% | 49.29% | 81.19% | 7.74% | 14.14% | 66.14% | 52.82% | 2.10% | 92.26% | 53.92% |
 | aegis2 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 1964 | 100.00% | 80.96% | 85.20% | 78.28% | 81.59% | 90.49% | 81.18% | 15.91% | 21.72% | 53.92% |
 | jailbreak-classification | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 1044 | 100.00% | 94.73% | 92.14% | 97.91% | 94.94% | 99.32% | 94.70% | 8.51% | 2.09% | 50.48% |
-| jailbreak-classification | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 1044 | 100.00% | 50.48% | 50.48% | 100.00% | 67.09% | 15.19% | 50.00% | 100.00% | 0.00% | 50.48% |
+| jailbreak-classification | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 1044 | 100.00% | 99.62% | 99.62% | 99.62% | 99.62% | 99.99% | 99.62% | 0.39% | 0.38% | 50.48% |
 | jailbreak-classification | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 1044 | 100.00% | 95.21% | 99.18% | 91.27% | 95.06% | 99.43% | 95.25% | 0.77% | 8.73% | 50.48% |
-| jailbreakhub | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 15134 | 99.96% | 65.46% | 20.48% | 94.44% | 33.66% | 91.42% | 78.47% | 37.50% | 5.56% | 90.72% |
-| jailbreakhub | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 15134 | 99.96% | 9.28% | 9.28% | 100.00% | 16.98% | 65.44% | 50.00% | 100.00% | 0.00% | 90.72% |
-| jailbreakhub | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 15134 | 99.96% | 78.19% | 28.17% | 87.11% | 42.57% | 89.74% | 82.20% | 22.72% | 12.89% | 90.72% |
+| jailbreakhub | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 15135 | 99.97% | 65.47% | 20.48% | 94.44% | 33.66% | 91.43% | 78.48% | 37.49% | 5.56% | 90.72% |
+| jailbreakhub | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 15135 | 99.97% | 28.83% | 11.16% | 95.87% | 19.99% | 71.26% | 58.92% | 78.03% | 4.13% | 90.72% |
+| jailbreakhub | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 15135 | 99.97% | 78.20% | 28.17% | 87.11% | 42.57% | 89.74% | 82.20% | 22.72% | 12.89% | 90.72% |
 
 ## 两两共同基线（利用已完成任务，覆盖范围各不相同）
 
@@ -90,32 +86,32 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 
 | 配对 | 供应商 / 模型 | 共同数据集 | 宏 F1 | 宏 AUROC | 宏平衡准确率 | 宏误报率 | 宏漏报率 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| fastino.ai vs laya-ai.com | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | aegis2、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 71.82% | 93.28% | 83.88% | 12.85% | 19.40% |
-| fastino.ai vs laya-ai.com | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | aegis2、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 60.39% | 37.14% | 50.00% | 100.00% | 0.00% |
+| fastino.ai vs laya-ai.com | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | aegis2、detect-jailbreak、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 66.46% | 93.43% | 83.38% | 16.58% | 16.66% |
+| fastino.ai vs laya-ai.com | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | aegis2、detect-jailbreak、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 42.86% | 76.35% | 66.49% | 30.61% | 36.40% |
 | fastino.ai vs typesafe.ai | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | aegis2、detect-jailbreak、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 66.46% | 93.43% | 83.38% | 16.58% | 16.66% |
 | fastino.ai vs typesafe.ai | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | aegis2、detect-jailbreak、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 72.43% | 93.22% | 85.02% | 12.32% | 17.65% |
-| laya-ai.com vs typesafe.ai | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | aegis2、detect-jailbreak、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 53.56% | 40.42% | 50.00% | 100.00% | 0.00% |
-| laya-ai.com vs typesafe.ai | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | aegis2、detect-jailbreak、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 72.43% | 93.22% | 85.02% | 12.32% | 17.64% |
+| laya-ai.com vs typesafe.ai | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | aegis2、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 46.43% | 77.46% | 67.12% | 23.35% | 42.41% |
+| laya-ai.com vs typesafe.ai | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | aegis2、hatecheck、jailbreak-classification、jailbreakhub、toxigen | 76.28% | 93.29% | 84.96% | 11.33% | 18.75% |
 
 | 配对 | 数据集 | 共同有效样本 | 共同覆盖率 | 质量评估状态 |
 | --- | --- | --- | --- | --- |
 | fastino.ai vs laya-ai.com | toxigen | 6789 | 100.00% | 参与均值 |
 | fastino.ai vs typesafe.ai | toxigen | 6789 | 100.00% | 参与均值 |
 | laya-ai.com vs typesafe.ai | toxigen | 6789 | 100.00% | 参与均值 |
-| fastino.ai vs laya-ai.com | hatecheck | 3727 | 99.97% | 参与均值 |
+| fastino.ai vs laya-ai.com | hatecheck | 3728 | 100.00% | 参与均值 |
 | fastino.ai vs typesafe.ai | hatecheck | 3728 | 100.00% | 参与均值 |
-| laya-ai.com vs typesafe.ai | hatecheck | 3727 | 99.97% | 参与均值 |
+| laya-ai.com vs typesafe.ai | hatecheck | 3728 | 100.00% | 参与均值 |
 | fastino.ai vs laya-ai.com | aegis2 | 1964 | 100.00% | 参与均值 |
 | fastino.ai vs typesafe.ai | aegis2 | 1964 | 100.00% | 参与均值 |
 | laya-ai.com vs typesafe.ai | aegis2 | 1964 | 100.00% | 参与均值 |
+| fastino.ai vs laya-ai.com | detect-jailbreak | 18253 | 99.97% | 参与均值 |
 | fastino.ai vs typesafe.ai | detect-jailbreak | 18258 | 100.00% | 参与均值 |
-| laya-ai.com vs typesafe.ai | detect-jailbreak | 18253 | 99.97% | 参与均值 |
 | fastino.ai vs laya-ai.com | jailbreak-classification | 1044 | 100.00% | 参与均值 |
 | fastino.ai vs typesafe.ai | jailbreak-classification | 1044 | 100.00% | 参与均值 |
 | laya-ai.com vs typesafe.ai | jailbreak-classification | 1044 | 100.00% | 参与均值 |
-| fastino.ai vs laya-ai.com | jailbreakhub | 15134 | 99.96% | 参与均值 |
+| fastino.ai vs laya-ai.com | jailbreakhub | 15135 | 99.97% | 参与均值 |
 | fastino.ai vs typesafe.ai | jailbreakhub | 15140 | 100.00% | 参与均值 |
-| laya-ai.com vs typesafe.ai | jailbreakhub | 15134 | 99.96% | 参与均值 |
+| laya-ai.com vs typesafe.ai | jailbreakhub | 15135 | 99.97% | 参与均值 |
 
 ## 提示词与阈值探索（同测试集选优，非公平总排名）
 
@@ -129,12 +125,12 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | detect-jailbreak | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 / 0.5 | 39.67% | 39.67% | 35.22% | 3.00% | 8/8 |
 | jailbreak-classification | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 / 0.5 | 94.94% | 94.94% | 8.51% | 2.09% | 7/8 |
 | jailbreakhub | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 / 0.5 | 33.66% | 33.66% | 37.51% | 5.55% | 8/8 |
-| toxigen | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 / 0.5 | 66.36% | 66.36% | 100.00% | 0.00% | 8/8 |
-| hatecheck | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 / 0.5 | 81.48% | 81.48% | 100.00% | 0.00% | 8/8 |
-| aegis2 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 / 0.5 | 70.06% | 70.06% | 100.00% | 0.00% | 8/8 |
-| detect-jailbreak | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 / 0.7 | 23.47% | 19.42% | 66.48% | 13.39% | 7/8 |
-| jailbreak-classification | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 / 0.5 | 67.09% | 67.09% | 100.00% | 0.00% | 2/8 |
-| jailbreakhub | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 / 0.8 | 23.07% | 16.98% | 59.14% | 11.54% | 8/8 |
+| toxigen | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 / 0.5 | 66.34% | 21.41% | 100.00% | 0.00% | 8/8 |
+| hatecheck | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 / 0.5 | 81.48% | 77.00% | 100.00% | 0.00% | 8/8 |
+| aegis2 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 / 0.5 | 70.06% | 14.14% | 100.00% | 0.00% | 8/8 |
+| detect-jailbreak | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 / 0.5 | 25.01% | 25.01% | 66.93% | 6.36% | 7/8 |
+| jailbreak-classification | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 / 0.5 | 99.62% | 99.62% | 0.39% | 0.38% | 2/8 |
+| jailbreakhub | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 / 0.8 | 23.07% | 19.99% | 59.14% | 11.54% | 8/8 |
 | toxigen | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v2 / 0.5 | 69.28% | 65.87% | 3.95% | 44.88% | 8/8 |
 | hatecheck | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v2 / 0.7 | 97.43% | 96.33% | 4.46% | 3.08% | 8/8 |
 | aegis2 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v1 / 0.5 | 81.59% | 81.59% | 15.91% | 21.72% | 8/8 |
@@ -155,25 +151,25 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | 数据集 | 供应商 / 模型 | 提示词 | 状态 | 已有轮次 | 完整轮次 | 四次均成功/参考 | 覆盖率 | 平均分数标准差 | 平均分数极差 | 判定翻转样本 | 判定翻转率（统一 0.5） | 失败/已落盘请求 | 请求失败率 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | toxigen | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 | complete | 4/4 | 4/4 | 6789/6789 | 100.00% | 0.286341 | 0.661275 | 4823 | 71.04% | 0/27156 | 0.00% |
-| toxigen | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 6781/6789 | 99.88% | 0.000000 | 0.000000 | 0 | 0.00% | 8/27156 | 0.03% |
+| toxigen | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 6781/6789 | 99.88% | 0.218065 | 0.503599 | 6333 | 93.39% | 8/27156 | 0.03% |
 | toxigen | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v1 | complete | 4/4 | 4/4 | 6789/6789 | 100.00% | 0.005146 | 0.012672 | 79 | 1.16% | 0/27156 | 0.00% |
 | toxigen | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v2 | complete | 4/4 | 4/4 | 6789/6789 | 100.00% | 0.000000 | 0.000000 | 0 | 0.00% | 0/27156 | 0.00% |
 | toxigen | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 | complete | 4/4 | 4/4 | 6780/6789 | 99.87% | 0.000000 | 0.000000 | 0 | 0.00% | 9/27156 | 0.03% |
 | toxigen | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v2 | complete | 4/4 | 4/4 | 6789/6789 | 100.00% | 0.004798 | 0.011797 | 88 | 1.30% | 0/27156 | 0.00% |
 | hatecheck | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 | complete | 4/4 | 4/4 | 3728/3728 | 100.00% | 0.123127 | 0.284349 | 1174 | 31.49% | 0/14912 | 0.00% |
-| hatecheck | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 3727/3728 | 99.97% | 0.000000 | 0.000000 | 0 | 0.00% | 1/14912 | 0.01% |
+| hatecheck | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 3728/3728 | 100.00% | 0.052235 | 0.120632 | 1460 | 39.16% | 0/14912 | 0.00% |
 | hatecheck | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v1 | complete | 4/4 | 4/4 | 3728/3728 | 100.00% | 0.005095 | 0.012538 | 50 | 1.34% | 0/14912 | 0.00% |
 | hatecheck | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v2 | complete | 4/4 | 4/4 | 3728/3728 | 100.00% | 0.000000 | 0.000000 | 0 | 0.00% | 0/14912 | 0.00% |
 | hatecheck | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 | complete | 4/4 | 4/4 | 3726/3728 | 99.95% | 0.000000 | 0.000000 | 0 | 0.00% | 2/14912 | 0.01% |
 | hatecheck | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v2 | complete | 4/4 | 4/4 | 3728/3728 | 100.00% | 0.004581 | 0.011274 | 35 | 0.94% | 0/14912 | 0.00% |
 | aegis2 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 | complete | 4/4 | 4/4 | 1964/1964 | 100.00% | 0.204869 | 0.473125 | 1078 | 54.89% | 0/7856 | 0.00% |
-| aegis2 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 1964/1964 | 100.00% | 0.000000 | 0.000000 | 0 | 0.00% | 0/7856 | 0.00% |
+| aegis2 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 1964/1964 | 100.00% | 0.230586 | 0.532515 | 1863 | 94.86% | 0/7856 | 0.00% |
 | aegis2 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v1 | complete | 4/4 | 4/4 | 1964/1964 | 100.00% | 0.006415 | 0.015850 | 31 | 1.58% | 0/7856 | 0.00% |
 | aegis2 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v2 | complete | 4/4 | 4/4 | 1961/1964 | 99.85% | 0.000000 | 0.000000 | 0 | 0.00% | 3/7856 | 0.04% |
 | aegis2 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 | complete | 4/4 | 4/4 | 1964/1964 | 100.00% | 0.000000 | 0.000000 | 0 | 0.00% | 0/7856 | 0.00% |
 | aegis2 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v2 | complete | 4/4 | 4/4 | 1964/1964 | 100.00% | 0.005369 | 0.013299 | 34 | 1.73% | 0/7856 | 0.00% |
 | detect-jailbreak | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 | unavailable_raw | 4/4 | 4/4 | 0/18258 | — | — | — | — | — | 2/73032 | 0.00% |
-| detect-jailbreak | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 18241/18258 | 99.91% | 0.000000 | 0.000000 | 0 | 0.00% | 29/73032 | 0.04% |
+| detect-jailbreak | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | unavailable_raw | 4/4 | 4/4 | 0/18258 | — | — | — | — | — | 29/73032 | 0.04% |
 | detect-jailbreak | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v1 | complete | 4/4 | 4/4 | 18258/18258 | 100.00% | 0.005082 | 0.012416 | 155 | 0.85% | 0/73032 | 0.00% |
 | detect-jailbreak | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v2 | complete | 4/4 | 4/4 | 14634/18258 | 80.15% | 0.018741 | 0.042424 | 624 | 4.26% | 3624/73032 | 4.96% |
 | detect-jailbreak | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 | incomplete_repeats | 3/4 | 3/4 | 0/18258 | — | — | — | — | — | 15/54774 | 0.03% |
@@ -185,7 +181,7 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | jailbreak-classification | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 | incomplete_repeats | 1/4 | 1/4 | 0/1044 | — | — | — | — | — | 0/1044 | 0.00% |
 | jailbreak-classification | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v2 | complete | 4/4 | 4/4 | 1044/1044 | 100.00% | 0.002192 | 0.005239 | 2 | 0.19% | 0/4176 | 0.00% |
 | jailbreakhub | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 | complete | 4/4 | 4/4 | 15140/15140 | 100.00% | 0.230010 | 0.531962 | 10904 | 72.02% | 0/60560 | 0.00% |
-| jailbreakhub | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 15130/15140 | 99.93% | 0.000000 | 0.000000 | 0 | 0.00% | 25/60560 | 0.04% |
+| jailbreakhub | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | complete | 4/4 | 4/4 | 15130/15140 | 99.93% | 0.056335 | 0.130100 | 3074 | 20.32% | 24/60560 | 0.04% |
 | jailbreakhub | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v1 | complete | 4/4 | 4/4 | 15140/15140 | 100.00% | 0.005015 | 0.012223 | 142 | 0.94% | 0/60560 | 0.00% |
 | jailbreakhub | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v2 | complete | 4/4 | 4/4 | 15139/15140 | 99.99% | 0.000112 | 0.000260 | 2 | 0.01% | 1/60560 | 0.00% |
 | jailbreakhub | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 | complete | 4/4 | 4/4 | 15129/15140 | 99.93% | 0.000000 | 0.000000 | 0 | 0.00% | 28/60560 | 0.05% |
@@ -209,14 +205,14 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 
 | 供应商 / 模型 | 提示词 | 共同数据集 | 共同样本/参考 | 共同覆盖率 | 宏平均分数标准差 | 宏平均分数极差 | 宏平均判定翻转率 | 请求失败率 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 | aegis2、hatecheck、jailbreakhub、toxigen | 27602/27621 | 99.93% | 0.211120 | 0.487755 | 57.37% | 0.00% |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | aegis2、hatecheck、jailbreakhub、toxigen | 27602/27621 | 99.93% | 0.000000 | 0.000000 | 0.00% | 0.03% |
-| typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v1 | aegis2、hatecheck、jailbreakhub、toxigen | 27602/27621 | 99.93% | 0.005418 | 0.013321 | 1.26% | 0.00% |
+| fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v1 | aegis2、hatecheck、jailbreakhub、toxigen | 27603/27621 | 99.93% | 0.211119 | 0.487752 | 57.37% | 0.00% |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v1 | aegis2、hatecheck、jailbreakhub、toxigen | 27603/27621 | 99.93% | 0.139305 | 0.321712 | 61.93% | 0.03% |
+| typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v1 | aegis2、hatecheck、jailbreakhub、toxigen | 27603/27621 | 99.93% | 0.005418 | 0.013320 | 1.26% | 0.00% |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | v2 | aegis2、hatecheck、jailbreakhub、toxigen | 27595/27621 | 99.91% | 0.000028 | 0.000065 | 0.00% | 0.00% |
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | v2 | aegis2、hatecheck、jailbreakhub、toxigen | 27595/27621 | 99.91% | 0.000000 | 0.000000 | 0.00% | 0.04% |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | v2 | aegis2、hatecheck、jailbreakhub、toxigen | 27595/27621 | 99.91% | 0.004734 | 0.011631 | 1.17% | 0.00% |
 
-## PII 检出（不是脱敏质量）
+## PII 普通二分类（是否含 PII，不是脱敏质量）
 
 | 数据集 | 供应商 / 模型 | 提示词 / 阈值 | 状态 | 有效/预期 | 正样本检出率 |
 | --- | --- | --- | --- | --- | --- |
@@ -274,7 +270,7 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | 供应商 / 模型 | 数据集 | 提示词 / 阈值 | 状态 | 落盘/预期 | 有效覆盖率 | 错误率 | 日志进度 | 日志累计 s | 整轮平均 ms |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | toxigen | v1 / 0.5 | complete | 6789/6789 | 100.00% | 0.00% | 6789/6789 | 1489.31 | 219.37 |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | toxigen | v1 / 0.5 | complete | 6789/6789 | 100.00% | 0.00% | 6789/6789 | 2870.91 | 422.88 |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | toxigen | v1 / 0.5 | complete | 6789/6789 | 100.00% | 0.00% | 6789/6789 | 5810.44 | 855.86 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | toxigen | v1 / 0.5 | complete | 6789/6789 | 100.00% | 0.00% | 6789/6789 | 1552.10 | 228.62 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | toxigen | v1 / 0.6 | complete | 6789/6789 | 100.00% | 0.00% | 6789/6789 | 3133.50 | 461.56 |
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | toxigen | v1 / 0.6 | complete | 6789/6789 | 99.99% | 0.01% | 6789/6789 | 2970.18 | 437.50 |
@@ -298,7 +294,7 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | toxigen | v2 / 0.8 | complete | 6789/6789 | 99.96% | 0.04% | 6789/6789 | 3853.96 | 567.68 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | toxigen | v2 / 0.8 | complete | 6789/6789 | 100.00% | 0.00% | 6789/6789 | 1565.98 | 230.66 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | hatecheck | v1 / 0.5 | complete | 3728/3728 | 100.00% | 0.00% | 3728/3728 | 831.63 | 223.08 |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | hatecheck | v1 / 0.5 | complete | 3728/3728 | 99.97% | 0.03% | 3728/3728 | 1664.83 | 446.57 |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | hatecheck | v1 / 0.5 | complete | 3728/3728 | 100.00% | 0.00% | 3728/3728 | 3771.80 | 1011.75 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | hatecheck | v1 / 0.5 | complete | 3728/3728 | 100.00% | 0.00% | 3728/3728 | 855.00 | 229.35 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | hatecheck | v1 / 0.6 | complete | 3728/3728 | 100.00% | 0.00% | 3728/3728 | 1236.90 | 331.79 |
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | hatecheck | v1 / 0.6 | complete | 3728/3728 | 100.00% | 0.00% | 3728/3728 | 1572.98 | 421.94 |
@@ -322,7 +318,7 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | hatecheck | v2 / 0.8 | complete | 3728/3728 | 99.95% | 0.05% | 3728/3728 | 1990.75 | 534.00 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | hatecheck | v2 / 0.8 | complete | 3728/3728 | 100.00% | 0.00% | 3728/3728 | 835.13 | 224.02 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | aegis2 | v1 / 0.5 | complete | 1964/1964 | 100.00% | 0.00% | 1964/1964 | 434.24 | 221.10 |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | aegis2 | v1 / 0.5 | complete | 1964/1964 | 100.00% | 0.00% | 1964/1964 | 922.82 | 469.87 |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | aegis2 | v1 / 0.5 | complete | 1964/1964 | 100.00% | 0.00% | 1964/1964 | 2582.22 | 1314.78 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | aegis2 | v1 / 0.5 | complete | 1964/1964 | 100.00% | 0.00% | 1964/1964 | 435.62 | 221.80 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | aegis2 | v1 / 0.6 | complete | 1964/1964 | 100.00% | 0.00% | 1964/1964 | 755.10 | 384.47 |
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | aegis2 | v1 / 0.6 | complete | 1964/1964 | 100.00% | 0.00% | 1964/1964 | 898.52 | 457.49 |
@@ -346,7 +342,7 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | aegis2 | v2 / 0.8 | complete | 1964/1964 | 100.00% | 0.00% | 1964/1964 | 1112.68 | 566.54 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | aegis2 | v2 / 0.8 | complete | 1964/1964 | 100.00% | 0.00% | 1964/1964 | 441.41 | 224.75 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | detect-jailbreak | v1 / 0.5 | complete | 18258/18258 | 100.00% | 0.00% | 18258/18258 | 4189.81 | 229.48 |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | detect-jailbreak | v1 / 0.5 | complete | 18258/18258 | 99.97% | 0.03% | 18258/18258 | 15080.51 | 825.97 |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | detect-jailbreak | v1 / 0.5 | complete | 18258/18258 | 99.97% | 0.03% | 18258/18258 | 17633.25 | 965.78 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | detect-jailbreak | v1 / 0.5 | complete | 18258/18258 | 100.00% | 0.00% | 18258/18258 | 4091.16 | 224.08 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | detect-jailbreak | v1 / 0.6 | complete | 18258/18258 | 99.99% | 0.01% | 18258/18258 | 7457.90 | 408.47 |
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | detect-jailbreak | v1 / 0.6 | complete | 18258/18258 | 99.92% | 0.08% | 18258/18258 | 15582.19 | 853.44 |
@@ -370,7 +366,7 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | detect-jailbreak | v2 / 0.8 | in_progress | 0/18258 | 0.00% | — | 3500/18258 | 19214.10 | — |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | detect-jailbreak | v2 / 0.8 | complete | 18258/18258 | 100.00% | 0.00% | 18258/18258 | 4043.71 | 221.48 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | jailbreak-classification | v1 / 0.5 | complete | 1044/1044 | 100.00% | 0.00% | 1044/1044 | 232.46 | 222.66 |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | jailbreak-classification | v1 / 0.5 | complete | 1044/1044 | 100.00% | 0.00% | 1044/1044 | 771.48 | 738.97 |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | jailbreak-classification | v1 / 0.5 | complete | 1044/1044 | 100.00% | 0.00% | 1044/1044 | 1568.00 | 1501.92 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | jailbreak-classification | v1 / 0.5 | complete | 1044/1044 | 100.00% | 0.00% | 1044/1044 | 239.84 | 229.73 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | jailbreak-classification | v1 / 0.6 | complete | 1044/1044 | 0.00% | 100.00% | 1044/1044 | 246.40 | 236.02 |
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | jailbreak-classification | v1 / 0.6 | missing | 0/1044 | 0.00% | — | — | — | — |
@@ -394,7 +390,7 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | jailbreak-classification | v2 / 0.8 | missing | 0/1044 | 0.00% | — | — | — | — |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | jailbreak-classification | v2 / 0.8 | complete | 1044/1044 | 100.00% | 0.00% | 1044/1044 | 240.36 | 230.23 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | jailbreakhub | v1 / 0.5 | complete | 15140/15140 | 100.00% | 0.00% | 15140/15140 | 3424.81 | 226.21 |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | jailbreakhub | v1 / 0.5 | complete | 15140/15140 | 99.96% | 0.04% | — | — | — |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | jailbreakhub | v1 / 0.5 | complete | 15140/15140 | 99.97% | 0.03% | 15140/15140 | 16016.56 | 1057.90 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | jailbreakhub | v1 / 0.5 | complete | 15140/15140 | 100.00% | 0.00% | 15140/15140 | 3529.11 | 233.10 |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | jailbreakhub | v1 / 0.6 | complete | 15140/15140 | 100.00% | 0.00% | 15140/15140 | 4845.10 | 320.02 |
 | laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | jailbreakhub | v1 / 0.6 | complete | 15140/15140 | 99.96% | 0.04% | — | — | — |
@@ -471,7 +467,7 @@ PII 仅报告正样本检出率，单类 AUROC、误报率、平衡准确率无�
 | 供应商 / 模型 | 已落盘请求数 | 失败数 | 失败率 | 异常类型计数 |
 | --- | --- | --- | --- | --- |
 | fastino.ai / request model=fastino/GLiDE；resolved model=glide_v2 | 454584 | 5386 | 1.18% | ConnectError: 1；HTTPStatusError: 5379；ReadTimeout: 5；RemoteProtocolError: 1 |
-| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 366162 | 3714 | 1.01% | ConnectError: 13；HTTPStatusError: 3694；ReadTimeout: 4；RemoteProtocolError: 3 |
+| laya-ai.com / request model=typed-decisions；serving model=laya-rl-agent；routed model=typed-decisions | 366162 | 3712 | 1.01% | ConnectError: 13；HTTPStatusError: 3693；ReadTimeout: 3；RemoteProtocolError: 3 |
 | typesafe.ai / request model=jev-latest；resolved model=待接口返回确认 | 454584 | 0 | 0.00% | 无 |
 
 ## OpenJev 内部汇总结果（4B，非共同样本基线）
@@ -525,7 +521,8 @@ OpenJev 4B 数值取自用户最初提供的清晰汇总表，分类阈值均为
 | 模型 | 提示词 | 共同数据集 | Average Accuracy | Avg Precision | Avg Recall | Avg F1 | Avg AUROC | Avg latency ms |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | fastino.ai | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 79.22% | 69.87% | 83.34% | 66.46% | 93.43% | 334.77 |
-| laya-ai.com | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 40.47% | 40.47% | 100.00% | 53.56% | 40.42% | 1416.45 |
+| gliguard-LLMGuardrails-300M-fine-tuned | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 93.73% | 89.22% | 85.55% | 87.13% | 96.25% | 228.59 |
+| laya-ai.com | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 57.21% | 63.22% | 63.60% | 42.86% | 76.35% | 1118.00 |
 | typesafe.ai | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 84.40% | 73.09% | 82.35% | 72.43% | 93.22% | 228.05 |
 | OpenJev 4B | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 83.30% | 74.29% | 75.47% | 72.13% | 89.60% | 938.00 |
 | OpenJev 32B | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 81.51% | 87.06% | 67.82% | 74.55% | 88.29% | 1569.00 |
@@ -536,10 +533,6 @@ OpenJev 4B 数值取自用户最初提供的清晰汇总表，分类阈值均为
 | OpenJev 4B | v2 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 83.75% | 75.62% | 74.47% | 72.03% | 89.83% | 930.59 |
 
 ## 数据警告
-
-outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress；整份日志不用于逐配置耗时比较，不猜测并发进度的阈值归属。可核验的完整四轮均值仅用于四模型参考图。
-
-outputs/laya-ai.com/run_model_suite_2026-10-21_084817.log: interleaved task starts cannot be assigned to progress；整份日志不用于逐配置耗时比较，不猜测并发进度的阈值归属。可核验的完整四轮均值仅用于四模型参考图。
 
 outputs/laya-ai.com/run_model_suite_2026-10-21_083713.log: interleaved task starts cannot be assigned to progress；整份日志不用于逐配置耗时比较，不猜测并发进度的阈值归属。可核验的完整四轮均值仅用于四模型参考图。
 
@@ -559,8 +552,6 @@ detect-jailbreak/v1/0.5：缺少历史逐样本预测，无法重新对齐共同
 
 fastino.ai vs laya-ai.com/detect-jailbreak：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。
 
-本次仅更新 Fastino 前六个数据集的 v1 / 0.5；Laya 保留本轮重跑前的结果快照，未混入进行中的部分结果。
-
 Fastino 本次六个配置使用 2026-10-29 六数据集并发运行日志；comparison 日志仅按数据集重排原始记录，未改变 elapsed。两个 HTTP 503 样本已补跑成功，质量指标包含补跑结果；主轮 elapsed 不含随后补跑耗时，不能解释为单请求延迟。
 
 fastino.ai/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
@@ -576,8 +567,6 @@ fastino.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文�
 fastino.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
 
 fastino.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
-
-laya-ai.com/detect-jailbreak_v1_t0.5.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
 
 laya-ai.com/detect-jailbreak_v1_t0.6.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
 
@@ -606,3 +595,7 @@ typesafe.ai/detect-jailbreak_v2_t0.6.csv：历史原始文件与当前参考文�
 typesafe.ai/detect-jailbreak_v2_t0.7.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
 
 typesafe.ai/detect-jailbreak_v2_t0.8.csv：历史原始文件与当前参考文本不匹配，保留上一快照汇总，不将该原始文件用于共同样本重算。
+
+laya-ai.com vs typesafe.ai/detect-jailbreak：缺少历史逐样本预测，无法重新对齐共同成功样本，排除共同样本比较。
+
+本次更新 Laya 前六个数据集的 v1 / 0.5：46,923 行，46,913 行成功、10 行失败。质量指标排除错误行；六个参考配置使用本轮完整单次 elapsed/processed，不混入历史其他阈值耗时。PII、v2、其他阈值及其他模型保留历史结果；提示词与重复调用探索混合历史轮次，不能把差异仅归因于提示词、阈值或随机性。
