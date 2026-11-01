@@ -1,0 +1,14 @@
+{
+  "source_repository": "jackhhao/jailbreak-classification",
+  "source_config": "default",
+  "source_revision": "2f2ceeb39658696fd3f462403562b6eea5306287",
+  "source_split": "test",
+  "partition_role": "held_out",
+  "available_splits": [
+    "train",
+    "test"
+  ],
+  "source_rows": 262,
+  "prepared_rows": 262,
+  "csv_sha256": "c6eb3a7e4e566f27011e300fad471b09cfd6ed177eaef4c6569b5c4c2707d2c8"
+}

@@ -1,8 +1,16 @@
-> **Current results:** [corrected comparison](outputs/comparison/comparison.md) · [updated charts](outputs/comparison/figures/index.html). Older comparison instructions and figures below are archived historical material; use `python -m scripts.publish_corrected_comparison` for the current presentation.
+> **Latest held-out results:** [HTML report](outputs/heldout_2026-10-28/comparison.html) · [v1 summary PNG](outputs/heldout_2026-10-28/figures/fig13_three_dataset_averages.png) · [all charts](outputs/heldout_2026-10-28/figures/index.html) · [scope and reproduction](HELDOUT_RERUN.md). Four completed providers on identical official evaluation rows; this is separate from the historical-row comparison below.
+
+> **Historical-row results (PR #20):** [corrected comparison](outputs/comparison/comparison.md) · [updated charts](outputs/comparison/figures/index.html). Older comparison instructions and figures below are archived historical material; use `python -m scripts.publish_corrected_comparison` for the current presentation.
 
 # JEV Benchmark Suite
 
 This project benchmarks multiple providers against safety classification datasets, including prompt-version comparison (v1/v2) and threshold tuning.
+
+Dataset preparation now follows an explicit [evaluation partition policy](docs/evaluation-partitions.md):
+official test first, then validation; train-only sources require reference-only
+opt-in. Every new prepared file records its source revision, split, role, and
+checksum. Regenerate every provider's predictions before comparing scores on the
+new partitions; historical outputs use the older mixed split policy.
 
 PII **extraction** has a separate [span/entity benchmark](docs/pii-extraction.md):
 `python -m scripts.pii_extraction {prepare,run,evaluate}`. It preserves gold

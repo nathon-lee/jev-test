@@ -6,6 +6,7 @@ from typing import Any
 
 import httpx
 import pandas as pd
+from benchmark.dataset_partitions import PROVENANCE_COLUMNS
 
 try:
     from typesafe_sdk import Noul, TypeSafeClient
@@ -501,11 +502,12 @@ def run_single_benchmark(
     api_key: str | None = None,
     base_url: str | None = None,
     debug: bool = False,
+    data_dir: Path | None = None,
 ) -> list[dict[str, Any]]:
     if dataset_name.startswith("pii_"):
         print("PII detection classification only: these scores do not measure extraction. "
               "Use python -m scripts.pii_extraction for entity precision/recall/F1.")
-    dataset_path = DATA_DIR / DATASET_SPECS[dataset_name]["path"]
+    dataset_path = (data_dir or DATA_DIR) / DATASET_SPECS[dataset_name]["path"]
     if not dataset_path.exists():
         raise FileNotFoundError(
             f"Dataset file not found: {dataset_path}. Run python scripts/prepare_datasets.py first."
@@ -525,6 +527,7 @@ def run_single_benchmark(
         sample_id = row.get("sample_id", len(rows))
         text = str(row.get("text", ""))
         label = int(row.get("label", 0))
+        provenance = {key: row[key] for key in PROVENANCE_COLUMNS if key in row}
         try:
             score = call_provider(
                 provider_name=provider_name,
@@ -538,6 +541,7 @@ def run_single_benchmark(
             rows.append(
                 {
                     "dataset": dataset_name,
+                    **provenance,
                     "sample_id": sample_id,
                     "text": text,
                     "label": label,
@@ -553,6 +557,7 @@ def run_single_benchmark(
             rows.append(
                 {
                     "dataset": dataset_name,
+                    **provenance,
                     "sample_id": sample_id,
                     "text": text,
                     "label": label,
@@ -576,8 +581,8 @@ def run_single_benchmark(
     return rows
 
 
-def save_rows(rows: list[dict[str, Any]], provider_name: str, dataset_name: str, prompt_version: str, threshold: float) -> Path:
-    provider_dir = OUTPUT_DIR / provider_name
+def save_rows(rows: list[dict[str, Any]], provider_name: str, dataset_name: str, prompt_version: str, threshold: float, output_dir: Path | None = None) -> Path:
+    provider_dir = (output_dir or OUTPUT_DIR) / provider_name
     provider_dir.mkdir(parents=True, exist_ok=True)
     file_name = f"{dataset_name}_{prompt_version}_t{threshold}.csv"
     path = provider_dir / file_name

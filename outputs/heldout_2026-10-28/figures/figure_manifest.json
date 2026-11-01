@@ -1,0 +1,155 @@
+{
+  "source_summary_sha256": "ffa9d841e1608e82b250e3b478278dc57ccf845753a88e06c1b3dc340851b372",
+  "scope": [
+    "hatecheck",
+    "aegis2",
+    "jailbreak-classification"
+  ],
+  "aggregation": "equal weight per dataset, separate prompts",
+  "figures": [
+    {
+      "name": "fig13_three_dataset_averages",
+      "caption": "v1 / 0.5; equal weights over hatecheck (n=3,728) / aegis2 (n=1,964) / jailbreak-classification (n=262). Unlike PR #20, ToxiGen is excluded and Jailbreak Classification is included. Official held-out partitions; matching rows verified. Training overlap has not been audited.",
+      "files": {
+        "png": {
+          "path": "fig13_three_dataset_averages.png",
+          "sha256": "4beee10c350a53c9da104311ce87c4480a91bd6ed6c676009d597d73cccd2060"
+        },
+        "svg": {
+          "path": "fig13_three_dataset_averages.svg",
+          "sha256": "3fa5faf27179b13ca3d6cac5a0f6db047b8d1953604b41270efc0ce12a6e4e53"
+        },
+        "pdf": {
+          "path": "fig13_three_dataset_averages.pdf",
+          "sha256": "bf240f218c7bc4724495bd5f18033fe087304ccaf00ed8fee0304f0b936ca2d9"
+        }
+      }
+    },
+    {
+      "name": "fig03_dataset_quality_v1",
+      "caption": "All six quality metrics on matched successful rows, v1. hatecheck (n=3,728) / aegis2 (n=1,964) / jailbreak-classification (n=262).",
+      "files": {
+        "png": {
+          "path": "fig03_dataset_quality_v1.png",
+          "sha256": "54f5e6f03b4a461d791de967cf86464f39afb040ed3389e01801135725f0fd88"
+        },
+        "svg": {
+          "path": "fig03_dataset_quality_v1.svg",
+          "sha256": "22ef43f129320f25030234eff70badbcae20f11ae3f08877344b3f6717947876"
+        },
+        "pdf": {
+          "path": "fig03_dataset_quality_v1.pdf",
+          "sha256": "27b3ba94fabafd8cd47d916bbd23a2a0604189602b96d4086168efdb2190f04b"
+        }
+      }
+    },
+    {
+      "name": "fig02_macro_averages_v2",
+      "caption": "v2 / 0.5; equal weights over hatecheck (n=3,728) / aegis2 (n=1,964) / jailbreak-classification (n=262). Unlike PR #20, ToxiGen is excluded and Jailbreak Classification is included. Official held-out partitions; matching rows verified. Training overlap has not been audited.",
+      "files": {
+        "png": {
+          "path": "fig02_macro_averages_v2.png",
+          "sha256": "9ed4d76120ebe87f60b27b05bdf338aa389595fe93b607d31c985f7e93c2478e"
+        },
+        "svg": {
+          "path": "fig02_macro_averages_v2.svg",
+          "sha256": "e438c9e30d4a4c37b6c73cbb7064280d67636a1109ff2110d8a0835b4ef3bee0"
+        },
+        "pdf": {
+          "path": "fig02_macro_averages_v2.pdf",
+          "sha256": "969dddec07fc100da44db539acb41752c112bcdafe9ac1be7d3a204cddcabad0"
+        }
+      }
+    },
+    {
+      "name": "fig03_dataset_quality_v2",
+      "caption": "All six quality metrics on matched successful rows, v2. hatecheck (n=3,728) / aegis2 (n=1,964) / jailbreak-classification (n=262).",
+      "files": {
+        "png": {
+          "path": "fig03_dataset_quality_v2.png",
+          "sha256": "9a50c10cfc92af59cbc5b28eb783cb5c95850a789b18778f677a2458ee853b18"
+        },
+        "svg": {
+          "path": "fig03_dataset_quality_v2.svg",
+          "sha256": "ac06a5e2721730a03398fd495fc7eb9c83af0c4b12888fd67cdce03d552205d6"
+        },
+        "pdf": {
+          "path": "fig03_dataset_quality_v2.pdf",
+          "sha256": "84098846038d9733f2d6b786aa90503b3998e944ec50596a9c8eeaeccc75fc8b"
+        }
+      }
+    },
+    {
+      "name": "fig04_threshold_sensitivity",
+      "caption": "Thresholds 0.5\u20130.8 derived offline from saved probabilities. No threshold selected using these test results.",
+      "files": {
+        "png": {
+          "path": "fig04_threshold_sensitivity.png",
+          "sha256": "f7acfc7af0b9bbe080500ff64e26c4949c7729e9c94c3919d949615942cbfbe7"
+        },
+        "svg": {
+          "path": "fig04_threshold_sensitivity.svg",
+          "sha256": "9b03f4efe33ee6a72e35eaaba542287ee39ff43be3cd176e97dface051de2a6e"
+        },
+        "pdf": {
+          "path": "fig04_threshold_sensitivity.pdf",
+          "sha256": "2902f4eae5a8aee003b7055ec960b9e2f44f0598bfa012baf0bcbaef1fb458ea"
+        }
+      }
+    },
+    {
+      "name": "fig05_request_timing",
+      "caption": "Timing includes retries and rate-limit waits. Microsoft is capped at 4 rps; worker counts/caps are in request_timing.csv. Do not rank deployment speed from this chart.",
+      "files": {
+        "png": {
+          "path": "fig05_request_timing.png",
+          "sha256": "c2ae0543df4458342acc4f77ff96fcaf37822cb699bc5fa17d9c51df7bf505d1"
+        },
+        "svg": {
+          "path": "fig05_request_timing.svg",
+          "sha256": "6bae13c40e04c5a4a293c8e2f3cf6acaaa2cf989d40ce0e796f095ce80bf5456"
+        },
+        "pdf": {
+          "path": "fig05_request_timing.pdf",
+          "sha256": "00daf3f180c15d016fd343c4865d7cacae543296d7ec6da52495337d092adbb0"
+        }
+      }
+    },
+    {
+      "name": "fig06_pii_extraction",
+      "caption": "Model: fastino/gliner2.5-multi-v1. Full Nano/Mini validation partitions. No document-detection, leakage or masking-success substitution for entity extraction quality.",
+      "files": {
+        "png": {
+          "path": "fig06_pii_extraction.png",
+          "sha256": "1b204619170b45aa97588e72e0d2271a90d550244a794691b95dd3de6fef3aae"
+        },
+        "svg": {
+          "path": "fig06_pii_extraction.svg",
+          "sha256": "5a087347ba3334c4fb3ce76ecc4c832c3969af663e0664a5c1f41804ae26bf1e"
+        },
+        "pdf": {
+          "path": "fig06_pii_extraction.pdf",
+          "sha256": "af4ac3c752057f33e9850407e18e486db5c8e05213dcbe31126b6ea5c7446038"
+        }
+      }
+    },
+    {
+      "name": "fig07_coverage",
+      "caption": "Each provider attempts the same declared datasets/prompts. Coverage is request count, not number of unique texts or independent repeat runs.",
+      "files": {
+        "png": {
+          "path": "fig07_coverage.png",
+          "sha256": "3947779595830fbaebaf766abecdd065f037a6c854b3e5e006175812e59e6d9d"
+        },
+        "svg": {
+          "path": "fig07_coverage.svg",
+          "sha256": "2760d47b66ed308bf8524d8a7b117c89a17a1b51d3d346cf565e11e8b424a31c"
+        },
+        "pdf": {
+          "path": "fig07_coverage.pdf",
+          "sha256": "76a94a4f5045998713b52af31f822688f1cf44912faa1646aa76030d817bec0d"
+        }
+      }
+    }
+  ]
+}

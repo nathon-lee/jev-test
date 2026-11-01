@@ -1,0 +1,242 @@
+{
+  "task": "pii_extraction",
+  "input_sha256": "e5092fb913ac8c081b089145ed5638152121188170f3ff08166f43d58996a689",
+  "model": "fastino/gliner2.5-multi-v1",
+  "threshold": 0.5,
+  "base_url": "https://api.fastino.ai/v1",
+  "entity_schema": {
+    "TITLE": "personal honorific or title",
+    "GIVENNAME": "person's given name",
+    "SURNAME": "person's family name",
+    "DATE": "calendar date",
+    "STREET": "street address or street name",
+    "BUILDINGNUM": "building or house number",
+    "CITY": "city name",
+    "EMAIL": "email address",
+    "TELEPHONENUM": "telephone number",
+    "ZIPCODE": "postal or zip code",
+    "AGE": "person's age",
+    "SEX": "person's sex",
+    "GENDER": "person's gender",
+    "TAXNUM": "tax identification number",
+    "CREDITCARDNUMBER": "credit card number",
+    "SOCIALNUM": "social security or social insurance number",
+    "IDCARDNUM": "identity card number",
+    "PASSPORTNUM": "passport number",
+    "DRIVERLICENSENUM": "driver license number"
+  },
+  "expected_rows": 990,
+  "partitions": [
+    [
+      "ai4privacy/pii-masking-mini-10k",
+      "validation",
+      "7b686c2e7475b02e10e38add1eb54a9f604f4361"
+    ]
+  ],
+  "provider": "fastino.ai",
+  "rows": 990,
+  "successful_rows": 990,
+  "failed_rows": 0,
+  "request_success_rate": 1.0,
+  "gold_entities": 7589,
+  "entity_micro": {
+    "tp": 3316,
+    "fp": 2663,
+    "fn": 4273,
+    "precision": 0.5546077939454759,
+    "recall": 0.4369482145210173,
+    "f1": 0.48879716981132076
+  },
+  "boundary_micro": {
+    "tp": 3697,
+    "fp": 1709,
+    "fn": 3892,
+    "precision": 0.6838697743248243,
+    "recall": 0.4871524575042825,
+    "f1": 0.5689880723355136
+  },
+  "per_type": {
+    "AGE": {
+      "tp": 202,
+      "fp": 125,
+      "fn": 203,
+      "precision": 0.617737003058104,
+      "recall": 0.49876543209876545,
+      "f1": 0.5519125683060109,
+      "support": 405
+    },
+    "BUILDINGNUM": {
+      "tp": 13,
+      "fp": 214,
+      "fn": 370,
+      "precision": 0.05726872246696035,
+      "recall": 0.033942558746736295,
+      "f1": 0.04262295081967213,
+      "support": 383
+    },
+    "CITY": {
+      "tp": 218,
+      "fp": 226,
+      "fn": 303,
+      "precision": 0.49099099099099097,
+      "recall": 0.418426103646833,
+      "f1": 0.45181347150259066,
+      "support": 521
+    },
+    "CREDITCARDNUMBER": {
+      "tp": 144,
+      "fp": 41,
+      "fn": 95,
+      "precision": 0.7783783783783784,
+      "recall": 0.602510460251046,
+      "f1": 0.6792452830188679,
+      "support": 239
+    },
+    "DATE": {
+      "tp": 768,
+      "fp": 66,
+      "fn": 100,
+      "precision": 0.920863309352518,
+      "recall": 0.8847926267281107,
+      "f1": 0.9024676850763808,
+      "support": 868
+    },
+    "DRIVERLICENSENUM": {
+      "tp": 50,
+      "fp": 0,
+      "fn": 173,
+      "precision": 1.0,
+      "recall": 0.2242152466367713,
+      "f1": 0.3663003663003663,
+      "support": 223
+    },
+    "EMAIL": {
+      "tp": 486,
+      "fp": 18,
+      "fn": 21,
+      "precision": 0.9642857142857143,
+      "recall": 0.9585798816568047,
+      "f1": 0.9614243323442137,
+      "support": 507
+    },
+    "GENDER": {
+      "tp": 120,
+      "fp": 141,
+      "fn": 105,
+      "precision": 0.45977011494252873,
+      "recall": 0.5333333333333333,
+      "f1": 0.49382716049382713,
+      "support": 225
+    },
+    "GIVENNAME": {
+      "tp": 137,
+      "fp": 566,
+      "fn": 729,
+      "precision": 0.19487908961593173,
+      "recall": 0.1581986143187067,
+      "f1": 0.17463352453792225,
+      "support": 866
+    },
+    "IDCARDNUM": {
+      "tp": 86,
+      "fp": 37,
+      "fn": 173,
+      "precision": 0.6991869918699187,
+      "recall": 0.33204633204633205,
+      "f1": 0.450261780104712,
+      "support": 259
+    },
+    "PASSPORTNUM": {
+      "tp": 62,
+      "fp": 57,
+      "fn": 91,
+      "precision": 0.5210084033613446,
+      "recall": 0.40522875816993464,
+      "f1": 0.45588235294117646,
+      "support": 153
+    },
+    "SEX": {
+      "tp": 166,
+      "fp": 111,
+      "fn": 61,
+      "precision": 0.5992779783393501,
+      "recall": 0.7312775330396476,
+      "f1": 0.6587301587301587,
+      "support": 227
+    },
+    "SOCIALNUM": {
+      "tp": 31,
+      "fp": 19,
+      "fn": 163,
+      "precision": 0.62,
+      "recall": 0.15979381443298968,
+      "f1": 0.2540983606557377,
+      "support": 194
+    },
+    "STREET": {
+      "tp": 34,
+      "fp": 375,
+      "fn": 360,
+      "precision": 0.08312958435207823,
+      "recall": 0.08629441624365482,
+      "f1": 0.08468244084682441,
+      "support": 394
+    },
+    "SURNAME": {
+      "tp": 36,
+      "fp": 269,
+      "fn": 680,
+      "precision": 0.1180327868852459,
+      "recall": 0.05027932960893855,
+      "f1": 0.07051909892262488,
+      "support": 716
+    },
+    "TAXNUM": {
+      "tp": 141,
+      "fp": 156,
+      "fn": 80,
+      "precision": 0.47474747474747475,
+      "recall": 0.6380090497737556,
+      "f1": 0.5444015444015444,
+      "support": 221
+    },
+    "TELEPHONENUM": {
+      "tp": 351,
+      "fp": 86,
+      "fn": 43,
+      "precision": 0.8032036613272311,
+      "recall": 0.8908629441624365,
+      "f1": 0.8447653429602888,
+      "support": 394
+    },
+    "TIME": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 23,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 23
+    },
+    "TITLE": {
+      "tp": 26,
+      "fp": 124,
+      "fn": 413,
+      "precision": 0.17333333333333334,
+      "recall": 0.05922551252847381,
+      "f1": 0.08828522920203735,
+      "support": 439
+    },
+    "ZIPCODE": {
+      "tp": 245,
+      "fp": 32,
+      "fn": 87,
+      "precision": 0.8844765342960289,
+      "recall": 0.7379518072289156,
+      "f1": 0.8045977011494253,
+      "support": 332
+    }
+  },
+  "entity_macro_f1": 0.4440235676157191,
+  "exact_document_match": 0.04040404040404041
+}

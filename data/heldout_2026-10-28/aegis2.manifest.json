@@ -1,0 +1,15 @@
+{
+  "source_repository": "nvidia/Aegis-AI-Content-Safety-Dataset-2.0",
+  "source_config": "default",
+  "source_revision": "d86bb8bedff51d25ac834ab7838f1cc61acb7a2c",
+  "source_split": "test",
+  "partition_role": "held_out",
+  "available_splits": [
+    "train",
+    "validation",
+    "test"
+  ],
+  "source_rows": 1964,
+  "prepared_rows": 1964,
+  "csv_sha256": "8b37befa9221dcb4bb1d2f6c1ec418e121931dda00c67c94763ee141149aa4b9"
+}

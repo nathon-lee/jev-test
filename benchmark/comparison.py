@@ -70,10 +70,15 @@ def fingerprint(text):
     return hashlib.sha256(normalized.encode("utf-8")).digest()
 
 
-def read_reference(path):
+def read_reference(path, provenance=None):
     rows = {}
+    frame = pd.read_csv(path)
+    if "partition_role" in frame.columns and set(frame["partition_role"]) != {"held_out"}:
+        raise ValueError(f"{path}: training/reference partitions cannot enter a held-out comparison; select held-out datasets explicitly")
+    if provenance is not None:
+        provenance["declared_partition"] = "partition_role" in frame.columns
     # Match run_single_benchmark's pandas parser, including NA and NUL handling.
-    for _, row in pd.read_csv(path).iterrows():
+    for _, row in frame.iterrows():
         sample = str(row["sample_id"])
         if sample in rows:
             raise ValueError(f"{path}: duplicate sample_id={sample}")
@@ -272,7 +277,7 @@ def read_predictions(path, reference, provider, dataset, prompt, threshold):
     return valid, len(seen), dict(errors)
 
 
-def collect_report(input_dir, data_dir, providers, previous_report=None):
+def collect_report(input_dir, data_dir, providers, previous_report=None, datasets=None):
     if len(providers) < 2 or len(set(providers)) != len(providers):
         raise ValueError("Select at least two distinct providers")
     for provider in providers:
@@ -280,7 +285,16 @@ def collect_report(input_dir, data_dir, providers, previous_report=None):
             raise ValueError(f"Unsupported provider: {provider}")
         if not (input_dir / provider).is_dir() and previous_report is None:
             raise FileNotFoundError(input_dir / provider)
-    references = {name: read_reference(data_dir / filename) for name, filename in DATASETS.items()}
+    selected = list(DATASETS) if datasets is None else list(datasets)
+    if not selected or len(set(selected)) != len(selected) or any(name not in DATASETS for name in selected):
+        raise ValueError("Select distinct known datasets")
+    if datasets is not None and previous_report is not None:
+        raise ValueError("Dataset selection cannot reuse a historical aggregate report")
+    provenance = {name: {} for name in selected}
+    references = {name: read_reference(data_dir / DATASETS[name], provenance[name]) for name in selected}
+    declared = [info["declared_partition"] for info in provenance.values()]
+    if any(declared) and not all(declared):
+        raise ValueError("Do not mix explicitly partitioned datasets with unversioned legacy datasets; select held-out datasets explicitly")
     previous = previous_report or {}
     if previous_report is not None and (
         previous["providers"] != providers
@@ -298,8 +312,8 @@ def collect_report(input_dir, data_dir, providers, previous_report=None):
     log_paths = [
         path for provider in providers for path in (input_dir / provider).glob("*.log")
     ]
-    logs = parse_logs(log_paths, warnings=warnings)
-    repeat_log_timings = parse_repeat_log_timings(log_paths)
+    logs = {key: value for key, value in parse_logs(log_paths, warnings=warnings).items() if key[1] in references}
+    repeat_log_timings = [row for row in parse_repeat_log_timings(log_paths) if row["dataset"] in references]
     paths = {}
     for provider in providers:
         for path in sorted((input_dir / provider).glob("*.csv")):
@@ -307,6 +321,8 @@ def collect_report(input_dir, data_dir, providers, previous_report=None):
             if not match:
                 raise ValueError(f"Unrecognized result filename: {path}")
             dataset, prompt, threshold = match.groups()
+            if dataset in DATASETS and dataset not in references:
+                continue
             threshold = float(threshold)
             if dataset not in DATASETS or threshold not in THRESHOLDS:
                 raise ValueError(f"Unknown dataset/threshold: {path}")
@@ -578,6 +594,7 @@ def collect_report(input_dir, data_dir, providers, previous_report=None):
         **({"previous_generated_at": previous["generated_at"]} if previous_report is not None else {}),
         "input_dir": str(input_dir), "data_dir": str(data_dir),
         "providers": providers, "baseline_datasets": baseline_datasets,
+        "selected_datasets": list(references),
         "model_identities": {provider: MODEL_IDENTITIES[provider] for provider in providers},
         "overview": overview, "runs": runs, "paired": paired,
         "pairwise": pairwise, "warnings": list(dict.fromkeys(warnings)),

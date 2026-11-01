@@ -11,6 +11,7 @@ def main():
     parser.add_argument("--data-dir", type=Path, default=Path("data/prepared"))
     parser.add_argument("--output-dir", type=Path, default=Path("outputs/comparison_historical_confidence"))
     parser.add_argument("--providers", default=",".join(MODELS), help="Comma-separated provider directory names")
+    parser.add_argument("--datasets", help="Comma-separated dataset names; use this to exclude train-only reference datasets")
     parser.add_argument("--paper-figures", action="store_true", help="Also export comparison PNG, SVG and PDF figures")
     parser.add_argument("--external-summary", type=Path, help="Optional OpenJev aggregate CSV (reference-only comparison)")
     parser.add_argument("--internal-summary", type=Path, help="Additional internal model aggregate CSV (reference-only)")
@@ -20,7 +21,8 @@ def main():
     previous = json.loads(args.previous_report.read_text(encoding="utf-8")) if args.previous_report else None
     if args.internal_summary and not (args.external_summary or (previous and previous.get("external_comparison"))):
         parser.error("--internal-summary requires --external-summary or a previous external comparison")
-    report = collect_report(args.input_dir, args.data_dir, providers, previous_report=previous)
+    report = collect_report(args.input_dir, args.data_dir, providers, previous_report=previous,
+                            datasets=args.datasets.split(",") if args.datasets else None)
     if args.external_summary is not None:
         from benchmark.external_summary import attach_openjev_summary
 
