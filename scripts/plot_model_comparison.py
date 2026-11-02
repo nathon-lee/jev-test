@@ -13,6 +13,7 @@ def main():
     parser.add_argument("--dpi", type=int, default=300, help="PNG resolution (minimum 72; vector exports are unaffected)")
     parser.add_argument("--fine-tuned-run", type=Path, help="Add an isolated fine-tuned run to reference-only comparisons")
     parser.add_argument("--fine-tuned-log", type=Path, help="Complete benchmark log for --fine-tuned-run")
+    parser.add_argument("--qwen-summary", type=Path, help="User-supplied 12-dataset Qwen3Guard summary CSV (v1 / 0.5)")
     args = parser.parse_args()
     if args.dpi < 72:
         parser.error("--dpi must be at least 72")
@@ -26,6 +27,10 @@ def main():
         attach_finetuned_run(report, args.fine_tuned_run, args.fine_tuned_log)
         report["generated_at"] = datetime.now(timezone.utc).isoformat()
         write_report(report, args.report.parent)
+    if args.qwen_summary:
+        from benchmark.external_summary import attach_qwen_summary
+
+        attach_qwen_summary(report, args.qwen_summary)
     write_paper_figures(report, args.output_dir, dpi=args.dpi)
     print(f"Figure gallery: {args.output_dir / 'index.html'}")
     print(f"Combined PDF: {args.output_dir / 'paper_figures.pdf'}")

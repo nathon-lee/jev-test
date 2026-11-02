@@ -4,7 +4,9 @@ import copy
 import hashlib
 import html
 import json
+import math
 import re
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
@@ -13,7 +15,8 @@ import pytest
 
 from benchmark.comparison import DATASETS, MODEL_IDENTITIES, MODELS
 from benchmark.external_summary import (
-    DATASET_CATEGORIES, attach_finetuned_run, attach_openjev_summary, category_reference_averages,
+    DATASET_CATEGORIES, METRICS, QWEN_PROVIDER, attach_finetuned_run, attach_openjev_summary,
+    attach_qwen_summary, category_reference_averages,
     reference_averages, three_dataset_averages, v1_reference_scope_averages,
 )
 from benchmark.paper_figures import (
@@ -24,6 +27,7 @@ from benchmark.paper_figures import (
     external_category_figure,
     external_dataset_figure,
     external_reference_providers,
+    highlight_reference_bars,
     model_averages_figure,
     quality_figure,
     stability_averages_figure,
@@ -32,6 +36,7 @@ from benchmark.paper_figures import (
     three_dataset_averages_figure,
     tradeoff_figure,
     write_paper_figures,
+    write_summary_model_details,
 )
 
 
@@ -142,6 +147,66 @@ def test_quality_chart_uses_paired_values_and_names(report, datasets):
             assert all(left.x1 < right.x0 for left, right in zip(labels, labels[1:]))
             assert all(label.x0 >= 0 and label.x1 <= figure.bbox.x1 for label in labels)
         assert figure.legends[0].get_window_extent(renderer).y0 > figure.axes[0].get_window_extent(renderer).y1
+    finally:
+        plt.close(figure)
+
+
+@pytest.mark.parametrize("horizontal", [False, True])
+@pytest.mark.parametrize("values, quality_winners, timing_winners", [
+    ([0.8, 0.8, None], [0, 1], [0, 1]),
+    ([0.8, 0.800000001, 0.7], [1], [2]),
+    ([None, np.nan, None], [], []),
+])
+def test_reference_highlights_respect_ties_missing_values_and_metric_direction(
+    horizontal, values, quality_winners, timing_winners,
+):
+    providers = list(MODELS)
+    metrics = ("accuracy", "precision", "recall", "f1", "auroc", "mean_elapsed_ms")
+    record = {
+        provider: dict.fromkeys(metrics, value)
+        for provider, value in zip(providers, values)
+    }
+    figure, axes = plt.subplots(3, 2, figsize=(16, 20))
+    try:
+        for ax in axes.flat:
+            plotted = [value if value is not None else np.nan for value in values]
+            if horizontal:
+                ax.barh(range(3), plotted, linewidth=0.4)
+                ax.set_yticks(range(3), providers)
+            else:
+                ax.bar(range(3), plotted, linewidth=0.4)
+            for bar, value in zip(ax.patches, plotted):
+                if math.isfinite(value):
+                    point = (value, bar.get_y() + bar.get_height() / 2) if horizontal else (
+                        bar.get_x() + bar.get_width() / 2, value
+                    )
+                    ax.annotate(str(value), point, xytext=(4, 0) if horizontal else (0, 4),
+                                textcoords="offset points")
+        highlight_reference_bars(figure, providers, [record], horizontal=horizontal)
+        figure.canvas.draw()
+        for index, ax in enumerate(axes.flat):
+            winners = timing_winners if index == 5 else quality_winners
+            assert [
+                i for i, bar in enumerate(ax.patches) if bar.get_linewidth() == 2.2
+            ] == winners
+            arrows = [text for text in ax.texts if text.arrow_patch is not None]
+            assert len(arrows) == len(winners)
+            numbers = [text for text in ax.texts if text.arrow_patch is None
+                       and text.get_gid() != "reference-highlight-label"]
+            assert all(text.get_zorder() > 5 and text.get_bbox_patch() is not None for text in numbers)
+            assert all(abs(text.get_position()[0]) <= 14 and abs(text.get_position()[1]) <= 14
+                       for text in arrows)
+            if winners:
+                callout = next(text for text in ax.texts if text.get_gid() == "reference-highlight-label")
+                label = callout.get_text().replace("\n", " ")
+                box = callout.get_bbox_patch().get_window_extent(figure.canvas.get_renderer())
+                assert all(not box.overlaps(text.get_window_extent(figure.canvas.get_renderer()))
+                           for text in numbers)
+                assert ("Lowest time:" if index == 5 else "Highest:") in label
+                assert all({"fastino.ai": "Fastino", "laya-ai.com": "Laya", "typesafe.ai": "TypeSafe"}[providers[i]]
+                           in label for i in winners)
+                if horizontal:
+                    assert box.y0 > ax.get_window_extent().y1
     finally:
         plt.close(figure)
 
@@ -639,6 +704,17 @@ def test_openjev_reference_exports_preserve_original_baselines_and_stability_lin
         focused["title"], category["title"], v1_reference["title"], reference_averages_title, coverage_title,
     ]
     assert len(category["panels"]) == 6
+    panel_sizes = []
+    for panel in category["panels"]:
+        svg = (destination / panel["files"]["svg"]).read_text()
+        view_box = re.search(r'viewBox="([^"]+)"', svg).group(1)
+        panel_sizes.append([float(value) for value in view_box.split()])
+    for size in panel_sizes[1:]:
+        assert size == pytest.approx(panel_sizes[0])
+    assert len({
+        plt.imread(destination / panel["files"]["png"]).shape
+        for panel in category["panels"]
+    }) == 1
     category_page = (destination / "category_reference_comparison.html").read_text()
     assert category_page.count("<img ") == 6
     assert 'src="data:image/png;base64,' in category_page
@@ -725,7 +801,11 @@ def test_openjev_reference_exports_preserve_original_baselines_and_stability_lin
     assert all(row["prompt"] == "v1" for row in averages[:4])
     supplied = {row["provider"]: row for row in averages[4:]}
     assert set(supplied) == {"Dynamo CPU", "Dynamo GPU (A100)", "Dynamo GPU (L4)", "Mistral", "Warden"}
-    assert all(row["prompt"] == "not_supplied" and row["f1"] == "" for row in supplied.values())
+    assert all(row["prompt"] == "not_supplied" for row in supplied.values())
+    for row in supplied.values():
+        precision, recall = float(row["precision"]), float(row["recall"])
+        assert float(row["f1"]) == pytest.approx(2 * precision * recall / (precision + recall))
+        assert row["f1_source"] == "harmonic_mean_of_supplied_precision_recall"
     assert float(supplied["Dynamo CPU"]["mean_elapsed_ms"]) == 20000
     assert float(supplied["Dynamo GPU (A100)"]["mean_elapsed_ms"]) == 55
     assert float(supplied["Dynamo GPU (L4)"]["mean_elapsed_ms"]) == 100
@@ -779,7 +859,13 @@ def test_openjev_reference_exports_preserve_original_baselines_and_stability_lin
         assert [bar.get_width() for bar in figure.axes[0].patches[4:]] == pytest.approx(
             [89.65, 89.41, 89.39, 83.33, 77.73],
         )
-        assert all(np.isnan(bar.get_width()) for bar in figure.axes[3].patches[4:])
+        assert [bar.get_width() for bar in figure.axes[3].patches[4:]] == pytest.approx(
+            [float(row["f1"]) * 100 for row in supplied.values()],
+        )
+        f1_labels = [text.get_text() for text in figure.axes[3].texts if text.arrow_patch is None
+                     and text.get_gid() != "reference-highlight-label"]
+        assert all(label.endswith("*") for label in f1_labels[4:])
+        assert all(not label.endswith("*") for label in f1_labels[:4])
         assert figure.axes[3].get_ylim() == (8.5, -0.5)
         assert [bar.get_width() for bar in figure.axes[4].patches[4:7]] == pytest.approx(
             [95.27, 95.24, 95.24],
@@ -843,6 +929,15 @@ def test_external_averages_use_v1_half_threshold_shared_timing_without_changing_
         np.testing.assert_allclose(times, expected_times, equal_nan=True)
         quality = [bar.get_height() for bar in figure.axes[0].patches]
         np.testing.assert_allclose(quality, [80] * 6)
+        for ax in figure.axes[:5]:
+            assert ax.get_ylim() == pytest.approx((0, 120))
+        assert figure.axes[5].get_ylim() == pytest.approx(
+            (0, 1 if no_shared_timing else max(expected_times) * 1.3)
+        )
+        for ax in figure.axes:
+            assert all(text.get_gid() != "reference-highlight-label" for text in ax.texts)
+            assert all(text.arrow_patch is None for text in ax.texts)
+            assert all(bar.get_linewidth() == 0.4 for bar in ax.patches)
         assert "3 shared non-PII datasets" in figure.axes[0].get_xticklabels()[0].get_text()
         count = 0 if no_shared_timing else 2
         assert f"{count} shared timed datasets" in figure.axes[5].get_xticklabels()[0].get_text()
@@ -863,8 +958,11 @@ def test_external_averages_use_v1_half_threshold_shared_timing_without_changing_
             ax.title.get_window_extent(renderer).y1 for ax in figure.axes
         )
         for ax in figure.axes:
-            assert all(label.get_fontsize() >= 11 for label in ax.texts)
-            labels = [label.get_window_extent(renderer) for label in ax.texts]
+            assert all(label.get_fontsize() >= 11 for label in ax.texts if label.arrow_patch is None)
+            labels = [
+                label.get_window_extent(renderer) for label in ax.texts
+                if label.arrow_patch is None and label.get_gid() != "reference-highlight-label"
+            ]
             assert all(left.x1 < right.x0 for left, right in zip(labels, labels[1:]))
             bounds = ax.get_window_extent(renderer)
             assert all(bounds.x0 <= label.x0 < label.x1 <= bounds.x1 for label in labels)
@@ -1016,6 +1114,136 @@ def fine_tuned_run(report, tmp_path):
     return report, run, log, data
 
 
+def test_qwen_summary_preserves_existing_scopes_and_excludes_unsupported_pii(fine_tuned_run, tmp_path):
+    report, _, _, _ = fine_tuned_run
+    before = copy.deepcopy(report)
+    scopes_before = v1_reference_scope_averages(report)
+    focused_before = three_dataset_averages(report)
+    source = Path(__file__).parents[1] / "data/external/qwen3guard_stream_8b_summary.csv"
+    attach_qwen_summary(report, source)
+    comparison = report["external_comparison"]
+    model = comparison["summary_models"][QWEN_PROVIDER]
+    assert (model["rows"], model["valid"], model["errors"]) == (66794, 66733, 61)
+    assert len(model["supplied_rows"]) == 12
+    assert report["runs"] == before["runs"]
+    assert report["providers"] == before["providers"]
+    assert comparison["runs"][:-8] == before["external_comparison"]["runs"]
+    supplied = {row["dataset"]: row for row in model["supplied_rows"]}
+    assert all(row["mean_elapsed_ms"] == row["log_elapsed_mean_ms_per_sample"] > 0
+               for row in supplied.values())
+    assert all(row["latency_source_kind"] == "single_complete_run" for row in supplied.values())
+    assert all(row["p95_source_kind"] == "successful_request_latency_ms" for row in supplied.values())
+    assert QWEN_PROVIDER in external_reference_providers(comparison, "v1")
+    assert QWEN_PROVIDER not in external_reference_providers(comparison, "v2")
+    scopes_after = v1_reference_scope_averages(report)
+    assert [row for row in scopes_after if row["provider"] != QWEN_PROVIDER] == scopes_before
+    assert [
+        row for row in three_dataset_averages(report) if row["provider"] != QWEN_PROVIDER
+    ] == focused_before
+    qwen_scopes = [row for row in scopes_after if row["provider"] == QWEN_PROVIDER]
+    assert {row["scope"] for row in qwen_scopes} == {"non_pii", "pii", "all"}
+    for row in qwen_scopes:
+        if row["scope"] in ("pii", "all"):
+            assert all(row[metric] is None for metric in METRICS)
+            assert row["shared_elapsed_ms"] is None
+        else:
+            assert row["mean_elapsed_ms"] == pytest.approx(
+                np.mean([supplied[dataset]["log_elapsed_mean_ms_per_sample"] for dataset in row["datasets"]])
+            )
+            assert row["shared_elapsed_ms"] == pytest.approx(
+                np.mean([supplied[dataset]["log_elapsed_mean_ms_per_sample"] for dataset in row["timing_datasets"]])
+            )
+    focused = next(row for row in three_dataset_averages(report) if row["provider"] == QWEN_PROVIDER)
+    assert focused["mean_elapsed_ms"] == pytest.approx(1649.0928346666665)
+    pii_category = next(
+        row for row in category_reference_averages(report)
+        if row["provider"] == QWEN_PROVIDER and row["category"] == "pii"
+    )
+    assert pii_category["task_supported"] is False
+    assert all(pii_category[metric] is None for metric in METRICS)
+    figure = external_dataset_figure(report, "v1")
+    try:
+        for ax in figure.axes:
+            assert sum(text.get_text() == "Unsupported" for text in ax.texts) == 2
+            assert all(text.get_gid() != "reference-highlight-label" for text in ax.texts)
+        assert np.isnan(figure.axes[0].patches[-1].get_height())
+        assert np.isnan(figure.axes[0].patches[-2].get_height())
+        np.testing.assert_allclose(
+            [bar.get_height() for bar in figure.axes[-1].patches[-8:]],
+            [supplied[dataset]["log_elapsed_mean_ms_per_sample"]
+             if supplied[dataset]["task_supported"] else np.nan for dataset in DATASETS],
+            equal_nan=True,
+        )
+    finally:
+        plt.close(figure)
+    write_summary_model_details(comparison, tmp_path)
+    with (tmp_path / model["summary_csv"]).open(encoding="utf-8-sig", newline="") as stream:
+        exported = list(csv.DictReader(stream))
+    assert len(exported) == 12
+    pii = next(row for row in exported if row["dataset"] == "pii_masking_mini_10k")
+    assert pii["task_supported"] == "False"
+    assert pii["f1"] == "0.555573"
+    assert float(pii["mean_elapsed_ms"]) == float(pii["log_elapsed_mean_ms_per_sample"]) == 1348.288084
+    assert pii["p95_latency_ms"] == "NaN"
+    golden = next(row for row in exported if row["dataset"] == "pii-detection-golden")
+    assert float(golden["log_elapsed_mean_ms_per_sample"]) == 1213.470162
+    assert float(golden["p95_latency_ms"]) == 2124.974660
+    assert "pii_rerun_20261029_203544.log" in golden["latency_log_file"]
+    page = (tmp_path / model["detail_page"]).read_text()
+    assert "66,794 rows; 66,733 valid; 61 errors" in page
+    assert "Unsupported (historical safety-proxy only)" in page
+    assert "2700/2700" in page and "not probabilities" in page
+    assert "including failed requests, loop overhead and waiting" in page
+    assert "missing P95 is not inferred from log average latency" in page
+    assert "python -m scripts.plot_model_comparison --qwen-summary" in page
+    attach_qwen_summary(report, source)
+    assert comparison["providers"].count(QWEN_PROVIDER) == 1
+    assert len([row for row in comparison["runs"] if row["provider"] == QWEN_PROVIDER]) == 8
+    json.dumps(report, allow_nan=False)
+
+
+@pytest.mark.parametrize("column,value", [
+    ("valid", "-1"), ("prompt", "v2"), ("accuracy", "1.1"),
+    ("log_elapsed_mean_ms_per_sample", "inf"), ("p95_latency_ms", "-1"),
+    ("latency_log_file", ""), ("dataset", "unknown"),
+])
+def test_qwen_summary_rejects_invalid_supplied_values(fine_tuned_run, tmp_path, column, value):
+    report, _, _, _ = fine_tuned_run
+    source = Path(__file__).parents[1] / "data/external/qwen3guard_stream_8b_summary.csv"
+    with source.open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    rows[0][column] = value
+    invalid = tmp_path / "invalid_summary.csv"
+    with invalid.open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    before = copy.deepcopy(report)
+    with pytest.raises(ValueError):
+        attach_qwen_summary(report, invalid)
+    assert report == before
+
+
+def test_qwen_missing_log_latency_remains_unavailable(fine_tuned_run, tmp_path):
+    report, _, _, _ = fine_tuned_run
+    source = Path(__file__).parents[1] / "data/external/qwen3guard_stream_8b_summary.csv"
+    with source.open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    next(row for row in rows if row["dataset"] == "toxigen")["log_elapsed_mean_ms_per_sample"] = "NaN"
+    partial = tmp_path / "partial_summary.csv"
+    with partial.open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    attach_qwen_summary(report, partial)
+    model = report["external_comparison"]["summary_models"][QWEN_PROVIDER]
+    toxigen = next(row for row in model["supplied_rows"] if row["dataset"] == "toxigen")
+    assert toxigen["mean_elapsed_ms"] is toxigen["p95_latency_ms"] is None
+    focused = next(row for row in three_dataset_averages(report) if row["provider"] == QWEN_PROVIDER)
+    assert focused["mean_elapsed_ms"] is None
+    assert focused["f1"] == pytest.approx(0.807799)
+
+
 def test_finetuned_reference_preserves_existing_models_and_untested_scopes(fine_tuned_run):
     report, run, log, data = fine_tuned_run
     before = copy.deepcopy(report)
@@ -1104,14 +1332,14 @@ def test_finetuned_bars_have_distinct_style_without_resizing_other_bars(fine_tun
             fine_tuned = ax.patches[groups:groups * 2]
             for bar in fine_tuned:
                 assert bar.get_hatch() == "////"
-                assert bar.get_linewidth() == 1.5
+                assert bar.get_linewidth() in (1.5, 2.2)
                 assert bar.get_edgecolor() == to_rgba("#172438")
                 assert bar.get_facecolor() == to_rgba("#E7298A")
                 if kind == "three_dataset":
                     assert bar.get_height() == ax.patches[0].get_height()
                 else:
                     assert bar.get_width() == ax.patches[0].get_width()
-            assert all(bar.get_linewidth() == 0.4 for bar in [
+            assert all(bar.get_linewidth() in (0.4, 2.2) for bar in [
                 *ax.patches[:groups], *ax.patches[groups * 2:],
             ])
         legend = figure.legends[0]
@@ -1214,6 +1442,10 @@ def test_internal_models_are_adjacent_in_v1_only_and_missing_toxigen_stays_na(re
     figure = external_dataset_figure(report, "v1")
     try:
         assert len(figure.axes[0].patches) == 48
+        for ax in figure.axes:
+            assert all(text.get_gid() != "reference-highlight-label" for text in ax.texts)
+            assert all(text.arrow_patch is None for text in ax.texts)
+            assert all(bar.get_linewidth() == 0.4 for bar in ax.patches)
         assert np.isnan(figure.axes[0].patches[32].get_height())
         assert figure.axes[0].patches[33].get_height() == 90
         assert figure.axes[5].patches[32].get_height() == 1100
@@ -1241,6 +1473,7 @@ def test_internal_models_are_adjacent_in_v1_only_and_missing_toxigen_stays_na(re
     figure = external_dataset_figure(report, "v2")
     try:
         assert len(figure.axes[0].patches) == 32
+        assert any(text.get_gid() == "reference-highlight-label" for text in figure.axes[0].texts)
         assert all("32B" not in text.get_text() and "Decision-1" not in text.get_text()
                    for text in figure.legends[0].texts)
     finally:
@@ -1252,6 +1485,21 @@ def test_internal_models_are_adjacent_in_v1_only_and_missing_toxigen_stays_na(re
     assert row["mean_elapsed_ms"] == 1100
 
 
+@pytest.mark.parametrize("precision,recall,expected", [
+    (0.2, 0.8, 0.32),
+    (0.0, 0.8, 0.0),
+    (0.0, 0.0, 0.0),
+])
+def test_missing_supplied_f1_uses_harmonic_mean(monkeypatch, precision, recall, expected):
+    monkeypatch.setattr("benchmark.external_summary.FOCUSED_SUPPLIED_AVERAGES", (
+        ("Supplied model", 0.5, precision, recall, None, 100),
+    ))
+    report = {"runs": [], "external_comparison": {"runs": [], "providers": []}}
+    row, = three_dataset_averages(report)
+    assert row["f1"] == pytest.approx(expected)
+    assert row["auroc"] is None
+
+
 def test_three_dataset_averages_use_only_v1_half_threshold_timing():
     records, runs = [], []
     for provider in ("fastino.ai", "openjev"):
@@ -1260,7 +1508,7 @@ def test_three_dataset_averages_use_only_v1_half_threshold_timing():
                 records.append({
                     "provider": provider, "dataset": dataset, "prompt": prompt,
                     "status": "complete", "valid": 10, "accuracy": 0.8 if prompt == "v1" else 0.1,
-                    "precision": 0.8, "recall": 0.8, "f1": 0.8, "auroc": 0.9,
+                    "precision": 0.8, "recall": 0.8, "f1": 0.65, "auroc": 0.9,
                     "mean_elapsed_ms": 800 if provider == "openjev" else 9000,
                 })
                 for threshold in (0.5, 0.7):
@@ -1276,6 +1524,8 @@ def test_three_dataset_averages_use_only_v1_half_threshold_timing():
     averages = three_dataset_averages(report)
     assert [row["prompt"] for row in averages[:2]] == ["v1", "v1"]
     assert [row["accuracy"] for row in averages[:2]] == pytest.approx([0.8, 0.8])
+    assert [row["f1"] for row in averages[:2]] == pytest.approx([0.65, 0.65])
+    assert all(row["f1_source"] == "mean_per_dataset" for row in averages[:2])
     assert [row["mean_elapsed_ms"] for row in averages[:2]] == [200, 800]
     runs[0]["status"] = "partial"
     assert three_dataset_averages(report)[0]["mean_elapsed_ms"] is None

@@ -521,7 +521,6 @@ OpenJev 4B 数值取自用户最初提供的清晰汇总表，分类阈值均为
 | 模型 | 提示词 | 共同数据集 | Average Accuracy | Avg Precision | Avg Recall | Avg F1 | Avg AUROC | Avg latency ms |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | fastino.ai | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 79.22% | 69.87% | 83.34% | 66.46% | 93.43% | 334.77 |
-| gliguard-LLMGuardrails-300M-fine-tuned | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 93.73% | 89.22% | 85.55% | 87.13% | 96.25% | 228.59 |
 | laya-ai.com | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 57.21% | 63.22% | 63.60% | 42.86% | 76.35% | 1118.00 |
 | typesafe.ai | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 84.40% | 73.09% | 82.35% | 72.43% | 93.22% | 228.05 |
 | OpenJev 4B | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 83.30% | 74.29% | 75.47% | 72.13% | 89.60% | 938.00 |

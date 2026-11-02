@@ -15,6 +15,33 @@ from benchmark.comparison import (
 
 METRICS = ("accuracy", "precision", "recall", "f1", "auroc", "mean_elapsed_ms")
 FINE_TUNED_DISPLAY_NAME = "gliguard-LLMGuardrails-300M-fine-tuned"
+QWEN_PROVIDER = "qwen3guard-stream-8b"
+QWEN_NOTES = (
+    "User-supplied summary only; no prediction CSV or source-data integrity audit was performed. "
+    "Prompt v1, threshold 0.5; 12 reported prediction CSVs. "
+    "Scores are binary general-safety labels, not probabilities. Metrics exclude error rows; "
+    "AUROC is unavailable for single-class valid labels. PII detection is unsupported: all three PII "
+    "rows are historical safety-proxy metrics for audit only, excluded from comparison metrics. "
+    "Supplied internal log: logs/qwen3guard-stream-8b_internal_20261029_163330.log (max_workers=1). "
+    "The PII golden rerun log is logs/qwen3guard-stream-8b_pii_rerun_20261029_203544.log "
+    "(max_workers=1), reported complete at 2700/2700 with a Saved record. "
+    "Public-dataset log: logs/qwen3guard_v1_t0.5_20261027_233111.log (max_workers=9 setting), "
+    "including the completed detect-jailbreak restart; duplicate backup records are not counted. "
+    "Log paths are normalized from supplied OCR, not independently verified. "
+    "The supplied description reports completed progress and Saved records with matching filenames/counts; "
+    "these do not prove the current CSVs were never overwritten afterward. "
+    "log_elapsed_mean_ms_per_sample = completed dataset elapsed seconds * 1000 / processed rows, "
+    "including failed requests, loop overhead and waiting; mean_elapsed_ms in chart exports aliases this value. "
+    "It is not the successful-request mean and cannot recover P95. "
+    "p95_latency_ms uses successful-request latency_ms from CSVs. NaN means unavailable; "
+    "no per-request latency is imputed. Latency includes client and network overhead, not pure server inference time. "
+    "This update changes latency only; prior classification metrics and counts are retained where OCR conflicts. "
+    "Different datasets/runs are not controlled latency comparisons. "
+    "Do not pool task-level F1 scores into a model ranking. "
+    "Supplied evaluation command (not executed): "
+    "python -m scripts.evaluate_model_suite --provider qwen3guard-stream-8b; "
+    "this reproduces classification metrics and CSV P95. Calculate log averages separately using the formula above."
+)
 FOCUSED_DATASETS = ("toxigen", "hatecheck", "aegis2")
 DATASET_CATEGORIES = {
     "harmful_content": ("toxigen", "hatecheck", "aegis2"),
@@ -176,14 +203,19 @@ def category_reference_averages(report):
         for provider in comparison["providers"]:
             rows = reference_averages(records, [provider], datasets, include_pii=True)
             result.extend(
-                {"category": category, **row, "threshold": 0.5}
+                {
+                    "category": category, **row, "threshold": 0.5,
+                    "task_supported": not (
+                        category == "pii" and provider in comparison.get("summary_models", {})
+                    ),
+                }
                 for row in rows if row["prompt"] == "v1"
             )
     return result
 
 
 def reference_comparison_averages(comparison, datasets=None, include_pii=False):
-    additional = comparison.get("fine_tuned_models", {})
+    additional = {**comparison.get("fine_tuned_models", {}), **comparison.get("summary_models", {})}
     providers = [provider for provider in comparison["providers"] if provider not in additional]
     rows = reference_averages(comparison["runs"], providers, datasets, include_pii=include_pii)
     if not additional:
@@ -214,14 +246,17 @@ def v1_reference_scope_averages(report, datasets=None):
         (row["provider"], row["dataset"]): row for row in report["runs"]
         if row["prompt"] == "v1" and row["threshold"] == 0.5
     }
-    timing = {}
+    timing, unsupported = {}, set()
     for row in comparison["runs"]:
         if row["prompt"] != "v1":
             continue
         key = (row["provider"], row["dataset"])
+        if row.get("task_supported") is False:
+            unsupported.add(key)
         if (
             row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
             or row["provider"] in comparison.get("fine_tuned_models", {})
+            or row["provider"] in comparison.get("summary_models", {})
         ):
             timing[key] = row["mean_elapsed_ms"]
         else:
@@ -243,15 +278,22 @@ def v1_reference_scope_averages(report, datasets=None):
         scope_datasets = rows[0]["datasets"] if rows else []
         timed = [
             dataset for dataset in scope_datasets
-            if all(timing.get((row["provider"], dataset)) is not None for row in rows)
+            if all(
+                timing.get((row["provider"], dataset)) is not None
+                for row in rows if row["provider"] not in comparison.get("summary_models", {})
+            )
         ]
         for row in rows:
             own = [timing.get((row["provider"], dataset)) for dataset in scope_datasets]
+            supported = not any((row["provider"], dataset) in unsupported for dataset in scope_datasets)
             result.append({
                 "scope": scope, **row, "threshold": 0.5, "timing_datasets": timed,
-                "mean_elapsed_ms": mean(own) if own and all(value is not None for value in own) else None,
+                "mean_elapsed_ms": mean(own) if supported and own and all(value is not None for value in own) else None,
                 "shared_elapsed_ms": (
-                    mean(timing[(row["provider"], dataset)] for dataset in timed) if timed else None
+                    mean(timing[(row["provider"], dataset)] for dataset in timed)
+                    if supported and timed
+                    and all(timing.get((row["provider"], dataset)) is not None for dataset in timed)
+                    else None
                 ),
             })
     return result
@@ -268,9 +310,11 @@ def three_dataset_averages(report):
         for row in report["runs"] if row["prompt"] == "v1" and row["threshold"] == 0.5
     }
     for row in overview:
+        row["f1_source"] = "mean_per_dataset" if row["f1"] is not None else "unavailable"
         if (
             row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
             or row["provider"] in comparison.get("fine_tuned_models", {})
+            or row["provider"] in comparison.get("summary_models", {})
         ):
             continue
         runs = [timing.get((row["provider"], dataset)) for dataset in FOCUSED_DATASETS]
@@ -282,9 +326,83 @@ def three_dataset_averages(report):
         overview.append({
             "provider": provider, "prompt": "not_supplied", "datasets": list(FOCUSED_DATASETS),
             "accuracy": accuracy, "precision": precision, "recall": recall,
-            "f1": None, "auroc": auroc, "mean_elapsed_ms": latency,
+            "f1": 2 * precision * recall / (precision + recall) if precision + recall else 0.0,
+            "f1_source": "harmonic_mean_of_supplied_precision_recall",
+            "auroc": auroc, "mean_elapsed_ms": latency,
         })
     return overview
+
+
+def attach_qwen_summary(report, path):
+    path = Path(path)
+    supplied_metrics = (*METRICS[:-1], "log_elapsed_mean_ms_per_sample", "p95_latency_ms")
+    expected = {*DATASETS, "harmful-content", "harmful-content-golden",
+                "jailbreak-golden", "pii-detection-golden"}
+    records, seen = [], set()
+    with path.open(encoding="utf-8-sig", newline="") as stream:
+        reader = csv.DictReader(stream)
+        required = {"dataset", "prompt", "threshold", "rows", "valid", "errors",
+                    *supplied_metrics, "latency_log_file"}
+        if not required.issubset(reader.fieldnames or []):
+            raise ValueError(f"{path}: missing Qwen summary columns")
+        for line, row in enumerate(reader, 2):
+            dataset = row["dataset"]
+            if dataset not in expected or dataset in seen:
+                raise ValueError(f"{path}:{line}: unknown or duplicate Qwen dataset")
+            seen.add(dataset)
+            if row["prompt"] != "v1" or float(row["threshold"]) != 0.5:
+                raise ValueError(f"{path}:{line}: Qwen summary requires v1 / 0.5")
+            rows, valid, errors = (int(row[key]) for key in ("rows", "valid", "errors"))
+            if rows <= 0 or min(valid, errors) < 0 or valid + errors != rows:
+                raise ValueError(f"{path}:{line}: invalid Qwen coverage counts")
+            metrics = {}
+            for metric in supplied_metrics:
+                value = None if row[metric] in ("", "NaN") else float(row[metric])
+                if value is not None and (
+                    not math.isfinite(value) or value < 0
+                    or (metric in METRICS[:-1] and value > 1)
+                ):
+                    raise ValueError(f"{path}:{line}: invalid Qwen {metric}")
+                metrics[metric] = value
+            if metrics["log_elapsed_mean_ms_per_sample"] is not None and not row["latency_log_file"]:
+                raise ValueError(f"{path}:{line}: Qwen log latency requires a supplied log reference")
+            records.append({
+                "provider": QWEN_PROVIDER, "dataset": dataset, "prompt": "v1", "threshold": 0.5,
+                "rows": rows, "valid": valid, "errors": errors,
+                "file": f"outputs/{QWEN_PROVIDER}/{dataset}_v1_t0.5.csv",
+                "task_supported": not dataset.startswith("pii"),
+                "source_kind": "user_supplied_aggregate",
+                "latency_source_kind": "single_complete_run",
+                "latency_log_file": row["latency_log_file"],
+                "p95_source_kind": "successful_request_latency_ms",
+                "mean_elapsed_ms": metrics["log_elapsed_mean_ms_per_sample"],
+                **metrics,
+            })
+    if seen != expected:
+        raise ValueError(f"{path}: Qwen summary must contain all 12 datasets")
+    comparison = report["external_comparison"]
+    comparison["runs"] = [
+        row for row in comparison["runs"] if row["provider"] != QWEN_PROVIDER
+    ] + [
+        {**row, **({metric: None for metric in METRICS} if not row["task_supported"] else {})}
+        for row in records if row["dataset"] in DATASETS
+    ]
+    if QWEN_PROVIDER not in comparison["providers"]:
+        comparison["providers"].append(QWEN_PROVIDER)
+    comparison["model_identities"][QWEN_PROVIDER] = {
+        "request_model": QWEN_PROVIDER, "resolved_model": None,
+        "display_name": "Qwen3Guard-Stream-8B",
+    }
+    comparison.setdefault("summary_models", {})[QWEN_PROVIDER] = {
+        "display_name": "Qwen3Guard-Stream-8B", "source": str(path),
+        "rows": sum(row["rows"] for row in records),
+        "valid": sum(row["valid"] for row in records),
+        "errors": sum(row["errors"] for row in records),
+        "notes": QWEN_NOTES, "supplied_rows": records,
+        "detail_page": "qwen3guard_stream_8b_summary.html",
+        "summary_csv": "qwen3guard_stream_8b_summary.csv",
+    }
+    comparison["overview"] = reference_comparison_averages(comparison)
 
 
 def attach_finetuned_run(report, run_dir, log_path, data_dir=Path("data/prepared")):

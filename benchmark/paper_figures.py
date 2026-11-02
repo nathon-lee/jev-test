@@ -5,6 +5,7 @@ import csv
 import html
 import json
 import math
+import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -17,10 +18,11 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
+from matplotlib.transforms import Bbox
 
 from benchmark.comparison import DATASETS, PROMPTS, STABILITY_METRICS, THRESHOLDS, baseline_rows
 from benchmark.external_summary import (
-    FINE_TUNED_DISPLAY_NAME, INTERNAL_IDENTITIES, METRICS, category_reference_averages,
+    FINE_TUNED_DISPLAY_NAME, INTERNAL_IDENTITIES, METRICS, QWEN_PROVIDER, category_reference_averages,
     three_dataset_averages, v1_reference_scope_averages,
 )
 
@@ -29,21 +31,25 @@ COLORS = {
     "fastino.ai": "#0072B2", "laya-ai.com": "#D55E00", "typesafe.ai": "#009E73",
     "openjev": "#CC79A7", "openjev-32b": "#6A3D9A", "microsoft-decision-1": "#B8860B",
     "fastino-ft-gg6-r1-ml2048-s7": "#E7298A",
+    QWEN_PROVIDER: "#56B4E9",
 }
 NAMES = {
     "fastino.ai": "Fastino", "laya-ai.com": "Laya", "typesafe.ai": "TypeSafe", "openjev": "OpenJev 4B",
     **{provider: identity["display_name"] for provider, identity in INTERNAL_IDENTITIES.items()},
     "fastino-ft-gg6-r1-ml2048-s7": FINE_TUNED_DISPLAY_NAME,
+    QWEN_PROVIDER: "Qwen3Guard-Stream-8B",
 }
 MARKERS = {
     "fastino.ai": "o", "laya-ai.com": "s", "typesafe.ai": "D", "openjev": "^",
     "openjev-32b": "v", "microsoft-decision-1": "P",
     "fastino-ft-gg6-r1-ml2048-s7": "D",
+    QWEN_PROVIDER: "X",
 }
 HATCHES = {
     "fastino.ai": "", "laya-ai.com": "///", "typesafe.ai": "...", "openjev": "xxx",
     "openjev-32b": "\\\\", "microsoft-decision-1": "++",
     "fastino-ft-gg6-r1-ml2048-s7": "////",
+    QWEN_PROVIDER: "oo",
 }
 DATASET_NAMES = {
     "aegis2": "AEGIS2",
@@ -76,6 +82,8 @@ STYLE = {
 
 
 def model_label(report, provider):
+    if provider in report.get("summary_models", {}):
+        return f"{NAMES[provider]} | supplied summary\nbinary safety labels; PII unsupported"
     if provider in report.get("fine_tuned_models", {}):
         model = report["fine_tuned_models"][provider]
         return f"{model['display_name']}\nFine-tuned · 300M\nmodel ID: {model['model_id']}"
@@ -99,6 +107,92 @@ def bar_style(report, provider):
         "linewidth": 1.5 if fine_tuned else 0.4,
         "hatch": HATCHES[provider],
     }
+
+
+def highlight_reference_bars(fig, providers, records, horizontal=False):
+    for ax, metric in zip(fig.axes, METRICS):
+        latency = metric == "mean_elapsed_ms"
+        for annotation in ax.texts:
+            annotation.set_zorder(6)
+            annotation.set_bbox({"facecolor": "white", "edgecolor": "none", "pad": 0.15})
+        for group, record in enumerate(records):
+            entries = []
+            for index, provider in enumerate(providers):
+                value = record.get(provider, {}).get(metric)
+                if value is not None and math.isfinite(value):
+                    bar_index = index if horizontal else index * len(records) + group
+                    entries.append((provider, value, ax.patches[bar_index]))
+            if not entries:
+                continue
+            best = (min if latency else max)(value for _, value, _ in entries)
+            winners = [entry for entry in entries if entry[1] == best]
+            names = ", ".join(NAMES.get(provider, provider) for provider, _, _ in winners)
+            label = ("Lowest time: " if latency else "Highest: ") + names
+            label = textwrap.fill(label, width=32 if horizontal else 22)
+            callout = ax.annotate(
+                label, (0.98, 1.02) if horizontal else (group, 0.98),
+                xycoords="axes fraction" if horizontal else ("data", "axes fraction"),
+                ha="right" if horizontal else "center", va="bottom" if horizontal else "top",
+                fontsize=11, fontweight="bold", color="#172438",
+                bbox={"boxstyle": "round,pad=0.3", "facecolor": "#FFF3CD", "edgecolor": "#B8860B"},
+                zorder=5,
+            )
+            callout.set_gid("reference-highlight-label")
+            for provider, _, bar in winners:
+                bar.set_edgecolor("#172438")
+                bar.set_linewidth(2.2)
+                bar.set_zorder(3)
+                point = (
+                    (bar.get_width(), bar.get_y() + bar.get_height() / 2)
+                    if horizontal else (bar.get_x() + bar.get_width() / 2, bar.get_height())
+                )
+                for annotation in ax.texts:
+                    if annotation.get_gid() != "reference-highlight-label" and annotation.xy == point:
+                        annotation.set_fontweight("bold")
+                bounds = bar.get_window_extent()
+                length = min(14, (bounds.width if horizontal else bounds.height) * 36 / fig.dpi)
+                ax.annotate(
+                    "", point, xytext=(-length, 0) if horizontal else (0, -length),
+                    textcoords="offset points", fontsize=11,
+                    arrowprops={
+                        "arrowstyle": "-|>", "edgecolor": "#172438", "facecolor": "#FFF3CD",
+                        "linewidth": 1.2, "shrinkA": 0, "shrinkB": 1,
+                    },
+                    zorder=4,
+                )
+                if horizontal:
+                    ax.get_yticklabels()[providers.index(provider)].set_fontweight("bold")
+    if not horizontal:
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        limits = {}
+        for ax in fig.axes:
+            callouts = [text for text in ax.texts if text.get_gid() == "reference-highlight-label"]
+            if not callouts:
+                continue
+            header_bottom = min(text.get_bbox_patch().get_window_extent(renderer).y0 for text in callouts)
+            scale = ax.yaxis.get_transform()
+            lower, upper = scale.transform(np.array(ax.get_ylim()))
+            for text in ax.texts:
+                if text.arrow_patch is not None or text.get_gid() == "reference-highlight-label":
+                    continue
+                y = text.xy[1]
+                if not math.isfinite(y) or (ax.get_yscale() == "log" and y <= 0):
+                    continue
+                anchor = ax.transData.transform(text.xy)[1]
+                offset = text.get_window_extent(renderer).y1 - anchor
+                room = (header_bottom - 8 * fig.dpi / 72 - offset - ax.bbox.y0) / ax.bbox.height
+                if room <= 0:
+                    raise ValueError("Reference panel is too short to separate highlights from numeric labels.")
+                upper = max(upper, lower + (scale.transform(np.array([y]))[0] - lower) / room)
+            limits[ax] = (lower, upper)
+        quality_upper = max(
+            (upper for ax, (_, upper) in limits.items() if ax.get_yscale() == "linear"), default=0,
+        )
+        for ax, (lower, upper) in limits.items():
+            if ax.get_yscale() == "linear":
+                upper = quality_upper
+            ax.set_ylim(ax.yaxis.get_transform().inverted().transform(np.array([lower, upper])))
 
 
 def decorate(fig, report, title, subtitle, note, legend_style="markers", stacked=False):
@@ -412,6 +506,8 @@ def metric_bars(ax, report, labels, records, metric, title, latency=False,
                     clip_on=False, zorder=4,
                 )
             label = f"{value:.{decimals}f}" if available else "N/A"
+            if record.get(provider, {}).get("task_supported") is False:
+                label = "Unsupported"
             if available and latency and record.get(provider, {}).get("latency_source_kind") == "single_complete_run":
                 label += "*"
             ax.annotate(
@@ -434,7 +530,10 @@ def six_metric_panels(report, labels, records, latency_labels=None, single_colum
     expanded = len(report["providers"]) > 4
     if single_column:
         fig, axes = plt.subplots(6, 1, figsize=(14.5, 28))
-        fig.subplots_adjust(left=0.09, right=0.985, top=0.90, bottom=0.09, hspace=0.65)
+        fig.subplots_adjust(
+            left=0.09, right=0.985, top=0.88 if len(report["providers"]) > 6 else 0.90,
+            bottom=0.09, hspace=0.65,
+        )
     else:
         fig, axes = plt.subplots(3, 2, figsize=(20, 15.2) if expanded else (18.4, 13.6))
         fig.subplots_adjust(
@@ -602,7 +701,9 @@ def stability_averages_figure(report):
 def external_reference_providers(comparison, prompt):
     return [
         provider for provider in comparison["providers"]
-        if (provider not in INTERNAL_IDENTITIES and provider not in comparison.get("fine_tuned_models", {}))
+        if (provider not in INTERNAL_IDENTITIES
+            and provider not in comparison.get("fine_tuned_models", {})
+            and provider not in comparison.get("summary_models", {}))
         or any(row["provider"] == provider and row["prompt"] == prompt for row in comparison["runs"])
     ]
 
@@ -613,6 +714,15 @@ def fine_tuned_note(report):
         f"{model['valid']:,} successful / {model['rows']:,} rows; {model['errors']} errors. "
         + model["notes"]
         for model in report.get("external_comparison", {}).get("fine_tuned_models", {}).values()
+    )
+
+
+def summary_model_note(report):
+    if QWEN_PROVIDER not in report.get("external_comparison", {}).get("summary_models", {}):
+        return ""
+    return (
+        "Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only).\n"
+        "Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking."
     )
 
 
@@ -657,6 +767,7 @@ def external_category_figure(report):
     ]
     fig = six_metric_panels(comparison, labels, records, single_column=True)
     reference_latency_log_axis(fig)
+    highlight_reference_bars(fig, comparison["providers"], records)
     decorate(
         fig, comparison, "Model reference averages by dataset category",
         "v1 / threshold = 0.5 | equal dataset weights within each category | NOT sample-paired",
@@ -666,7 +777,8 @@ def external_category_figure(report):
         "Each metric is the arithmetic mean of per-dataset metrics, not pooled samples or F1 recomputed from means.\n"
         "Missing required data or undefined metrics = N/A; category scopes are never reduced to available datasets.\n"
         "Latency averages the same reference timings as the per-dataset chart; protocols differ and include failure waits.\n"
-        "Own successful samples / supplied aggregates; descriptive only, not a fair ranking.",
+        "Own successful samples / supplied aggregates; descriptive only, not a fair ranking."
+        + ("\n" + summary_model_note(report) if summary_model_note(report) else ""),
         legend_style="bars", stacked=True,
     )
     highlight_pii_task(fig, stacked=True)
@@ -689,6 +801,8 @@ def external_dataset_figure(report, prompt):
     fig = six_metric_panels(comparison, labels, records, single_column=stacked)
     if stacked:
         reference_latency_log_axis(fig)
+    else:
+        highlight_reference_bars(fig, comparison["providers"], records)
     note = (
         "OpenJev 4B: four-run summary timing; local models prefer four-run log averages. 4B valid/error counts are unknown.\n"
     )
@@ -708,6 +822,8 @@ def external_dataset_figure(report, prompt):
         "N/A = missing quality, undefined metric, or incomplete timing; missing values are not zero.\n"
         "Descriptive only, not a fair ranking. PII is ordinary binary classification (present vs absent), not masking quality."
     )
+    if stacked and summary_model_note(report):
+        note += "\n" + summary_model_note(report)
     decorate(
         fig, comparison, f"Model reference comparison: prompt {prompt}",
         "threshold = 0.5 | own successful samples | internal models: aggregates, NOT sample-paired",
@@ -746,12 +862,15 @@ def external_averages_figure(report, datasets=None):
         else "Model reference averages: ToxiGen / HateCheck / AEGIS2",
         "v1 | threshold = 0.5 | shared non-PII dataset names | equal dataset weights | PII reported separately",
         "Each model uses its own successful samples; aggregate models have no paired sample IDs. Not a fair ranking.\n"
-        "Latency: equal dataset weights on the SAME fully timed v1 / 0.5 subset for all models:\n"
+        + ("Latency: original models' shared fully timed v1 / 0.5 subset; Qwen follows the same dataset scope:\n"
+           if comparison.get("summary_models")
+           else "Latency: equal dataset weights on the SAME fully timed v1 / 0.5 subset for all models:\n")
         + (", ".join(DATASET_NAMES[dataset] for dataset in timed_datasets) or "None")
         + ". Quality and latency dataset scopes can differ.\n"
         "APIs: v1 / 0.5 single-run timing. OpenJev 4B: supplied summary; 32B / Decision-1: supplied single-run timing.\n"
         "PII is ordinary binary classification (present vs absent), not masking quality; positives-only results are separate.\n"
-        "Missing quality stays N/A; no shared timing subset = N/A latency. Timing protocols differ; not inference time.",
+        "Missing quality stays N/A; no shared timing subset = N/A latency. Timing protocols differ; not inference time."
+        + ("\n" + summary_model_note(report) if summary_model_note(report) else ""),
         legend_style="bars",
         stacked=True,
     )
@@ -771,7 +890,10 @@ def three_dataset_averages_figure(report):
             row["provider"] in report["providers"]
             or row["provider"] in report["external_comparison"].get("fine_tuned_models", {})
         )
-        else "internal" if row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
+        else "internal" if (
+            row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
+            or row["provider"] in report["external_comparison"].get("summary_models", {})
+        )
         else "dynamo" if row["provider"].startswith("Dynamo ") else "other"
         for row in rows
     ]
@@ -779,7 +901,7 @@ def three_dataset_averages_figure(report):
     has_fine_tuned = bool(report["external_comparison"].get("fine_tuned_models"))
     fig, axes = plt.subplots(3, 2, figsize=(20 if has_fine_tuned else 16, 20))
     fig.subplots_adjust(
-        left=0.22 if has_fine_tuned else 0.16, right=0.98, top=0.91, bottom=0.14,
+        left=0.22 if has_fine_tuned else 0.16, right=0.98, top=0.89, bottom=0.14,
         hspace=0.38, wspace=0.9 if has_fine_tuned else 0.6,
     )
     for ax, metric, title in zip(
@@ -801,16 +923,19 @@ def three_dataset_averages_figure(report):
         for bar, row in zip(bars, rows):
             if row["provider"] in report["external_comparison"].get("fine_tuned_models", {}):
                 bar.set(**bar_style(report["external_comparison"], row["provider"]))
-        for bar, value in zip(bars, values):
+        for bar, value, row in zip(bars, values, rows):
             available = math.isfinite(value)
+            label = f"{value:,.2f}" if available else "N/A"
+            if metric == "f1" and row["f1_source"] == "harmonic_mean_of_supplied_precision_recall":
+                label += "*"
             ax.annotate(
-                f"{value:,.2f}" if available else "N/A",
+                label,
                 (value if available else 0, bar.get_y() + bar.get_height() / 2),
                 xytext=(4, 0), textcoords="offset points", va="center", fontsize=11,
             )
         ax.set_yticks(np.arange(len(rows)), labels)
         ax.set_ylim(len(rows) - 0.5, -0.5)
-        ax.set_title(title, fontsize=14)
+        ax.set_title(title, fontsize=14, y=1.16)
         ax.tick_params(labelsize=12)
         for boundary in boundaries:
             ax.axhline(boundary, color="#BFC8D2", linewidth=0.8)
@@ -823,6 +948,10 @@ def three_dataset_averages_figure(report):
             ax.set_xticks(range(0, 101, 20))
             ax.set_xlabel("% (higher is better)", fontsize=12)
         style_axis(ax, "x")
+    highlight_reference_bars(
+        fig, [row["provider"] for row in rows],
+        [{row["provider"]: row for row in rows}], horizontal=True,
+    )
     fig.suptitle("Three-dataset model reference averages", fontsize=17, y=0.98)
     fig.text(
         0.5, 0.955, "Computed averages: ToxiGen / HateCheck / AEGIS2 | supplied-model dataset scopes unverified",
@@ -834,8 +963,9 @@ def three_dataset_averages_figure(report):
         "Local latency uses v1 / 0.5 runs; OpenJev 4B / 32B and Decision-1 use their supplied summary latency.\n"
         "Dynamo / Mistral / Warden: supplied averages; their evaluations may also include an internal dataset.\n"
         "Its inclusion in their averages is unconfirmed; prompt, threshold and timing protocols were not supplied.\n"
-        "N/A = not supplied or required source data missing. F1 is not inferred from average precision / recall.\n"
-        "Successful samples and timing protocols are not aligned; descriptive reference only, not a fair ranking.",
+        "* F1 = 2PR / (P + R) from supplied averages; not a mean of per-dataset F1. N/A = unavailable.\n"
+        "Successful samples and timing protocols are not aligned; descriptive reference only, not a fair ranking."
+        + ("\n" + summary_model_note(report) if summary_model_note(report) else ""),
         fontsize=9, va="top",
     )
     if report["external_comparison"].get("fine_tuned_models"):
@@ -1042,7 +1172,10 @@ EXTERNAL_FIGURES = (
         "Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied averages retained as provided. "
         "These means are not averaged again; "
         "their prompts, thresholds and timing protocols were not supplied. "
-        "Unreported F1 or AUROC values are N/A; F1 is not inferred from average Precision/Recall. "
+        "For these five supplied-average models, missing F1 is derived as 2PR / (P + R) "
+        "from the supplied Precision and Recall (zero if both are zero), and marked with an asterisk. "
+        "This derived F1 is not a mean of per-dataset F1; existing per-dataset F1 averages are retained unchanged. "
+        "The CSV f1_source column distinguishes the two methods. Unreported AUROC remains N/A. "
         "The latency axis uses a logarithmic scale above 1 ms. "
         "Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking. "
         "All six metrics are visible together in a two-column grid (one column on narrow screens). "
@@ -1177,6 +1310,50 @@ def write_latex_table(report, path):
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def write_summary_model_details(comparison, output_dir):
+    for model in comparison.get("summary_models", {}).values():
+        records = model["supplied_rows"]
+        with (output_dir / model["summary_csv"]).open("w", encoding="utf-8-sig", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(records[0]))
+            writer.writeheader()
+            writer.writerows({
+                key: "NaN" if value is None else value for key, value in row.items()
+            } for row in records)
+        title = model["display_name"] + " supplied summary (v1 / threshold 0.5)"
+        page = gallery_header(title)
+        page += '<p><a href="index.html">Back to the full figure gallery</a> | '
+        page += f'<a href="{model["summary_csv"]}">Download all 12 dataset summaries (CSV)</a></p>'
+        page += (
+            f'<p>{model["rows"]:,} rows; {model["valid"]:,} valid; {model["errors"]} errors. '
+            'Metrics cover successful requests only.</p>'
+            '<p class="report-note">' + html.escape(model["notes"]) + "</p>"
+            "<p>Prediction and log file paths below are normalized from supplied text, not independently verified. "
+            "NaN means unavailable; missing P95 is not inferred from log average latency. "
+            "PII values below are historical safety-proxy metrics for audit only, not PII detection results.</p>"
+            "<p>Regenerate figures from the saved report and this supplied summary: <code>"
+            "python -m scripts.plot_model_comparison --qwen-summary "
+            + html.escape(model["source"]) + "</code></p>"
+        )
+        columns = ("dataset", "rows", "valid", "errors", "task_supported",
+                   *METRICS[:-1], "log_elapsed_mean_ms_per_sample", "p95_latency_ms",
+                   "latency_log_file", "file")
+        page += '<section><div class="table-scroll"><table class="scope-table"><thead><tr>' + "".join(
+            "<th>" + html.escape(key) + "</th>" for key in columns
+        ) + "</tr></thead><tbody>"
+        for row in records:
+            values = []
+            for key in columns:
+                value = row[key]
+                if key == "task_supported":
+                    text = "Supported" if value else "Unsupported (historical safety-proxy only)"
+                else:
+                    text = "NaN" if value is None else f"{value:.6f}" if isinstance(value, float) else str(value)
+                values.append("<td>" + html.escape(text) + "</td>")
+            page += "<tr>" + "".join(values) + "</tr>"
+        page += "</tbody></table></div></section></main></html>\n"
+        (output_dir / model["detail_page"]).write_text(page, encoding="utf-8")
+
+
 def write_paper_figures(report, output_dir, dpi=300):
     if dpi < 72:
         raise ValueError("dpi must be at least 72")
@@ -1213,12 +1390,16 @@ def write_paper_figures(report, output_dir, dpi=300):
             manifest["external_comparison"]["internal_source"] = comparison["internal_source"]
         if comparison.get("fine_tuned_models"):
             manifest["external_comparison"]["fine_tuned_models"] = comparison["fine_tuned_models"]
+        if comparison.get("summary_models"):
+            manifest["external_comparison"]["summary_models"] = comparison["summary_models"]
     with plt.rc_context(STYLE), PdfPages(output_dir / "paper_figures.pdf") as bundle:
         for stem, builder, title, caption in figures:
             if stem in {item[0] for item in EXTERNAL_FIGURES} and stem != "fig11_openjev_reference_v2":
                 note = fine_tuned_note(report)
                 if note:
                     caption += " " + note.replace("\n", " ")
+                if summary_model_note(report):
+                    caption += " " + summary_model_note(report).replace("\n", " ")
             scoped_title = title
             if stem in (
                 "fig03_threshold_sensitivity", "fig05_dataset_metrics", "fig06_model_averages",
@@ -1243,11 +1424,29 @@ def write_paper_figures(report, output_dir, dpi=300):
                     fig.canvas.draw()
                     renderer = fig.canvas.get_renderer()
                     axes = dict(zip(METRICS, fig.axes))
+                    bounds_by_metric = {
+                        metric: ax.get_tightbbox(renderer).transformed(fig.dpi_scale_trans.inverted())
+                        for metric, ax in axes.items()
+                    }
+                    if stem == "fig14_category_reference_averages":
+                        plot_bounds = {
+                            metric: ax.get_window_extent(renderer).transformed(fig.dpi_scale_trans.inverted())
+                            for metric, ax in axes.items()
+                        }
+                        left = min(bounds.x0 for bounds in bounds_by_metric.values())
+                        right = max(bounds.x1 for bounds in bounds_by_metric.values())
+                        bottom = max(plot_bounds[metric].y0 - bounds.y0 for metric, bounds in bounds_by_metric.items())
+                        top = max(bounds.y1 - plot_bounds[metric].y1 for metric, bounds in bounds_by_metric.items())
+                        height = max(bounds.height for bounds in plot_bounds.values())
+                        bounds_by_metric = {
+                            metric: Bbox.from_extents(left, bounds.y0 - bottom, right, bounds.y0 + height + top)
+                            for metric, bounds in plot_bounds.items()
+                        }
                     panel_order = REFERENCE_AVERAGE_PANEL_ORDER if stem == "fig12_openjev_reference_averages" else METRICS
                     for metric in panel_order:
                         ax = axes[metric]
                         panel_stem = f"{stem}_{metric}"
-                        bounds = ax.get_tightbbox(renderer).transformed(fig.dpi_scale_trans.inverted()).padded(0.15)
+                        bounds = bounds_by_metric[metric].padded(0.15)
                         for extension in ("png", "svg", "pdf"):
                             fig.savefig(output_dir / f"{panel_stem}.{extension}", dpi=dpi, bbox_inches=bounds)
                         panels.append({
@@ -1309,6 +1508,7 @@ def write_paper_figures(report, output_dir, dpi=300):
                 "timing_datasets": ",".join(row["timing_datasets"]),
             } for row in scope_averages)
         manifest["external_comparison"]["v1_scope_averages_csv"] = "v1_reference_scope_averages.csv"
+        write_summary_model_details(report["external_comparison"], output_dir)
     (output_dir / "figure_manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8",
     )
@@ -1406,6 +1606,13 @@ def write_paper_figures(report, output_dir, dpi=300):
             note = fine_tuned_note(report)
             if note:
                 content = '<p class="report-note">' + html.escape(note).replace("\n", "<br>") + "</p>" + content
+            for model in report["external_comparison"].get("summary_models", {}).values():
+                content = (
+                    '<p class="report-note">' + html.escape(summary_model_note(report)).replace("\n", "<br>")
+                    + f'<br><a href="{model["detail_page"]}">All 12 datasets, coverage and source limitations</a>'
+                    + f' | <a href="{model["summary_csv"]}">Supplied summary CSV</a></p>'
+                    + content
+                )
         if figure["name"] in (
             "fig14_category_reference_averages", "fig10_openjev_reference_v1", "fig11_openjev_reference_v2",
         ):
@@ -1485,7 +1692,9 @@ def write_paper_figures(report, output_dir, dpi=300):
         '<a class="primary-action" href="paper_figures.pdf">Download Figures (PDF)</a>'
         '<a href="../comparison.html">View Evaluation Report</a></nav>'
         '<p class="report-note">Reference comparisons use different successful samples and timing protocols; '
-        'they are not fair rankings. PII is ordinary binary classification (present vs absent), not masking quality.</p>'
+        'they are not fair rankings. Arrows and outlined bars mark the highest available score or lowest time '
+        'within each group; exact ties are all highlighted, and missing values are excluded. '
+        'PII is ordinary binary classification (present vs absent), not masking quality.</p>'
         '<div class="report-resources"><details><summary>Data &amp; Downloads</summary>'
         '<p>PDF and SVG are vector formats; PNG defaults to 300 DPI.</p>'
         '<p><a href="table01_baseline.tex">Download the LaTeX comparison table</a></p>'
@@ -1513,6 +1722,12 @@ def write_paper_figures(report, output_dir, dpi=300):
             gallery += (
                 '<p>Fine-tuned model: <a href="fine_tuned_model_runs.csv">Per-dataset summary CSV</a> | '
                 '<a href="fine_tuned_model_averages.csv">Category and six-dataset averages CSV</a></p>'
+            )
+        for model in report["external_comparison"].get("summary_models", {}).values():
+            gallery += (
+                "<p>" + html.escape(model["display_name"]) + ": "
+                + f'<a href="{model["detail_page"]}">All 12 dataset summaries and limitations</a> | '
+                + f'<a href="{model["summary_csv"]}">CSV</a></p>'
             )
     gallery += (
         '</details><details><summary>Methodology &amp; Limitations</summary>'
