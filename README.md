@@ -58,6 +58,21 @@ Do not pass its JSONL files directly to `scripts/evaluate.py` or compare its PII
 F1 with an unrelated binary PII score. See the
 [preset benchmark README](./demo-preset-benchmark/README.md) for details.
 
+To reuse all six non-PII CSVs in `data/prepared`, configure the actual toxicity,
+hate, and safety preset names in the benchmark `.env` as documented above.
+From `demo-preset-benchmark`, run:
+
+```bash
+python benchmark.py --list-presets
+python benchmark.py --source prepared --dataset-workers 7 --limit 3 --output results-prepared-smoke
+python benchmark.py --source prepared --dataset-workers 7 --output results-prepared
+```
+
+Each dataset thread makes sequential requests. PII remains the original 990-row
+validation dataset with four-category multilabel scoring, not the local PII CSVs.
+Prepared non-PII mode preserves local sample IDs, input text, and binary labels;
+outputs remain JSONL and are not directly consumed by the existing CSV evaluator.
+
 ## Create a virtual environment
 
 On Linux / macOS:

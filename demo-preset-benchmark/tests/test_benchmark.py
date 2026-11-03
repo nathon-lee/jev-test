@@ -1,5 +1,9 @@
 import importlib.util
+import csv
+import json
 from pathlib import Path
+import threading
+from types import SimpleNamespace
 
 import pytest
 
@@ -52,3 +56,150 @@ def test_failed_calls_are_not_counted_as_zero_quality():
     assert result["failed_rows"] == 1
     assert result["coverage"] == 0
     assert "f1" not in result
+
+
+def write_prepared(path, rows):
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["sample_id", "text", "label"])
+        writer.writerows(rows)
+
+
+def test_prepared_preserves_samples_and_applies_limit(tmp_path):
+    write_prepared(tmp_path / "detect_jailbreak.csv",
+                   [["42", "original\ntext\u2028unchanged", "1"], ["43", "safe", "0"]])
+    sources, provenance, presets = benchmark.load_prepared(
+        tmp_path, "detect-jailbreak", {"pi": "prompt_injection_luna"}, limit=1)
+    row = sources["detect_jailbreak"][0]
+    assert row["input"] == "original\ntext\u2028unchanged"
+    assert row["sample_id"] == row["source_index"] == "42"
+    assert row["gold"] == 1
+    assert provenance["detect_jailbreak"]["total_rows"] == 2
+    assert presets == {"detect_jailbreak": "prompt_injection_luna"}
+
+
+@pytest.mark.parametrize("dataset", ["toxigen", "hatecheck", "aegis2"])
+def test_prepared_requires_matching_preset(tmp_path, dataset):
+    with pytest.raises(ValueError, match="requires"):
+        benchmark.load_prepared(tmp_path, dataset, {"pi": "prompt_injection_luna"})
+
+
+@pytest.mark.parametrize("rows, message", [
+    ([["1", "text", "2"]], "invalid sample"),
+    ([["1", "text", "0"], ["1", "other", "1"]], "duplicate sample_id"),
+    ([], "dataset is empty"),
+])
+def test_prepared_rejects_invalid_data(tmp_path, rows, message):
+    write_prepared(tmp_path / "detect_jailbreak.csv", rows)
+    with pytest.raises(ValueError, match=message):
+        benchmark.load_prepared(tmp_path, "detect_jailbreak", {"pi": "prompt_injection_luna"})
+
+
+def test_local_pii_is_not_substituted(tmp_path):
+    with pytest.raises(ValueError, match="original PII validation"):
+        benchmark.load_prepared(tmp_path, "pii_masking_mini_10k", {})
+
+
+def test_dataset_threads_are_parallel_but_rows_are_sequential(tmp_path, monkeypatch):
+    barrier = threading.Barrier(2)
+    calls = {}
+
+    class FakeEvaluator:
+        def __init__(self, api, info, metric):
+            self.metric = metric
+
+        def evaluate(self, row):
+            calls.setdefault(self.metric, []).append(threading.get_ident())
+            if row["index"] == 0:
+                barrier.wait(timeout=5)
+            return {**row, "score": 0.9, "prediction": 1, "error": None,
+                    "scorer_version_id": "v1"}
+
+    monkeypatch.setattr(benchmark, "Evaluator", FakeEvaluator)
+    sources = {
+        metric: [{"index": i, "source_index": str(i), "input": f"text {i}\u2028",
+                  "gold": 1} for i in range(3)]
+        for metric in ("toxigen", "hatecheck")
+    }
+    state = {"metrics": {metric: {"scorer_version_id": "v1"} for metric in sources}}
+    api = SimpleNamespace(key="test-key")
+    result = benchmark.run(api, state, sources, tmp_path, 4, False, dataset_workers=2)
+    assert set(result["metrics"]) == set(sources)
+    assert all(len(ids) == 3 and len(set(ids)) == 1 for ids in calls.values())
+    assert calls["toxigen"][0] != calls["hatecheck"][0]
+    for metric in sources:
+        path = tmp_path / metric / f"{metric}-predictions.jsonl"
+        with path.open(encoding="utf-8") as handle:
+            assert len([json.loads(line) for line in handle]) == 3
+
+    def unexpected_call(*args):
+        raise AssertionError("Completed rows must not be requested again")
+
+    monkeypatch.setattr(FakeEvaluator, "evaluate", unexpected_call)
+    resumed = benchmark.run(api, state, sources, tmp_path, 4, False, dataset_workers=2)
+    assert resumed["metrics"] == result["metrics"]
+
+
+def test_concurrent_failure_keeps_other_results(tmp_path, monkeypatch):
+    class FakeEvaluator:
+        def __init__(self, api, info, metric):
+            self.metric = metric
+
+        def evaluate(self, row):
+            error = "unavailable" if self.metric == "toxigen" else None
+            return {**row, "score": 0.9, "prediction": 1, "error": error,
+                    "scorer_version_id": "v1"}
+
+    monkeypatch.setattr(benchmark, "Evaluator", FakeEvaluator)
+    sources = {metric: [{"index": 0, "source_index": "0", "input": "text", "gold": 1}]
+               for metric in ("toxigen", "hatecheck")}
+    state = {"metrics": {metric: {"scorer_version_id": "v1"} for metric in sources}}
+    with pytest.raises(RuntimeError, match="Dataset failures: toxigen"):
+        benchmark.run(SimpleNamespace(key="test-key"), state, sources, tmp_path,
+                      4, False, dataset_workers=2)
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["metrics"]["hatecheck"]["successful_rows"] == 1
+    assert "toxigen" in summary["dataset_errors"]
+
+
+@pytest.mark.parametrize("metric, score, prediction", [
+    ("toxigen", 0.75, 1),
+    ("hatecheck", 0.25, 0),
+    ("pii", ["email", "name"], ["email"]),
+])
+def test_evaluator_binary_tasks_and_original_pii(metric, score, prediction):
+    info = {"agent_name": "agent", "stream_id": "stream", "scorer_name": "preset",
+            "scorer_id": "scorer", "scorer_version_id": "v1", "control_id": "control"}
+    execution = {"control_id": "control", "result": {"metadata": {
+        "scorer_id": "scorer", "requested_scorer_version_id": "v1",
+        "status": "success", "score": score}}}
+    api = SimpleNamespace(key="test-key", request=lambda *args, **kwargs: {"matches": [execution]})
+    evaluator = benchmark.Evaluator(api, info, metric)
+    evaluator.token, evaluator.expires = "test-token", float("inf")
+    result = evaluator.evaluate({"index": 0, "input": "text", "gold": 1})
+    assert result["error"] is None
+    assert result["score"] == score
+    assert result["prediction"] == prediction
+
+
+def test_retry_errors_replaces_latest_checkpoint(tmp_path, monkeypatch):
+    row = {"index": 0, "source_index": "0", "input": "text", "gold": 1}
+    previous = {**row, "score": None, "prediction": None,
+                "error": "temporary failure", "scorer_version_id": "v1"}
+    (tmp_path / "toxigen-predictions.jsonl").write_text(
+        json.dumps(previous) + "\n", encoding="utf-8")
+
+    class FakeEvaluator:
+        def __init__(self, *args):
+            pass
+
+        def evaluate(self, sample):
+            return {**sample, "score": 0.9, "prediction": 1, "error": None,
+                    "scorer_version_id": "v1"}
+
+    monkeypatch.setattr(benchmark, "Evaluator", FakeEvaluator)
+    result = benchmark.run(SimpleNamespace(key="test-key"),
+                           {"metrics": {"toxigen": {"scorer_version_id": "v1"}}},
+                           {"toxigen": [row]}, tmp_path, 1, True)
+    assert result["metrics"]["toxigen"]["successful_rows"] == 1
+    assert result["metrics"]["toxigen"]["failed_rows"] == 0

@@ -67,6 +67,61 @@ The script stops if the first pending call for a metric fails.
 
 ## Dataset columns and scoring
 
+### Prepared datasets and dataset-level concurrency
+
+The original public benchmark remains the default. To reuse the repository's
+prepared samples, use `--source prepared`. By default this selects all six
+non-PII CSVs from `../data/prepared`:
+
+| Prepared dataset | Preset task |
+|---|---|
+| `toxigen` | `GALILEO_TOXICITY_PRESET` |
+| `hatecheck` | `GALILEO_HATE_PRESET` |
+| `aegis2` | `GALILEO_SAFETY_PRESET` |
+| `detect_jailbreak`, `jailbreak_classification`, `jailbreakhub` | `prompt_injection_luna` |
+
+Set the three task-specific environment variables in `.env` to actual original
+SLM preset names in your cluster. They must return a positive-class probability
+in `[0, 1]` matching the CSV's unsafe/toxic/hateful label. No preset names or
+score direction are inferred. Missing mappings fail before resource creation.
+List visible preset names with `python benchmark.py --list-presets`; configure
+only verified task mappings. CLI overrides are `--toxicity-preset`,
+`--hate-preset`, and `--safety-preset`.
+
+```bash
+# Smoke test each selected dataset:
+python benchmark.py --source prepared --dataset-workers 7 --limit 3 --output results-prepared-smoke
+# All six complete prepared CSVs plus the unchanged original PII validation:
+python benchmark.py --source prepared --dataset-workers 7 --output results-prepared
+# Resume, including retry of failed calls:
+python benchmark.py --source prepared --dataset-workers 7 --retry-errors --output results-prepared
+```
+
+PII still uses the original 990 validation documents and four-category scoring
+below; the two local PII CSVs are deliberately excluded. This mode therefore
+has seven dataset tasks, not all eight local CSVs. `--pi-size` does not sample
+prepared datasets; all rows are used unless `--limit` is set. `--data-dir` can
+override the prepared directory (needed for a standalone copy).
+
+To run only the three jailbreak CSVs and original PII without extra mappings:
+
+```bash
+python benchmark.py --source prepared --datasets detect_jailbreak,jailbreak_classification,jailbreakhub --dataset-workers 4 --output results-jailbreak-pii
+```
+
+`--metric pi` omits original PII from prepared mode; `--metric pii` runs only the
+original PII dataset. `--dataset-workers N` above one runs up to N dataset
+threads, each making sequential calls, ignoring row-level `--workers`. The
+original default (`--dataset-workers 1`) processes datasets sequentially with
+four concurrent row requests. Resource setup remains sequential; inference
+starts after setup.
+
+With dataset concurrency, each dataset owns its checkpoint and summary in an
+output subdirectory; the parent `summary.json` aggregates results. Failures are
+reported and cause nonzero exit without discarding other datasets' checkpoints.
+Use a new output folder when switching between sequential and dataset-concurrent
+modes, or changing samples or preset mappings.
+
 | Metric | Dataset / split | Input | Reference label |
 |---|---|---|---|
 | Prompt Injection | `GuardrailsAI/detect-jailbreak`, sampled train | `prompt` | `is_jailbreak` |

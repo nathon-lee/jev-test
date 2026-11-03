@@ -8,6 +8,7 @@ No local project imports, custom metrics, model uploads, or prompt changes.
 
 import argparse
 import base64
+import csv
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -31,6 +32,10 @@ import truststore
 
 
 PRESETS = {"pi": "prompt_injection_luna", "pii": "input_pii"}
+PREPARED_TASKS = {
+    "toxigen": "toxicity", "hatecheck": "hate", "aegis2": "safety",
+    "detect_jailbreak": "pi", "jailbreak_classification": "pi", "jailbreakhub": "pi",
+}
 PI_REVISION = "5f68a89245ce067ba4258c92198633dbebd02dac"
 PII_REVISION = "7b686c2e7475b02e10e38add1eb54a9f604f4361"
 PII_MAP = {"CREDITCARDNUMBER": "credit_card_info", "EMAIL": "email",
@@ -142,14 +147,56 @@ def load_sources(cache, pi_size, seed, metric):
     return sources, provenance
 
 
-def setup(api, project_id, sources, provenance, output):
+def load_prepared(directory, datasets, presets, limit=None):
+    selected = list(PREPARED_TASKS) if datasets == "all" else [
+        name.strip().replace("-", "_") for name in datasets.split(",")]
+    if not selected or len(set(selected)) != len(selected):
+        raise ValueError("--datasets must contain unique dataset names")
+    sources, provenance, mapping = {}, {}, {}
+    for dataset in selected:
+        if dataset not in PREPARED_TASKS:
+            raise ValueError(f"Unsupported prepared dataset: {dataset}. "
+                             "Local PII CSVs are excluded; original PII validation is retained.")
+        task = PREPARED_TASKS[dataset]
+        name = presets.get(task)
+        if not name or name.startswith("YOUR_"):
+            raise ValueError(f"{dataset} requires --{task}-preset or "
+                             f"GALILEO_{task.upper()}_PRESET. No substitute preset is used.")
+        path = directory / f"{dataset}.csv"
+        rows, ids = [], set()
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            if not {"sample_id", "text", "label"} <= set(reader.fieldnames or []):
+                raise ValueError(f"{path}: required columns are sample_id,text,label")
+            for index, row in enumerate(reader):
+                if row["label"] not in ("0", "1") or not row["sample_id"] or row["text"] is None:
+                    raise ValueError(f"{path}: invalid sample at CSV record {index + 2}")
+                if row["sample_id"] in ids:
+                    raise ValueError(f"{path}: duplicate sample_id {row['sample_id']}")
+                ids.add(row["sample_id"])
+                rows.append({"index": index, "source_index": row["sample_id"],
+                             "sample_id": row["sample_id"], "dataset": dataset,
+                             "input": row["text"], "gold": int(row["label"])})
+        if not rows:
+            raise ValueError(f"{path}: dataset is empty")
+        sources[dataset] = rows[:limit] if limit is not None else rows
+        provenance[dataset] = {"file": str(path.resolve()), "task": task,
+                               "file_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                               "total_rows": len(rows), "selected_rows": len(sources[dataset])}
+        mapping[dataset] = name
+    return sources, provenance, mapping
+
+
+def setup(api, project_id, sources, provenance, output, presets=None, dataset_workers=1):
+    presets = PRESETS if presets is None else presets
     project = api.request("GET", f"/projects/{project_id}")
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:6]
     state = {"api_url": api.url, "project_id": project_id,
              "project_name": project["name"], "run_id": run_id,
-             "source_fingerprint": digest(sources), "datasets": provenance, "metrics": {}}
+             "source_fingerprint": digest(sources), "datasets": provenance, "metrics": {},
+             "dataset_subdirectories": dataset_workers > 1}
     for metric in sources:
-        name = PRESETS[metric]
+        name = presets[metric]
         catalog = api.request("POST", "/v2/scorers/list", {
             "filters": [{"name": "name", "operator": "eq", "value": name}]})
         found = [x for x in catalog["scorers"] if x["name"] == name and x["scorer_type"] == "preset"]
@@ -163,7 +210,7 @@ def setup(api, project_id, sources, provenance, output):
         config = {"scorer_id": scorer["id"], "scorer_version_id": scorer["default_version_id"],
                   "scorer_label": name, "operator": "any" if metric == "pii" else "gte",
                   "timeout_ms": 60000}
-        if metric == "pi":
+        if metric != "pii":
             config["threshold"] = 0.5
         control = api.request("PUT", "/agent-control/api/v1/controls", {
             "name": agent, "data": {"enabled": True, "execution": "server",
@@ -242,11 +289,11 @@ class Evaluator:
             if result.get("error") or meta.get("error_message") or meta.get("status") != "success":
                 raise ValueError("Scorer execution failed: " + str(meta.get("error_message") or result.get("error") or meta.get("status")))
             score = meta.get("score")
-            if self.metric == "pi":
+            if self.metric != "pii":
                 if isinstance(score, list) and len(score) == 1:
                     score = score[0]
                 if isinstance(score, bool) or not isinstance(score, (int, float)) or not math.isfinite(score) or not 0 <= score <= 1:
-                    raise ValueError("Expected a PI probability in [0, 1]")
+                    raise ValueError("Expected a positive-class probability in [0, 1]")
                 prediction = int(score >= 0.5)
             else:
                 if not isinstance(score, list) or any(not isinstance(x, str) or x not in PII_EXPOSED for x in score):
@@ -293,7 +340,7 @@ def summarize(metric, records, requested):
                "error_counts": dict(Counter(r["error"] for r in records if r["error"]))}
     if not valid:
         return summary  # Never present infrastructure failure as zero model F1.
-    if metric == "pi":
+    if metric != "pii":
         summary.update(binary(valid))
         summary["threshold"] = 0.5
         if len({r["gold"] for r in valid}) == 2:
@@ -311,8 +358,30 @@ def summarize(metric, records, requested):
     return summary
 
 
-def run(api, state, sources, output, workers, retry_errors):
+def run(api, state, sources, output, workers, retry_errors, dataset_workers=1):
     report = {"pii_mapping": PII_MAP, "pii_primary_classes": PII_CLASSES, "metrics": {}}
+    output.mkdir(parents=True, exist_ok=True)
+    if dataset_workers > 1:
+        failures = {}
+        with ThreadPoolExecutor(max_workers=dataset_workers) as pool:
+            futures = {
+                pool.submit(run, api, state, {metric: rows}, output / metric,
+                            1, retry_errors): metric
+                for metric, rows in sources.items()
+            }
+            for future in as_completed(futures):
+                metric = futures[future]
+                try:
+                    result = future.result()
+                    report["metrics"].update(result["metrics"])
+                except (RuntimeError, ValueError, KeyError, TypeError, OSError) as exc:
+                    failures[metric] = str(exc).replace(api.key, "[REDACTED]")
+                    print(f"{metric}: failed: {failures[metric]}", flush=True)
+                report["dataset_errors"] = failures
+                save(output / "summary.json", report)
+        if failures:
+            raise RuntimeError("Dataset failures: " + ", ".join(failures))
+        return report
     for metric, rows in sources.items():
         path = output / f"{metric}-predictions.jsonl"
         latest = {}
@@ -322,13 +391,14 @@ def run(api, state, sources, output, workers, retry_errors):
             with path.open(encoding="utf-8") as handle:
                 latest = {r["index"]: r for r in (json.loads(line) for line in handle)}
         for index, old in latest.items():
-            if index >= len(rows) or any(old[k] != rows[index][k] for k in ("input", "gold", "source_index")) or old[
+            if not isinstance(index, int) or index < 0 or index >= len(rows) or any(old[k] != rows[index][k] for k in ("input", "gold", "source_index")) or old[
                     "scorer_version_id"] != state["metrics"][metric]["scorer_version_id"]:
                 raise ValueError("Checkpoint does not match this dataset/version. Use a new --output folder.")
         evaluator = Evaluator(api, state["metrics"][metric], metric)
         pending = [r for r in rows if r["index"] not in latest or (retry_errors and latest[r["index"]]["error"])]
         # Stop on infrastructure/configuration failure before issuing a large batch.
         if pending:
+            print(f"{metric}: requesting preflight sample {pending[0]['index']}", flush=True)
             first = evaluator.evaluate(pending[0])
             with path.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(first, ensure_ascii=False) + "\n")
@@ -338,9 +408,12 @@ def run(api, state, sources, output, workers, retry_errors):
             pending = pending[1:]
             print(f"{metric}: preflight passed; processing {len(rows)} rows", flush=True)
         with path.open("a", encoding="utf-8") as handle, ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = [pool.submit(evaluator.evaluate, row) for row in pending]
-            for future in as_completed(futures):
-                record = future.result()
+            if workers == 1:
+                records = map(evaluator.evaluate, pending)
+            else:
+                futures = [pool.submit(evaluator.evaluate, row) for row in pending]
+                records = (future.result() for future in as_completed(futures))
+            for record in records:
                 latest[record["index"]] = record
                 handle.write(json.dumps(record, ensure_ascii=False) + "\n")
                 handle.flush()
@@ -362,15 +435,52 @@ def main():
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--limit", type=int, help="Connectivity test: first N selected rows per dataset")
     parser.add_argument("--retry-errors", action="store_true")
+    parser.add_argument("--source", choices=["public", "prepared"], default="public")
+    parser.add_argument("--data-dir", type=Path,
+                        default=Path(__file__).resolve().parents[1] / "data" / "prepared")
+    parser.add_argument("--datasets", default="all",
+                        help="Prepared non-PII datasets: all or comma-separated names")
+    parser.add_argument("--dataset-workers", type=int, default=1,
+                        help="Concurrent datasets; values above 1 use one sequential worker per dataset")
+    for task in ("toxicity", "hate", "safety"):
+        parser.add_argument(f"--{task}-preset")
+    parser.add_argument("--list-presets", action="store_true",
+                        help="List visible preset names without creating benchmark resources")
     args = parser.parse_args()
     load_dotenv(args.env_file)
     required = ["GALILEO_API_URL", "GALILEO_API_KEY", "GALILEO_PROJECT_ID"]
     if any(not os.getenv(k) or os.getenv(k).startswith("YOUR_") for k in required):
         parser.error("Set GALILEO_API_URL, GALILEO_API_KEY and GALILEO_PROJECT_ID in .env or your environment")
-    if args.workers < 1 or (args.limit is not None and args.limit < 1):
-        parser.error("--workers and --limit must be positive")
+    if args.workers < 1 or args.dataset_workers < 1 or (args.limit is not None and args.limit < 1):
+        parser.error("--workers, --dataset-workers and --limit must be positive")
+    if args.list_presets:
+        api = API(os.environ["GALILEO_API_URL"], os.environ["GALILEO_API_KEY"])
+        try:
+            catalog = api.request("POST", "/v2/scorers/list", {"filters": []})
+            for scorer in catalog["scorers"]:
+                if scorer.get("scorer_type") == "preset":
+                    print(scorer["name"], scorer.get("model_type"), flush=True)
+        finally:
+            api.close()
+        return 0
+    presets = dict(PRESETS)
+    if args.source == "prepared" and args.metric != "pii":
+        try:
+            sources, provenance, presets = load_prepared(
+                args.data_dir, args.datasets,
+                {"pi": PRESETS["pi"], **{
+                    task: getattr(args, f"{task}_preset") or os.getenv(f"GALILEO_{task.upper()}_PRESET")
+                    for task in ("toxicity", "hate", "safety")}}, args.limit)
+        except (ValueError, OSError) as exc:
+            parser.error(str(exc))
+        if args.metric == "both":
+            pii_sources, pii_provenance = load_sources(args.cache, args.pi_size, args.seed, "pii")
+            sources.update(pii_sources)
+            provenance.update(pii_provenance)
+            presets["pii"] = PRESETS["pii"]
+    else:
+        sources, provenance = load_sources(args.cache, args.pi_size, args.seed, args.metric)
     args.output.mkdir(parents=True, exist_ok=True)
-    sources, provenance = load_sources(args.cache, args.pi_size, args.seed, args.metric)
     if args.limit:
         sources = {key: value[:args.limit] for key, value in sources.items()}
     for metric, rows in sources.items():
@@ -383,12 +493,21 @@ def main():
             if (state["api_url"] != api.url or state["project_id"] != os.environ["GALILEO_PROJECT_ID"]
                     or state["source_fingerprint"] != digest(sources)):
                 raise ValueError("Existing results have a different configuration. Use a new --output folder.")
+            if any(state["metrics"][metric]["scorer_name"] != presets[metric] for metric in sources):
+                raise ValueError("Preset mapping changed. Use a new --output folder.")
+            if state.get("dataset_subdirectories", False) != (args.dataset_workers > 1):
+                raise ValueError("Dataset checkpoint layout changed. Use a new --output folder.")
         else:
-            state = setup(api, os.environ["GALILEO_PROJECT_ID"], sources, provenance, args.output)
-        result = run(api, state, sources, args.output, args.workers, args.retry_errors)
+            state = setup(api, os.environ["GALILEO_PROJECT_ID"], sources, provenance, args.output,
+                          presets, args.dataset_workers)
+        if args.dataset_workers > 1:
+            print(f"Dataset concurrency: {args.dataset_workers}; one sequential worker per dataset",
+                  flush=True)
+        result = run(api, state, sources, args.output, args.workers, args.retry_errors,
+                     args.dataset_workers)
         print("\nMetric / class                         Precision   Recall       F1")
         for metric, summary in result["metrics"].items():
-            statistics = {"Prompt Injection": summary} if metric == "pi" else {
+            statistics = {metric: summary} if metric != "pii" else {
                 **{f"PII: {label}": value for label, value in summary.get("per_class", {}).items()},
                 "PII: micro average (4 classes)": summary.get("micro", {})}
             for label, value in statistics.items():
