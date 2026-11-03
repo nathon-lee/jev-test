@@ -1,0 +1,8 @@
+{
+	"mcpServers": {
+		"fastino": {
+			"type": "http",
+			"url": "https://api.fastino.ai/v1/teams/f0612c79-8d65-4602-8a09-9d1054ff7065/mcp"
+		}
+	}
+}

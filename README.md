@@ -22,6 +22,42 @@ Supported datasets:
 - pii_masking_nano_1k
 - pii_masking_mini_10k
 
+## Galileo original preset benchmark (Linux)
+
+The optional [`demo-preset-benchmark/`](./demo-preset-benchmark/) runs the
+original `prompt_injection_luna` and `input_pii` presets through Galileo Agent
+Control. It is separate from the generic `galileo.ai` provider above.
+Use Python 3.11 or newer. From the repository root:
+
+```bash
+cd demo-preset-benchmark
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+cp .env.example .env
+# Edit .env: set GALILEO_API_URL, GALILEO_API_KEY and GALILEO_PROJECT_ID.
+python benchmark.py --limit 3 --output results-smoke
+```
+
+After the connectivity test succeeds:
+
+```bash
+python benchmark.py --output results
+# Resume and retry previously failed requests:
+python benchmark.py --output results --retry-errors
+```
+
+Outputs include JSONL predictions, `manifest.json`, and `summary.json` with
+computed metrics. The script downloads pinned public datasets and creates
+dedicated observing controls and log streams in the configured project.
+Do not commit credentials, downloaded data, or predictions.
+
+This is not yet a unified cross-model comparison: it uses its own samples,
+and PII is document-level multilabel evaluation over four mapped categories.
+Do not pass its JSONL files directly to `scripts/evaluate.py` or compare its PII
+F1 with an unrelated binary PII score. See the
+[preset benchmark README](./demo-preset-benchmark/README.md) for details.
+
 ## Create a virtual environment
 
 On Linux / macOS:
