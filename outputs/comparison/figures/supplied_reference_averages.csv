@@ -1,0 +1,9 @@
+provider,prompt,datasets,accuracy,precision,recall,f1,auroc,mean_elapsed_ms,evidence
+openjev,v1,"toxigen,hatecheck,aegis2",0.7773,0.8482666666666666,0.7211,0.7631666666666667,0.8562333333333333,868.2366666666667,supplied aggregate; matching rows and timing conditions unverified
+openjev-32b,v1,"toxigen,hatecheck,aegis2",0.7799446666666666,0.9063463333333334,0.6577933333333333,0.737671,0.867307,1818.546583,supplied aggregate; matching rows and timing conditions unverified
+microsoft-decision-1,v1,"toxigen,hatecheck,aegis2",0.8318953333333333,0.936145,0.72204,0.7990336666666666,0.918753,1239.601246,supplied aggregate; matching rows and timing conditions unverified
+Dynamo CPU,not_supplied,"toxigen,hatecheck,aegis2",0.8965,0.8888,0.9086,,0.9527,20000.0,supplied aggregate; matching rows and timing conditions unverified
+Dynamo GPU (A100),not_supplied,"toxigen,hatecheck,aegis2",0.8941,0.8869,0.9106,,0.9524,55.0,supplied aggregate; matching rows and timing conditions unverified
+Dynamo GPU (L4),not_supplied,"toxigen,hatecheck,aegis2",0.8939,0.8869,0.9102,,0.9524,100.0,supplied aggregate; matching rows and timing conditions unverified
+Mistral,not_supplied,"toxigen,hatecheck,aegis2",0.8333,0.8564,0.834,,,1671.08,supplied aggregate; matching rows and timing conditions unverified
+Warden,not_supplied,"toxigen,hatecheck,aegis2",0.7773,0.8203,0.7611,,,328.53,supplied aggregate; matching rows and timing conditions unverified

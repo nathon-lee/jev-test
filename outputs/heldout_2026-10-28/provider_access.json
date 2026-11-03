@@ -1,0 +1,26 @@
+{
+  "openjev": {
+    "status": "blocked",
+    "reason": "Both https://openjev.sh/docs and https://api.openjev.sh/ show Deployment Paused; no signup completed."
+  },
+  "galileo.ai": {
+    "status": "excluded",
+    "reason": "Optional placeholder adapter; no identified deployed classifier or requirement for the held-out harness."
+  },
+  "microsoft-decision-1": {
+    "status": "complete",
+    "model": "Microsoft-Decision-1",
+    "model_version": "1",
+    "deployment_alias": "hsbc-decision-1",
+    "deployment_sku": "GlobalStandard",
+    "resource_scope": "existing non-production test resource",
+    "authentication": "existing resource key saved only in ignored .env",
+    "requests_per_second": 4
+  },
+  "laya-ai.com": {
+    "status": "complete",
+    "successful_requests": 11908,
+    "final_errors": 0,
+    "note": "Transient HTTP 503 errors cleared by success-preserving checkpoint retries."
+  }
+}

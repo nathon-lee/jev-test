@@ -7,8 +7,8 @@ from benchmark.paper_figures import write_paper_figures
 
 def main():
     parser = argparse.ArgumentParser(description="Render comparison figures from the saved comparison JSON.")
-    parser.add_argument("--report", type=Path, default=Path("outputs/comparison/comparison.json"))
-    parser.add_argument("--output-dir", type=Path, default=Path("outputs/comparison/figures"))
+    parser.add_argument("--report", type=Path, default=Path("outputs/comparison_historical_confidence/comparison.json"))
+    parser.add_argument("--output-dir", type=Path, default=Path("outputs/comparison_historical_confidence/figures"))
     parser.add_argument("--dpi", type=int, default=300, help="PNG resolution (minimum 72; vector exports are unaffected)")
     args = parser.parse_args()
     if args.dpi < 72:
