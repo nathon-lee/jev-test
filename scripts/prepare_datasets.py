@@ -1,4 +1,5 @@
 from pathlib import Path
+import argparse
 from benchmark.datasets import (
     prepare_toxigen,
     prepare_hatecheck,
@@ -18,53 +19,31 @@ def canonical_dataset_file_stem(dataset_name: str) -> str:
     return dataset_name.strip().lower().replace("-", "_")
 
 
-def main():
-    toxigen = prepare_toxigen()
-    save_dataset(
-        toxigen,
-        OUTPUT_DIR / f"{canonical_dataset_file_stem('toxigen')}.csv",
-    )
+PREPARERS = {
+    "toxigen": prepare_toxigen, "hatecheck": prepare_hatecheck, "aegis2": prepare_aegis2,
+    "detect-jailbreak": prepare_detect_jailbreak,
+    "jailbreak-classification": prepare_jailbreak_classification, "jailbreakhub": prepare_jailbreakhub,
+    "pii_masking_nano_1k": prepare_pii_masking_nano_1k,
+    "pii_masking_mini_10k": prepare_pii_masking_mini_10k,
+}
 
-    hatecheck = prepare_hatecheck()
-    save_dataset(
-        hatecheck,
-        OUTPUT_DIR / f"{canonical_dataset_file_stem('hatecheck')}.csv",
-    )
 
-    aegis2 = prepare_aegis2()
-    save_dataset(
-        aegis2,
-        OUTPUT_DIR / f"{canonical_dataset_file_stem('aegis2')}.csv",
-    )
-
-    detect_jailbreak = prepare_detect_jailbreak()
-    save_dataset(
-        detect_jailbreak,
-        OUTPUT_DIR / f"{canonical_dataset_file_stem('detect-jailbreak')}.csv",
-    )
-
-    jailbreak_classification = prepare_jailbreak_classification()
-    save_dataset(
-        jailbreak_classification,
-        OUTPUT_DIR / f"{canonical_dataset_file_stem('jailbreak-classification')}.csv",
-    )
-
-    jailbreakhub = prepare_jailbreakhub()
-    save_dataset(
-        jailbreakhub,
-        OUTPUT_DIR / f"{canonical_dataset_file_stem('jailbreakhub')}.csv",
-    )
-
-    pii_nano_1k = prepare_pii_masking_nano_1k()
-    save_dataset(
-        pii_nano_1k,
-        OUTPUT_DIR / "pii_masking_nano_1k.csv",
-    )
-
-    pii_mini_10k = prepare_pii_masking_mini_10k()
-    save_dataset(
-        pii_mini_10k,
-        OUTPUT_DIR / "pii_masking_mini_10k.csv",
-    )
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Prepare explicit, revision-pinned evaluation partitions")
+    parser.add_argument("--datasets", default="all", help="Comma-separated suite dataset names or all")
+    parser.add_argument("--split", help="Exact split override; unions/slices are not accepted")
+    parser.add_argument("--revision", help="Override the committed source pin; resolved to a commit SHA")
+    parser.add_argument("--allow-train-eval", action="store_true", help="Explicitly permit labelled training-reference data")
+    parser.add_argument("--output-dir", type=Path, default=OUTPUT_DIR)
+    args = parser.parse_args(argv)
+    names = list(PREPARERS) if args.datasets == "all" else args.datasets.split(",")
+    if not names or any(name not in PREPARERS for name in names):
+        parser.error(f"Choose datasets from {list(PREPARERS)}")
+    # Prepare all selected frames before replacing any existing data files. A
+    # train-only source must not leave a half-updated dataset directory on failure.
+    frames = {name: PREPARERS[name](split=args.split, revision=args.revision,
+                                   allow_train_eval=args.allow_train_eval) for name in names}
+    for name, frame in frames.items():
+        save_dataset(frame, args.output_dir / f"{canonical_dataset_file_stem(name)}.csv")
 if __name__ == "__main__":
     main()
