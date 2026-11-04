@@ -387,3 +387,45 @@ def test_fastino_cold_start_wait_is_bounded(monkeypatch):
             api_key="test-key", base_url="https://api.fastino.ai/v1",
         )
     assert len(calls) == 1
+
+
+def test_glide_guardrail_is_called_on_systemone_with_its_model_id(monkeypatch):
+    captured = {}
+
+    def fake_post(url, headers=None, json=None, timeout=None, verify=None):
+        captured["url"] = url
+        captured["json"] = json
+        return httpx.Response(200, request=httpx.Request("POST", url), json={
+            "model": json["model"],
+            "answers": {"score": {"type": "noul", "noul": 0.25, "confidence": 0.9}},
+        })
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    score = call_provider(
+        "fastino-glide-guardrail", "Is this text unsafe?", "Example",
+        api_key="test-key", base_url="https://api.fastino.ai/v1",
+    )
+
+    assert score == 0.25
+    assert captured["url"] == "https://api.fastino.ai/v1/systemone"
+    assert captured["json"]["model"] == "21ac7ad2-f9b5-5e6f-801b-45b52e26bdc9"
+    assert captured["json"]["questions"]["score"]["instructions"] == "Is this text unsafe?"
+    assert "messages" not in captured["json"]
+
+
+def test_base_glide_still_uses_its_catalog_model(monkeypatch):
+    captured = {}
+
+    def fake_post(url, headers=None, json=None, timeout=None, verify=None):
+        captured["json"] = json
+        return httpx.Response(200, request=httpx.Request("POST", url), json={
+            "answers": {"score": {"type": "noul", "noul": 0.5, "confidence": 0.9}},
+        })
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    call_provider(
+        "fastino.ai", "Is this text unsafe?", "Example",
+        api_key="test-key", base_url="https://api.fastino.ai/v1",
+    )
+
+    assert captured["json"]["model"] == "fastino/GLiDE"
