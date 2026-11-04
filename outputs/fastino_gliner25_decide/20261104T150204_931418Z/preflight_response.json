@@ -1,0 +1,24 @@
+{
+  "id": "chatcmpl-e72b75c514464f61ac557330",
+  "object": "chat.completion",
+  "created": 1793805275,
+  "model": "fastino/gliner2.5-decide",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"Is this text unsafe?\": [{\"label\": \"safe\", \"confidence\": 0.6575384140014648}, {\"label\": \"unsafe\", \"confidence\": 0.3665897250175476}]}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 5,
+    "completion_tokens": 46,
+    "total_tokens": 51,
+    "prompt_tokens_details": null
+  },
+  "x_fastino": null,
+  "token_usage": 51
+}

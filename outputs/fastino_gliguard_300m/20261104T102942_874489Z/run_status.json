@@ -1,0 +1,66 @@
+{
+  "status": "completed_with_errors",
+  "started_at": "2026-11-04T10:29:42.874623+00:00",
+  "pid": 22724,
+  "commit": "69b19a97a213aa00621ea453cffc01e45a2cf6ea",
+  "provider": "fastino-gliguard-300m",
+  "model": "fastino/gliguard-LLMGuardrails-300M",
+  "prompt_version": "v1",
+  "threshold": 0.5,
+  "pii_excluded": true,
+  "workers": 6,
+  "scoring": "Direct unsafe confidence; both labels requested at API threshold zero.",
+  "datasets": {
+    "toxigen": {
+      "rows": 6789,
+      "sha256": "2e49545424e7b17a41d642ef7757b5f345000fce3ffd038d2af54c01e456a48d"
+    },
+    "hatecheck": {
+      "rows": 3728,
+      "sha256": "99fb50ce11998511199e62c23f1297458946e3bc74f3e4fa490cc243bab95fe9"
+    },
+    "aegis2": {
+      "rows": 1964,
+      "sha256": "aef31af150bf18ec09ccb7b54875babf8d236d02f8cbcbd7595a2b426f6ed50b"
+    },
+    "detect-jailbreak": {
+      "rows": 18258,
+      "sha256": "bd8ba4f6a615ccfba9f8db02af4d18a380b5cf92c8c83e624eb753eb583fb286"
+    },
+    "jailbreak-classification": {
+      "rows": 1044,
+      "sha256": "070c14265bf751ca78cf219d6e6bc9732dbcd6fc3ba71379be19c8342c2b4db3"
+    },
+    "jailbreakhub": {
+      "rows": 15140,
+      "sha256": "614596379515cca0efa4b6064396ccbb97a094ddd80b21fd677b1f878dc3222f"
+    }
+  },
+  "command": [
+    "/workspace/jev-test/.venv/bin/python",
+    "-u",
+    "-m",
+    "scripts.run_model_suite",
+    "--providers",
+    "fastino-gliguard-300m",
+    "--datasets",
+    "toxigen,hatecheck,aegis2,detect-jailbreak,jailbreak-classification,jailbreakhub",
+    "--prompt-versions",
+    "v1",
+    "--thresholds",
+    "0.5",
+    "--max-workers",
+    "6",
+    "--base-url",
+    "https://api.fastino.ai/v1",
+    "--output-dir",
+    "/workspace/jev-test/outputs/fastino_gliguard_300m/20261104T102942_874489Z"
+  ],
+  "benchmark_pid": 22772,
+  "finished_at": "2026-11-04T11:43:12.666996+00:00",
+  "exit_code": 0,
+  "completed_datasets": 6,
+  "processed_rows": 46923,
+  "valid_rows": 46225,
+  "error_rows": 698
+}

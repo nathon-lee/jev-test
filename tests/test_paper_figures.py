@@ -15,8 +15,11 @@ import pytest
 
 from benchmark.comparison import DATASETS, MODEL_IDENTITIES, MODELS
 from benchmark.external_summary import (
-    DATASET_CATEGORIES, GLIGUARD_DISPLAY_NAME, GLIGUARD_PROVIDER, METRICS, QWEN_PROVIDER,
-    attach_finetuned_run, attach_gliguard_run, attach_openjev_summary,
+    DATASET_CATEGORIES, GLIGUARD_DISPLAY_NAME, GLIGUARD_PROVIDER,
+    GLINER25_DISPLAY_NAME, GLINER25_MODEL, GLINER25_PROVIDER, METRICS,
+    POC_DISPLAY_NAME, POC_MODEL, POC_PROVIDER, QWEN_PROVIDER,
+    attach_finetuned_run, attach_gliguard_run, attach_gliner25_run,
+    attach_openjev_summary, attach_poc_run,
     attach_qwen_summary, category_reference_averages,
     reference_averages, three_dataset_averages, v1_reference_scope_averages,
 )
@@ -1391,6 +1394,186 @@ def test_fastino_standalone_page_contains_only_two_models_and_embedded_panels(gl
     assert "GLiGuard was not tested on PII" in page
     assert "17 successful / 18 rows; 1 errors" in page
     assert all(name not in page for name in ("TypeSafe", "Laya", "OpenJev", "Qwen3Guard"))
+    assert report == before
+
+
+@pytest.fixture
+def poc_run(gliguard_run, tmp_path):
+    report, original, data = gliguard_run
+    attach_gliguard_run(report, original, data)
+    run = tmp_path / "poc_run"
+    (run / POC_PROVIDER).mkdir(parents=True)
+    for path in (original / GLIGUARD_PROVIDER).glob("*.csv"):
+        with path.open(newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        for row, latency in zip(rows, (100, 200, 900)):
+            row.update(
+                provider=POC_PROVIDER, requested_model=POC_MODEL,
+                response_model="" if row["error"] else "glide_v2",
+                http_status="400" if row["error"] else "200", latency_ms=latency,
+            )
+        with (run / POC_PROVIDER / path.name).open("w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+    status = json.loads((original / "run_status.json").read_text())
+    status.update(
+        provider=POC_PROVIDER, model=POC_MODEL, pii_excluded=True,
+        response_models={"glide_v2": 17},
+    )
+    for dataset, details in status["datasets"].items():
+        errors = int(dataset == "jailbreakhub")
+        details.update(processed=3, valid=3 - errors, errors=errors)
+    (run / "run_status.json").write_text(json.dumps(status))
+    return report, run, data
+
+
+def test_poc_reference_preserves_identity_coverage_and_latency_protocol(poc_run):
+    report, run, data = poc_run
+    before = copy.deepcopy(report)
+    attach_poc_run(report, run, data)
+    comparison = report["external_comparison"]
+    assert report["runs"] == before["runs"]
+    assert report["providers"] == before["providers"]
+    assert [row for row in comparison["runs"] if row["provider"] != POC_PROVIDER] == before["external_comparison"]["runs"]
+    identity = comparison["model_identities"][POC_PROVIDER]
+    assert identity["request_model"] == POC_MODEL
+    assert identity["resolved_model"] is None
+    assert identity["response_model"] == "glide_v2"
+    assert POC_PROVIDER not in external_reference_providers(comparison, "v2")
+    records = {row["dataset"]: row for row in comparison["runs"] if row["provider"] == POC_PROVIDER}
+    assert records["toxigen"]["mean_elapsed_ms"] == 400
+    assert records["jailbreakhub"]["mean_elapsed_ms"] == 500
+    assert all(row["latency_source_kind"] == "successful_request_latency_ms" for row in records.values())
+    pii = next(row for row in category_reference_averages(report) if row["provider"] == POC_PROVIDER and row["category"] == "pii")
+    assert all(pii[metric] is None for metric in METRICS)
+    attach_poc_run(report, run, data)
+    assert comparison["providers"].count(POC_PROVIDER) == 1
+    assert len([row for row in comparison["runs"] if row["provider"] == POC_PROVIDER]) == 6
+
+
+@pytest.mark.parametrize("invalid", [
+    "running", "reference", "counts", "response_models", "requested_model", "latency",
+])
+def test_poc_reference_rejects_mismatched_sources_without_mutation(poc_run, invalid):
+    report, run, data = poc_run
+    status_path = run / "run_status.json"
+    status = json.loads(status_path.read_text())
+    if invalid == "running":
+        status["status"] = "running"
+    elif invalid == "reference":
+        (data / DATASETS["toxigen"]).write_text("different reference")
+    elif invalid == "counts":
+        status["valid_rows"] += 1
+    elif invalid == "response_models":
+        status["response_models"] = {"other-model": 17}
+    else:
+        path = run / POC_PROVIDER / "toxigen_v1_t0.5.csv"
+        with path.open(newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        rows[0]["requested_model" if invalid == "requested_model" else "latency_ms"] = (
+            "other-model" if invalid == "requested_model" else "nan"
+        )
+        with path.open("w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+    status_path.write_text(json.dumps(status))
+    before = copy.deepcopy(report)
+    with pytest.raises(ValueError):
+        attach_poc_run(report, run, data)
+    assert report == before
+
+
+def test_fastino_page_adds_poc_with_unverified_alias_and_untested_pii(poc_run, tmp_path):
+    report, run, data = poc_run
+    attach_poc_run(report, run, data)
+    before = copy.deepcopy(report)
+    output = tmp_path / "fastino_comparison.html"
+    write_fastino_comparison(report, output, dpi=72)
+    page = output.read_text()
+    assert POC_DISPLAY_NAME in page and POC_MODEL in page
+    assert "response model: glide_v2 (mapping unverified)" in page
+    assert "17 successful / 18 rows; 1 errors" in page
+    assert "The POC model was also not tested on PII" in page
+    assert "successful-request CSV mean, not log elapsed/processed" in page
+    assert page.count('src="data:image/png;base64,') == 6
+    assert GLIGUARD_DISPLAY_NAME in page and "Fastino GLiDE | request:" in page
+    assert all(name not in page for name in ("TypeSafe", "Laya", "OpenJev", "Qwen3Guard"))
+    assert report == before
+
+
+@pytest.fixture
+def gliner25_run(poc_run, tmp_path):
+    report, original, data = poc_run
+    attach_poc_run(report, original, data)
+    run = tmp_path / "gliner25_run"
+    (run / GLINER25_PROVIDER).mkdir(parents=True)
+    for path in (original / POC_PROVIDER).glob("*.csv"):
+        with path.open(newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        for row in rows:
+            row.update(
+                provider=GLINER25_PROVIDER, requested_model=GLINER25_MODEL,
+                response_model="" if row["error"] else GLINER25_MODEL,
+            )
+        with (run / GLINER25_PROVIDER / path.name).open("w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+    status = json.loads((original / "run_status.json").read_text())
+    status.update(
+        provider=GLINER25_PROVIDER, model=GLINER25_MODEL,
+        response_models={GLINER25_MODEL: 17},
+    )
+    (run / "run_status.json").write_text(json.dumps(status))
+    return report, run, data
+
+
+def test_fastino_page_appends_gliner25_without_replacing_previous_models(gliner25_run, tmp_path):
+    report, run, data = gliner25_run
+    before = copy.deepcopy(report)
+    attach_gliner25_run(report, run, data)
+    comparison = report["external_comparison"]
+    assert report["runs"] == before["runs"]
+    assert [row for row in comparison["runs"] if row["provider"] != GLINER25_PROVIDER] == before["external_comparison"]["runs"]
+    info = comparison["classification_models"][GLINER25_PROVIDER]
+    assert (info["valid"], info["errors"]) == (17, 1)
+    assert info["http_error_counts"] == {"400": 1}
+    assert info["mapping_unverified"] is False
+    assert comparison["model_identities"][GLINER25_PROVIDER]["resolved_model"] == GLINER25_MODEL
+    assert GLINER25_PROVIDER not in external_reference_providers(comparison, "v2")
+    pii = next(row for row in category_reference_averages(report) if row["provider"] == GLINER25_PROVIDER and row["category"] == "pii")
+    assert all(pii[metric] is None for metric in METRICS)
+    attach_gliner25_run(report, run, data)
+    assert comparison["providers"].count(GLINER25_PROVIDER) == 1
+    snapshot = copy.deepcopy(report)
+    output = tmp_path / "fastino_comparison.html"
+    write_fastino_comparison(report, output, dpi=72)
+    page = output.read_text()
+    assert all(name in page for name in (GLINER25_DISPLAY_NAME, POC_DISPLAY_NAME, GLIGUARD_DISPLAY_NAME))
+    assert "Fastino GLiDE | request:" in page
+    assert "response model: glide_v2 (mapping unverified)" in page
+    assert "response model: fastino/gliner2.5-decide (mapping unverified)" not in page
+    assert "HTTP 400: 1 errors." in page
+    assert "GLiNER2.5-Decide was not tested on PII" in page
+    assert page.count('src="data:image/png;base64,') == 6
+    assert report == snapshot
+
+
+def test_gliner25_reference_rejects_response_alias(gliner25_run):
+    report, run, data = gliner25_run
+    path = run / GLINER25_PROVIDER / "toxigen_v1_t0.5.csv"
+    with path.open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    rows[0]["response_model"] = "glide_v2"
+    with path.open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    before = copy.deepcopy(report)
+    with pytest.raises(ValueError, match="response identity"):
+        attach_gliner25_run(report, run, data)
     assert report == before
 
 

@@ -17,6 +17,12 @@ METRICS = ("accuracy", "precision", "recall", "f1", "auroc", "mean_elapsed_ms")
 FINE_TUNED_DISPLAY_NAME = "gliguard-LLMGuardrails-300M-fine-tuned"
 GLIGUARD_PROVIDER = "fastino-gliguard-300m"
 GLIGUARD_DISPLAY_NAME = "Fastino GLiGuard-LLMGuardrails-300M"
+POC_PROVIDER = "fastino-systemone-21ac7ad2"
+POC_MODEL = "21ac7ad2-f9b5-5e6f-801b-45b52e26bdc9"
+POC_DISPLAY_NAME = "Fastino POC model"
+GLINER25_PROVIDER = "fastino-gliner2.5-decide"
+GLINER25_MODEL = "fastino/gliner2.5-decide"
+GLINER25_DISPLAY_NAME = "Fastino GLiNER2.5-Decide"
 QWEN_PROVIDER = "qwen3guard-stream-8b"
 QWEN_NOTES = (
     "User-supplied summary only; no prediction CSV or source-data integrity audit was performed. "
@@ -454,6 +460,124 @@ def attach_gliguard_run(report, run_dir, data_dir=Path("data/prepared")):
         report, run_dir, run_dir / "run.log", data_dir, metadata,
         "classification_models", GLIGUARD_DISPLAY_NAME,
     )
+
+
+def attach_poc_run(report, run_dir, data_dir=Path("data/prepared")):
+    _attach_completed_classification_run(
+        report, run_dir, data_dir, POC_PROVIDER, POC_MODEL, POC_DISPLAY_NAME,
+        "POC model. Actual model mapping is unverified; the response alias is not proof of model identity. "
+        "Direct answers.safety.probabilities.unsafe, not choice confidence or GLiDE Noul.",
+        allow_response_alias=True,
+    )
+
+
+def attach_gliner25_run(report, run_dir, data_dir=Path("data/prepared")):
+    _attach_completed_classification_run(
+        report, run_dir, data_dir, GLINER25_PROVIDER, GLINER25_MODEL, GLINER25_DISPLAY_NAME,
+        "Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. "
+        "Both labels were requested at API threshold zero; no normalization or complement. "
+        "Inputs were not truncated; overlength inputs are recorded as errors.",
+    )
+
+
+def _attach_completed_classification_run(
+    report, run_dir, data_dir, provider, model, display_name, notes,
+    *, allow_response_alias=False,
+):
+    run_dir, data_dir = Path(run_dir), Path(data_dir)
+    status = json.loads((run_dir / "run_status.json").read_text(encoding="utf-8"))
+    if (
+        status["provider"] != provider or status["model"] != model
+        or status["status"] not in ("completed", "completed_with_errors")
+        or status["prompt_version"] != "v1" or status["threshold"] != 0.5
+        or status["pii_excluded"] is not True
+        or list(status["datasets"]) != list(DATASETS)[:6]
+    ):
+        raise ValueError(f"{display_name} comparison requires a completed six-dataset v1 / 0.5 run.")
+    records, response_models, http_errors = [], {}, {}
+    for dataset, details in status["datasets"].items():
+        reference_path = data_dir / DATASETS[dataset]
+        if hashlib.sha256(reference_path.read_bytes()).hexdigest() != details["sha256"]:
+            raise ValueError(f"{dataset}: {display_name} reference fingerprint mismatch.")
+        reference = read_reference(reference_path)
+        path = run_dir / provider / f"{dataset}_v1_t0.5.csv"
+        frame, count, errors = read_predictions(
+            path, reference, provider, dataset, "v1", 0.5,
+        )
+        if (
+            count != len(reference) or count != details["rows"]
+            or details["processed"] != count or details["valid"] != len(frame)
+            or details["errors"] != count - len(frame)
+        ):
+            raise ValueError(f"{dataset}: {display_name} result counts do not match completed status.")
+        latencies = []
+        with path.open(encoding="utf-8-sig", newline="") as stream:
+            for row in csv.DictReader(stream):
+                if row["requested_model"] != model:
+                    raise ValueError(f"{dataset}: {display_name} requested model mismatch.")
+                if row["error"].strip():
+                    if row["http_status"]:
+                        http_errors[row["http_status"]] = http_errors.get(row["http_status"], 0) + 1
+                    continue
+                response_model = row["response_model"]
+                latency = float(row["latency_ms"])
+                if (
+                    not response_model or (not allow_response_alias and response_model != model)
+                    or row["http_status"] != "200" or not math.isfinite(latency) or latency < 0
+                ):
+                    raise ValueError(f"{dataset}: invalid {display_name} response identity or latency.")
+                response_models[response_model] = response_models.get(response_model, 0) + 1
+                latencies.append(latency)
+        records.append({
+            "provider": provider, "model": model,
+            "display_name": display_name, "dataset": dataset,
+            "prompt": "v1", "threshold": 0.5, "file": str(path),
+            "status": "complete", "expected": len(reference), "rows": count,
+            "valid": len(frame), "errors": count - len(frame),
+            "error_categories": errors, "source_kind": "classification_predictions",
+            "mean_elapsed_ms": mean(latencies) if latencies else None,
+            "latency_source_kind": "successful_request_latency_ms",
+            **classification_metrics(frame.values()),
+        })
+    counts = tuple(sum(row[key] for row in records) for key in ("rows", "valid", "errors"))
+    if (
+        counts != (status["processed_rows"], status["valid_rows"], status["error_rows"])
+        or response_models != status["response_models"]
+    ):
+        raise ValueError(f"{display_name} aggregate counts or response models disagree with completed status.")
+    comparison = report["external_comparison"]
+    comparison["runs"] = [
+        row for row in comparison["runs"] if row["provider"] != provider
+    ] + records
+    if provider not in comparison["providers"]:
+        comparison["providers"].insert(comparison["providers"].index("fastino.ai") + 1, provider)
+    response_model = ", ".join(sorted(response_models)) or "unavailable"
+    comparison["model_identities"][provider] = {
+        "request_model": model, "resolved_model": None if allow_response_alias else model,
+        "response_model": response_model, "display_name": display_name,
+    }
+    comparison.setdefault("display_names", {})[provider] = display_name
+    failure_note = " ".join(
+        f"HTTP {code}: {count} errors." for code, count in sorted(http_errors.items())
+    )
+    comparison.setdefault("classification_models", {})[provider] = {
+        "run_dir": str(run_dir), "log_file": str(run_dir / "run.log"),
+        "model_id": model, "display_name": display_name,
+        "response_model": response_model, "mapping_unverified": allow_response_alias,
+        "http_error_counts": http_errors,
+        "rows": counts[0], "valid": counts[1], "errors": counts[2],
+        "finished_at": status["finished_at"],
+        "notes": (
+            notes + f" Requested model: {model}; response model: {response_model}. "
+            "v1 / 0.5; six non-PII datasets. Quality excludes failed requests. "
+            + failure_note + " "
+            "Latency is the successful-request mean from CSV latency_ms, including per-request "
+            "retry waits and client/network overhead, but excluding initial preflight warmup; "
+            "it differs from GLiDE/GLiGuard log elapsed/processed timing. "
+            "PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking."
+        ),
+    }
+    comparison["overview"] = reference_comparison_averages(comparison)
 
 
 def _attach_fastino_run(report, run_dir, log_path, data_dir, metadata, model_group, display_name):

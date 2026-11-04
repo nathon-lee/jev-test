@@ -1,0 +1,65 @@
+{
+  "status": "completed",
+  "started_at": "2026-11-04T14:02:06.111868+00:00",
+  "pid": 28283,
+  "model": "21ac7ad2-f9b5-5e6f-801b-45b52e26bdc9",
+  "provider": "fastino-systemone-21ac7ad2",
+  "endpoint": "https://api.fastino.ai/v1/systemone",
+  "workers": 6,
+  "pii_excluded": true,
+  "prompt_version": "v1",
+  "threshold": 0.5,
+  "scoring": "Direct answers.safety.probabilities.unsafe; no confidence substitution or normalization.",
+  "datasets": {
+    "toxigen": {
+      "rows": 6789,
+      "sha256": "2e49545424e7b17a41d642ef7757b5f345000fce3ffd038d2af54c01e456a48d",
+      "processed": 6789,
+      "valid": 6789,
+      "errors": 0
+    },
+    "hatecheck": {
+      "rows": 3728,
+      "sha256": "99fb50ce11998511199e62c23f1297458946e3bc74f3e4fa490cc243bab95fe9",
+      "processed": 3728,
+      "valid": 3728,
+      "errors": 0
+    },
+    "aegis2": {
+      "rows": 1964,
+      "sha256": "aef31af150bf18ec09ccb7b54875babf8d236d02f8cbcbd7595a2b426f6ed50b",
+      "processed": 1964,
+      "valid": 1964,
+      "errors": 0
+    },
+    "detect-jailbreak": {
+      "rows": 18258,
+      "sha256": "bd8ba4f6a615ccfba9f8db02af4d18a380b5cf92c8c83e624eb753eb583fb286",
+      "processed": 18258,
+      "valid": 18258,
+      "errors": 0
+    },
+    "jailbreak-classification": {
+      "rows": 1044,
+      "sha256": "070c14265bf751ca78cf219d6e6bc9732dbcd6fc3ba71379be19c8342c2b4db3",
+      "processed": 1044,
+      "valid": 1044,
+      "errors": 0
+    },
+    "jailbreakhub": {
+      "rows": 15140,
+      "sha256": "614596379515cca0efa4b6064396ccbb97a094ddd80b21fd677b1f878dc3222f",
+      "processed": 15140,
+      "valid": 15140,
+      "errors": 0
+    }
+  },
+  "response_models": {
+    "glide_v2": 46923
+  },
+  "preflight_response_model": "glide_v2",
+  "finished_at": "2026-11-04T15:14:16.690827+00:00",
+  "processed_rows": 46923,
+  "valid_rows": 46923,
+  "error_rows": 0
+}

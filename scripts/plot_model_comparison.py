@@ -14,8 +14,10 @@ def main():
     parser.add_argument("--fine-tuned-run", type=Path, help="Add an isolated fine-tuned run to reference-only comparisons")
     parser.add_argument("--fine-tuned-log", type=Path, help="Complete benchmark log for --fine-tuned-run")
     parser.add_argument("--gliguard-run", type=Path, help="Add a completed Fastino GLiGuard 300M run to reference-only comparisons")
+    parser.add_argument("--poc-run", type=Path, help="Add a completed Fastino SystemOne POC run to reference-only comparisons")
+    parser.add_argument("--gliner25-run", type=Path, help="Add a completed Fastino GLiNER2.5-Decide run to reference-only comparisons")
     parser.add_argument("--qwen-summary", type=Path, help="User-supplied 12-dataset Qwen3Guard summary CSV (v1 / 0.5)")
-    parser.add_argument("--fastino-page", type=Path, help="Write only a self-contained per-dataset GLiDE / GLiGuard comparison HTML page")
+    parser.add_argument("--fastino-page", type=Path, help="Write only a self-contained per-dataset Fastino comparison HTML page")
     args = parser.parse_args()
     if args.dpi < 72:
         parser.error("--dpi must be at least 72")
@@ -30,18 +32,27 @@ def main():
         from benchmark.external_summary import attach_gliguard_run
 
         attach_gliguard_run(report, args.gliguard_run)
+    if args.poc_run:
+        from benchmark.external_summary import attach_poc_run
+
+        attach_poc_run(report, args.poc_run)
+    if args.gliner25_run:
+        from benchmark.external_summary import attach_gliner25_run
+
+        attach_gliner25_run(report, args.gliner25_run)
     if args.qwen_summary:
         from benchmark.external_summary import attach_qwen_summary
 
         attach_qwen_summary(report, args.qwen_summary)
+    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run:
+        report["generated_at"] = datetime.now(timezone.utc).isoformat()
     if args.fastino_page:
         write_fastino_comparison(report, args.fastino_page, dpi=args.dpi)
         print(f"Fastino comparison: {args.fastino_page}")
         return
-    if args.fine_tuned_run or args.gliguard_run:
+    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run:
         from benchmark.comparison import write_report
 
-        report["generated_at"] = datetime.now(timezone.utc).isoformat()
         write_report(report, args.report.parent)
     write_paper_figures(report, args.output_dir, dpi=args.dpi)
     print(f"Figure gallery: {args.output_dir / 'index.html'}")

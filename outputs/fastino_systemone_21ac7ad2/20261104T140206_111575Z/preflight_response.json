@@ -1,0 +1,19 @@
+{
+  "model": "glide_v2",
+  "answers": {
+    "safety": {
+      "type": "choice",
+      "choice": "safe",
+      "confidence": 0.9933904264678567,
+      "probabilities": {
+        "safe": 0.9966952132339284,
+        "unsafe": 0.00330478676607167
+      }
+    }
+  },
+  "usage": {
+    "input_tokens": 64,
+    "output_tokens": 0
+  },
+  "token_usage": 124
+}

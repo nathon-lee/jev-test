@@ -24,7 +24,8 @@ from matplotlib.transforms import Bbox
 from benchmark.comparison import DATASETS, PROMPTS, STABILITY_METRICS, THRESHOLDS, baseline_rows
 from benchmark.external_summary import (
     FINE_TUNED_DISPLAY_NAME, GLIGUARD_DISPLAY_NAME, GLIGUARD_PROVIDER,
-    INTERNAL_IDENTITIES, METRICS, QWEN_PROVIDER, category_reference_averages,
+    GLINER25_DISPLAY_NAME, GLINER25_PROVIDER,
+    INTERNAL_IDENTITIES, METRICS, POC_DISPLAY_NAME, POC_PROVIDER, QWEN_PROVIDER, category_reference_averages,
     three_dataset_averages, v1_reference_scope_averages,
 )
 
@@ -34,6 +35,8 @@ COLORS = {
     "openjev": "#CC79A7", "openjev-32b": "#6A3D9A", "microsoft-decision-1": "#B8860B",
     "fastino-ft-gg6-r1-ml2048-s7": "#E7298A",
     GLIGUARD_PROVIDER: "#332288",
+    POC_PROVIDER: "#009E73",
+    GLINER25_PROVIDER: "#D55E00",
     QWEN_PROVIDER: "#56B4E9",
 }
 NAMES = {
@@ -41,6 +44,8 @@ NAMES = {
     **{provider: identity["display_name"] for provider, identity in INTERNAL_IDENTITIES.items()},
     "fastino-ft-gg6-r1-ml2048-s7": FINE_TUNED_DISPLAY_NAME,
     GLIGUARD_PROVIDER: GLIGUARD_DISPLAY_NAME,
+    POC_PROVIDER: POC_DISPLAY_NAME,
+    GLINER25_PROVIDER: GLINER25_DISPLAY_NAME,
     QWEN_PROVIDER: "Qwen3Guard-Stream-8B",
 }
 MARKERS = {
@@ -48,6 +53,8 @@ MARKERS = {
     "openjev-32b": "v", "microsoft-decision-1": "P",
     "fastino-ft-gg6-r1-ml2048-s7": "D",
     GLIGUARD_PROVIDER: "h",
+    POC_PROVIDER: "P",
+    GLINER25_PROVIDER: "s",
     QWEN_PROVIDER: "X",
 }
 HATCHES = {
@@ -55,6 +62,8 @@ HATCHES = {
     "openjev-32b": "\\\\", "microsoft-decision-1": "++",
     "fastino-ft-gg6-r1-ml2048-s7": "////",
     GLIGUARD_PROVIDER: "..",
+    POC_PROVIDER: "///",
+    GLINER25_PROVIDER: "\\\\",
     QWEN_PROVIDER: "oo",
 }
 DATASET_NAMES = {
@@ -90,7 +99,12 @@ STYLE = {
 def model_label(report, provider):
     if provider in report.get("classification_models", {}):
         model = report["classification_models"][provider]
-        return f"{model['display_name']}\nmodel ID: {model['model_id']}\nv1 / 0.5; PII not tested"
+        response = (
+            f"\nresponse model: {model['response_model']}"
+            + (" (mapping unverified)" if model.get("mapping_unverified") else "")
+            if model.get("response_model") else ""
+        )
+        return f"{model['display_name']}\nmodel ID: {model['model_id']}{response}\nv1 / 0.5; PII not tested"
     if provider in report.get("summary_models", {}):
         return f"{NAMES[provider]} | supplied summary\nbinary safety labels; PII unsupported"
     if provider in report.get("fine_tuned_models", {}):
@@ -1372,6 +1386,10 @@ def write_summary_model_details(comparison, output_dir):
 def write_fastino_comparison(report, output_path, dpi=300):
     source = report["external_comparison"]
     providers = ["fastino.ai", GLIGUARD_PROVIDER]
+    providers.extend(
+        provider for provider in (POC_PROVIDER, GLINER25_PROVIDER)
+        if provider in source["providers"]
+    )
     for provider in providers:
         if provider not in source["providers"] or not any(
             row["provider"] == provider and row["prompt"] == "v1" and row["threshold"] == 0.5
@@ -1392,16 +1410,31 @@ def write_fastino_comparison(report, output_path, dpi=300):
     title = "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5)"
     page = gallery_header(title)
     page += (
-        '<p class="report-subtitle">Fastino GLiDE vs. Fastino GLiGuard-LLMGuardrails-300M</p>'
+        '<p class="report-subtitle">Fastino GLiDE vs. Fastino GLiGuard-LLMGuardrails-300M'
+        + "".join(" vs. " + NAMES[provider] for provider in providers[2:]) + "</p>"
         '<p class="report-meta">Source snapshot (UTC): '
         + html.escape(report["generated_at"]) + "</p>"
         '<section><p class="report-note">Reference only: each model uses its own successful samples; '
         'these are not sample-aligned rankings. GLiDE uses Noul scores; GLiGuard uses direct unsafe '
-        'confidence from independent safe/unsafe scores. Timing protocols differ and include '
+        'confidence from independent safe/unsafe scores. '
+        + (
+            'The POC model uses the unsafe choice probability, not choice confidence. '
+            'Its latency is the successful-request CSV mean, not log elapsed/processed. '
+            if POC_PROVIDER in providers else ""
+        )
+        + (
+            'GLiNER2.5-Decide uses direct unsafe label confidence and successful-request CSV latency; '
+            'failed and overlength requests are excluded from quality metrics. '
+            if GLINER25_PROVIDER in providers else ""
+        )
+        + 'Timing protocols differ and include '
         'network overhead and failure waits.</p>'
         '<aside class="pii-task-notice"><strong>PII = binary detection: present vs absent.</strong>'
         'Not entity extraction or masking quality. PII datasets contain positives only; AUROC is undefined. '
-        'GLiGuard was not tested on PII; its PII results are N/A.</aside>'
+        'GLiGuard was not tested on PII; its PII results are N/A. '
+        + ("The POC model was also not tested on PII; its PII results are N/A." if POC_PROVIDER in providers else "")
+        + (" GLiNER2.5-Decide was not tested on PII; its PII results are N/A." if GLINER25_PROVIDER in providers else "")
+        + '</aside>'
     )
     note = fine_tuned_note(selected)
     if note:
