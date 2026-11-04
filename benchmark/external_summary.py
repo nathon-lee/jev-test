@@ -15,6 +15,8 @@ from benchmark.comparison import (
 
 METRICS = ("accuracy", "precision", "recall", "f1", "auroc", "mean_elapsed_ms")
 FINE_TUNED_DISPLAY_NAME = "gliguard-LLMGuardrails-300M-fine-tuned"
+GLIGUARD_PROVIDER = "fastino-gliguard-300m"
+GLIGUARD_DISPLAY_NAME = "Fastino GLiGuard-LLMGuardrails-300M"
 QWEN_PROVIDER = "qwen3guard-stream-8b"
 QWEN_NOTES = (
     "User-supplied summary only; no prediction CSV or source-data integrity audit was performed. "
@@ -215,7 +217,11 @@ def category_reference_averages(report):
 
 
 def reference_comparison_averages(comparison, datasets=None, include_pii=False):
-    additional = {**comparison.get("fine_tuned_models", {}), **comparison.get("summary_models", {})}
+    additional = {
+        **comparison.get("fine_tuned_models", {}),
+        **comparison.get("classification_models", {}),
+        **comparison.get("summary_models", {}),
+    }
     providers = [provider for provider in comparison["providers"] if provider not in additional]
     rows = reference_averages(comparison["runs"], providers, datasets, include_pii=include_pii)
     if not additional:
@@ -256,6 +262,7 @@ def v1_reference_scope_averages(report, datasets=None):
         if (
             row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
             or row["provider"] in comparison.get("fine_tuned_models", {})
+            or row["provider"] in comparison.get("classification_models", {})
             or row["provider"] in comparison.get("summary_models", {})
         ):
             timing[key] = row["mean_elapsed_ms"]
@@ -314,6 +321,7 @@ def three_dataset_averages(report):
         if (
             row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
             or row["provider"] in comparison.get("fine_tuned_models", {})
+            or row["provider"] in comparison.get("classification_models", {})
             or row["provider"] in comparison.get("summary_models", {})
         ):
             continue
@@ -413,24 +421,61 @@ def attach_finetuned_run(report, run_dir, log_path, data_dir=Path("data/prepared
     provider = metadata["provider"]
     if provider != "fastino-ft-gg6-r1-ml2048-s7" or metadata["model"] != resolve_provider(provider)["model"]:
         raise ValueError("Unsupported fine-tuned model identity.")
+    _attach_fastino_run(
+        report, run_dir, log_path, data_dir, metadata,
+        "fine_tuned_models", FINE_TUNED_DISPLAY_NAME,
+    )
+
+
+def attach_gliguard_run(report, run_dir, data_dir=Path("data/prepared")):
+    from benchmark.provider_suite import resolve_provider
+
+    run_dir, data_dir = Path(run_dir), Path(data_dir)
+    status = json.loads((run_dir / "run_status.json").read_text(encoding="utf-8"))
+    if (
+        status["provider"] != GLIGUARD_PROVIDER
+        or status["model"] != resolve_provider(GLIGUARD_PROVIDER)["model"]
+        or status["status"] not in ("completed", "completed_with_errors")
+        or status["exit_code"] != 0 or status["completed_datasets"] != 6
+    ):
+        raise ValueError("GLiGuard comparison requires a completed run with the exact model identity.")
+    metadata = {
+        "provider": status["provider"], "model": status["model"],
+        "prompt_version": status["prompt_version"], "decision_threshold": status["threshold"],
+        "datasets": list(status["datasets"]),
+        "input_sha256": {
+            str(Path("data/prepared") / DATASETS[dataset]): details["sha256"]
+            for dataset, details in status["datasets"].items()
+        },
+        "counts": (status["processed_rows"], status["valid_rows"], status["error_rows"]),
+        "finished_at": status["finished_at"],
+    }
+    _attach_fastino_run(
+        report, run_dir, run_dir / "run.log", data_dir, metadata,
+        "classification_models", GLIGUARD_DISPLAY_NAME,
+    )
+
+
+def _attach_fastino_run(report, run_dir, log_path, data_dir, metadata, model_group, display_name):
+    provider = metadata["provider"]
     if (
         metadata["prompt_version"] != "v1" or metadata["decision_threshold"] != 0.5
         or metadata["datasets"] != list(DATASETS)[:6]
     ):
-        raise ValueError("Fine-tuned comparison requires the first six datasets at v1 / 0.5.")
+        raise ValueError("Fastino comparison requires the first six datasets at v1 / 0.5.")
     tasks, timings = {}, {}
     text = log_path.read_text(encoding="utf-8")
-    if f"MODEL_ID={metadata['model']}" not in text:
+    if model_group == "fine_tuned_models" and f"MODEL_ID={metadata['model']}" not in text:
         raise ValueError("Fine-tuned log does not identify the requested model ID.")
     for match in START.finditer(text):
         name, dataset, prompt, threshold, total = match.groups()
         if name != provider or prompt != "v1" or float(threshold) != 0.5 or dataset in tasks:
-            raise ValueError("Fine-tuned log must contain one unambiguous v1 / 0.5 task per dataset.")
+            raise ValueError("Fastino log must contain one unambiguous v1 / 0.5 task per dataset.")
         tasks[dataset] = int(total)
     for match in PROGRESS.finditer(text):
         count, total, name, dataset, prompt, elapsed = match.groups()
         if name != provider or prompt != "v1" or dataset not in tasks:
-            raise ValueError("Fine-tuned progress does not match the recorded tasks.")
+            raise ValueError("Fastino progress does not match the recorded tasks.")
         current = int(count), int(total), float(elapsed)
         previous = timings.get(dataset)
         if (
@@ -438,33 +483,37 @@ def attach_finetuned_run(report, run_dir, log_path, data_dir=Path("data/prepared
             or not math.isfinite(current[2]) or current[2] < 0
             or (previous and (current[0] < previous[0] or current[2] < previous[2]))
         ):
-            raise ValueError("Invalid fine-tuned log progress.")
+            raise ValueError("Invalid Fastino log progress.")
         timings[dataset] = current
     if set(tasks) != set(metadata["datasets"]):
-        raise ValueError("Fine-tuned log does not cover the expected datasets.")
+        raise ValueError("Fastino log does not cover the expected datasets.")
     records = []
     for dataset in metadata["datasets"]:
         reference_path = data_dir / DATASETS[dataset]
         expected_hash = metadata["input_sha256"][str(Path("data/prepared") / DATASETS[dataset])]
         if hashlib.sha256(reference_path.read_bytes()).hexdigest() != expected_hash:
-            raise ValueError(f"{dataset}: fine-tuned run reference fingerprint mismatch.")
+            raise ValueError(f"{dataset}: Fastino run reference fingerprint mismatch.")
         reference = read_reference(reference_path)
         path = run_dir / provider / f"{dataset}_v1_t0.5.csv"
         frame, count, errors = read_predictions(path, reference, provider, dataset, "v1", 0.5)
         timing = timings.get(dataset)
         if not timing or timing[0] != timing[1] or timing[0] != count or count != len(reference):
-            raise ValueError(f"{dataset}: fine-tuned result and complete log counts must match.")
+            raise ValueError(f"{dataset}: Fastino result and complete log counts must match.")
         records.append({
             "provider": provider, "model": metadata["model"], "dataset": dataset,
-            "display_name": FINE_TUNED_DISPLAY_NAME,
+            "display_name": display_name,
             "prompt": "v1", "threshold": 0.5, "file": str(path),
             "status": "complete", "expected": len(reference), "rows": count,
             "valid": len(frame), "errors": count - len(frame),
-            "error_categories": errors, "source_kind": "fine_tuned_predictions",
+            "error_categories": errors,
+            "source_kind": "fine_tuned_predictions" if model_group == "fine_tuned_models" else "classification_predictions",
             "mean_elapsed_ms": timing[2] * 1000 / count,
             "latency_source_kind": "single_complete_run", "latency_log_file": str(log_path),
             **classification_metrics(frame.values()),
         })
+    counts = tuple(sum(row[key] for row in records) for key in ("rows", "valid", "errors"))
+    if "counts" in metadata and counts != metadata["counts"]:
+        raise ValueError("Fastino result counts do not match the completed run status.")
     comparison = report["external_comparison"]
     comparison["runs"] = [
         row for row in comparison["runs"] if row["provider"] != provider
@@ -473,15 +522,13 @@ def attach_finetuned_run(report, run_dir, log_path, data_dir=Path("data/prepared
         comparison["providers"].insert(comparison["providers"].index("fastino.ai") + 1, provider)
     comparison["model_identities"][provider] = {
         "request_model": metadata["model"], "resolved_model": metadata["model"],
-        "display_name": FINE_TUNED_DISPLAY_NAME, "base_model": metadata["base_model"],
+        "display_name": display_name,
     }
-    comparison.setdefault("display_names", {})[provider] = FINE_TUNED_DISPLAY_NAME
-    comparison.setdefault("fine_tuned_models", {})[provider] = {
+    comparison.setdefault("display_names", {})[provider] = display_name
+    model_info = {
         "run_dir": str(run_dir), "log_file": str(log_path), "model_id": metadata["model"],
-        "display_name": FINE_TUNED_DISPLAY_NAME, "training_name": metadata["display_name"],
-        "rows": sum(row["rows"] for row in records),
-        "valid": sum(row["valid"] for row in records),
-        "errors": sum(row["errors"] for row in records),
+        "display_name": display_name,
+        "rows": counts[0], "valid": counts[1], "errors": counts[2],
         "notes": (
             "v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, "
             "not GLiDE Noul. Quality excludes failed requests; no input truncation. "
@@ -490,6 +537,18 @@ def attach_finetuned_run(report, run_dir, log_path, data_dir=Path("data/prepared
             "Not a sample-aligned ranking."
         ),
     }
+    if model_group == "fine_tuned_models":
+        comparison["model_identities"][provider]["base_model"] = metadata["base_model"]
+        model_info["training_name"] = metadata["display_name"]
+    else:
+        model_info["finished_at"] = metadata["finished_at"]
+        model_info["notes"] = (
+            "v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, "
+            "not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. "
+            "Single-run elapsed includes failed requests, client and network overhead. "
+            "PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking."
+        )
+    comparison.setdefault(model_group, {})[provider] = model_info
     comparison["overview"] = reference_comparison_averages(comparison)
 
 

@@ -149,11 +149,15 @@ def test_laya_uses_systemone_endpoint(monkeypatch):
 
 
 @pytest.mark.parametrize("unsafe_score", [0.0, 0.1, 0.5, 1.0])
-def test_finetuned_fastino_uses_exact_model_and_direct_unsafe_confidence(monkeypatch, unsafe_score):
+@pytest.mark.parametrize("provider,model", [
+    ("fastino-ft-gg6-r1-ml2048-s7", "c94233af-98e6-4942-8e26-98ad204851bf"),
+    ("fastino-gliguard-300m", "fastino/gliguard-LLMGuardrails-300M"),
+])
+def test_finetuned_fastino_uses_exact_model_and_direct_unsafe_confidence(monkeypatch, unsafe_score, provider, model):
     def fake_post(url, *, headers, json: dict, timeout):
         assert url == "https://api.fastino.ai/v1/chat/completions"
         assert headers["Authorization"] == "Bearer test-key"
-        assert json["model"] == "c94233af-98e6-4942-8e26-98ad204851bf"
+        assert json["model"] == model
         assert json["messages"] == [{"role": "user", "content": "Example"}]
         assert json["schema"]["classifications"] == [{
             "task": "Is this text hateful?", "labels": ["safe", "unsafe"],
@@ -170,7 +174,7 @@ def test_finetuned_fastino_uses_exact_model_and_direct_unsafe_confidence(monkeyp
 
     monkeypatch.setattr(httpx, "post", fake_post)
     score = call_provider(
-        "fastino-ft-gg6-r1-ml2048-s7", "Is this text hateful?", "Example",
+        provider, "Is this text hateful?", "Example",
         api_key="test-key", base_url="https://api.fastino.ai/v1",
     )
     assert score == unsafe_score

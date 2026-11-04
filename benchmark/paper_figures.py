@@ -3,6 +3,7 @@
 import base64
 import csv
 import html
+import io
 import json
 import math
 import textwrap
@@ -22,7 +23,8 @@ from matplotlib.transforms import Bbox
 
 from benchmark.comparison import DATASETS, PROMPTS, STABILITY_METRICS, THRESHOLDS, baseline_rows
 from benchmark.external_summary import (
-    FINE_TUNED_DISPLAY_NAME, INTERNAL_IDENTITIES, METRICS, QWEN_PROVIDER, category_reference_averages,
+    FINE_TUNED_DISPLAY_NAME, GLIGUARD_DISPLAY_NAME, GLIGUARD_PROVIDER,
+    INTERNAL_IDENTITIES, METRICS, QWEN_PROVIDER, category_reference_averages,
     three_dataset_averages, v1_reference_scope_averages,
 )
 
@@ -31,24 +33,28 @@ COLORS = {
     "fastino.ai": "#0072B2", "laya-ai.com": "#D55E00", "typesafe.ai": "#009E73",
     "openjev": "#CC79A7", "openjev-32b": "#6A3D9A", "microsoft-decision-1": "#B8860B",
     "fastino-ft-gg6-r1-ml2048-s7": "#E7298A",
+    GLIGUARD_PROVIDER: "#332288",
     QWEN_PROVIDER: "#56B4E9",
 }
 NAMES = {
     "fastino.ai": "Fastino", "laya-ai.com": "Laya", "typesafe.ai": "TypeSafe", "openjev": "OpenJev 4B",
     **{provider: identity["display_name"] for provider, identity in INTERNAL_IDENTITIES.items()},
     "fastino-ft-gg6-r1-ml2048-s7": FINE_TUNED_DISPLAY_NAME,
+    GLIGUARD_PROVIDER: GLIGUARD_DISPLAY_NAME,
     QWEN_PROVIDER: "Qwen3Guard-Stream-8B",
 }
 MARKERS = {
     "fastino.ai": "o", "laya-ai.com": "s", "typesafe.ai": "D", "openjev": "^",
     "openjev-32b": "v", "microsoft-decision-1": "P",
     "fastino-ft-gg6-r1-ml2048-s7": "D",
+    GLIGUARD_PROVIDER: "h",
     QWEN_PROVIDER: "X",
 }
 HATCHES = {
     "fastino.ai": "", "laya-ai.com": "///", "typesafe.ai": "...", "openjev": "xxx",
     "openjev-32b": "\\\\", "microsoft-decision-1": "++",
     "fastino-ft-gg6-r1-ml2048-s7": "////",
+    GLIGUARD_PROVIDER: "..",
     QWEN_PROVIDER: "oo",
 }
 DATASET_NAMES = {
@@ -82,6 +88,9 @@ STYLE = {
 
 
 def model_label(report, provider):
+    if provider in report.get("classification_models", {}):
+        model = report["classification_models"][provider]
+        return f"{model['display_name']}\nmodel ID: {model['model_id']}\nv1 / 0.5; PII not tested"
     if provider in report.get("summary_models", {}):
         return f"{NAMES[provider]} | supplied summary\nbinary safety labels; PII unsupported"
     if provider in report.get("fine_tuned_models", {}):
@@ -703,6 +712,7 @@ def external_reference_providers(comparison, prompt):
         provider for provider in comparison["providers"]
         if (provider not in INTERNAL_IDENTITIES
             and provider not in comparison.get("fine_tuned_models", {})
+            and provider not in comparison.get("classification_models", {})
             and provider not in comparison.get("summary_models", {}))
         or any(row["provider"] == provider and row["prompt"] == prompt for row in comparison["runs"])
     ]
@@ -713,7 +723,8 @@ def fine_tuned_note(report):
         f"{model['display_name']} | model ID: {model['model_id']}\n"
         f"{model['valid']:,} successful / {model['rows']:,} rows; {model['errors']} errors. "
         + model["notes"]
-        for model in report.get("external_comparison", {}).get("fine_tuned_models", {}).values()
+        for key in ("fine_tuned_models", "classification_models")
+        for model in report.get("external_comparison", {}).get(key, {}).values()
     )
 
 
@@ -889,6 +900,7 @@ def three_dataset_averages_figure(report):
         "api" if (
             row["provider"] in report["providers"]
             or row["provider"] in report["external_comparison"].get("fine_tuned_models", {})
+            or row["provider"] in report["external_comparison"].get("classification_models", {})
         )
         else "internal" if (
             row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
@@ -898,11 +910,14 @@ def three_dataset_averages_figure(report):
         for row in rows
     ]
     boundaries = [index + 0.5 for index in range(len(rows) - 1) if groups[index] != groups[index + 1]]
-    has_fine_tuned = bool(report["external_comparison"].get("fine_tuned_models"))
-    fig, axes = plt.subplots(3, 2, figsize=(20 if has_fine_tuned else 16, 20))
+    has_long_labels = bool(
+        report["external_comparison"].get("fine_tuned_models")
+        or report["external_comparison"].get("classification_models")
+    )
+    fig, axes = plt.subplots(3, 2, figsize=(20 if has_long_labels else 16, 20))
     fig.subplots_adjust(
-        left=0.22 if has_fine_tuned else 0.16, right=0.98, top=0.89, bottom=0.14,
-        hspace=0.38, wspace=0.9 if has_fine_tuned else 0.6,
+        left=0.22 if has_long_labels else 0.16, right=0.98, top=0.89, bottom=0.14,
+        hspace=0.38, wspace=0.9 if has_long_labels else 0.6,
     )
     for ax, metric, title in zip(
         axes.flat,
@@ -1354,6 +1369,82 @@ def write_summary_model_details(comparison, output_dir):
         (output_dir / model["detail_page"]).write_text(page, encoding="utf-8")
 
 
+def write_fastino_comparison(report, output_path, dpi=300):
+    source = report["external_comparison"]
+    providers = ["fastino.ai", GLIGUARD_PROVIDER]
+    for provider in providers:
+        if provider not in source["providers"] or not any(
+            row["provider"] == provider and row["prompt"] == "v1" and row["threshold"] == 0.5
+            for row in source["runs"]
+        ):
+            raise ValueError(f"Fastino comparison requires v1 / 0.5 results for {provider}.")
+    comparison = {
+        **source, "providers": providers,
+        "runs": [row for row in source["runs"] if row["provider"] in providers],
+        "model_identities": {provider: source["model_identities"][provider] for provider in providers},
+        "classification_models": {
+            provider: model for provider, model in source.get("classification_models", {}).items()
+            if provider in providers
+        },
+        "fine_tuned_models": {}, "summary_models": {},
+    }
+    selected = {**report, "external_comparison": comparison}
+    title = "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5)"
+    page = gallery_header(title)
+    page += (
+        '<p class="report-subtitle">Fastino GLiDE vs. Fastino GLiGuard-LLMGuardrails-300M</p>'
+        '<p class="report-meta">Source snapshot (UTC): '
+        + html.escape(report["generated_at"]) + "</p>"
+        '<section><p class="report-note">Reference only: each model uses its own successful samples; '
+        'these are not sample-aligned rankings. GLiDE uses Noul scores; GLiGuard uses direct unsafe '
+        'confidence from independent safe/unsafe scores. Timing protocols differ and include '
+        'network overhead and failure waits.</p>'
+        '<aside class="pii-task-notice"><strong>PII = binary detection: present vs absent.</strong>'
+        'Not entity extraction or masking quality. PII datasets contain positives only; AUROC is undefined. '
+        'GLiGuard was not tested on PII; its PII results are N/A.</aside>'
+    )
+    note = fine_tuned_note(selected)
+    if note:
+        page += '<p class="report-note">' + html.escape(note).replace("\n", "<br>") + "</p>"
+    page += '<ul class="model-legend">' + "".join(
+        '<li><span class="legend-swatch" style="background-color:' + COLORS[provider] + '"></span>'
+        + html.escape(
+            model_label(comparison, provider).replace("Fastino |", "Fastino GLiDE |", 1)
+        ) + "</li>"
+        for provider in providers
+    ) + "</ul>"
+    primary, detailed = [], []
+    with plt.rc_context(STYLE):
+        figure = external_dataset_figure(selected, "v1")
+        try:
+            figure.canvas.draw()
+            renderer = figure.canvas.get_renderer()
+            for metric, axis in zip(METRICS, figure.axes):
+                bounds = axis.get_tightbbox(renderer).transformed(
+                    figure.dpi_scale_trans.inverted()
+                ).padded(0.15)
+                image = io.BytesIO()
+                figure.savefig(image, format="png", dpi=dpi, bbox_inches=bounds)
+                encoded = base64.b64encode(image.getvalue()).decode("ascii")
+                panel = (
+                    '<div class="metric-panel" data-metric="' + metric + '">'
+                    '<img src="data:image/png;base64,' + encoded + '" alt="'
+                    + html.escape(axis.get_title()) + '"></div>'
+                )
+                (primary if metric in ("accuracy", "f1", "mean_elapsed_ms") else detailed).append(panel)
+        finally:
+            plt.close(figure)
+    page += "".join(primary)
+    page += (
+        "<details><summary>Detailed metrics: Precision, Recall and AUROC</summary>"
+        + "".join(detailed) + "</details></section></main></html>\n"
+    )
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(page, encoding="utf-8")
+    return output_path
+
+
 def write_paper_figures(report, output_dir, dpi=300):
     if dpi < 72:
         raise ValueError("dpi must be at least 72")
@@ -1390,6 +1481,8 @@ def write_paper_figures(report, output_dir, dpi=300):
             manifest["external_comparison"]["internal_source"] = comparison["internal_source"]
         if comparison.get("fine_tuned_models"):
             manifest["external_comparison"]["fine_tuned_models"] = comparison["fine_tuned_models"]
+        if comparison.get("classification_models"):
+            manifest["external_comparison"]["classification_models"] = comparison["classification_models"]
         if comparison.get("summary_models"):
             manifest["external_comparison"]["summary_models"] = comparison["summary_models"]
     with plt.rc_context(STYLE), PdfPages(output_dir / "paper_figures.pdf") as bundle:
@@ -1471,12 +1564,17 @@ def write_paper_figures(report, output_dir, dpi=300):
             writer.writeheader()
             writer.writerows({**row, "datasets": ",".join(row["datasets"])} for row in category_averages)
         manifest["external_comparison"]["category_averages_csv"] = "category_reference_averages.csv"
-        if report["external_comparison"].get("fine_tuned_models"):
-            providers = report["external_comparison"]["fine_tuned_models"]
+        for model_group, prefix in (
+            ("fine_tuned_models", "fine_tuned_model"),
+            ("classification_models", "classification_model"),
+        ):
+            providers = report["external_comparison"].get(model_group, {})
+            if not providers:
+                continue
             fine_tuned_runs = [
                 row for row in report["external_comparison"]["runs"] if row["provider"] in providers
             ]
-            with (output_dir / "fine_tuned_model_runs.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+            with (output_dir / f"{prefix}_runs.csv").open("w", encoding="utf-8-sig", newline="") as stream:
                 writer = csv.DictWriter(stream, fieldnames=list(fine_tuned_runs[0]))
                 writer.writeheader()
                 writer.writerows(fine_tuned_runs)
@@ -1495,7 +1593,7 @@ def write_paper_figures(report, output_dir, dpi=300):
                 for row in report["external_comparison"]["overview"]
                 if row["provider"] in providers and row["prompt"] == "v1"
             )
-            with (output_dir / "fine_tuned_model_averages.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+            with (output_dir / f"{prefix}_averages.csv").open("w", encoding="utf-8-sig", newline="") as stream:
                 writer = csv.DictWriter(stream, fieldnames=list(averages[0]))
                 writer.writeheader()
                 writer.writerows({**row, "datasets": ",".join(row["datasets"])} for row in averages)
@@ -1722,6 +1820,12 @@ def write_paper_figures(report, output_dir, dpi=300):
             gallery += (
                 '<p>Fine-tuned model: <a href="fine_tuned_model_runs.csv">Per-dataset summary CSV</a> | '
                 '<a href="fine_tuned_model_averages.csv">Category and six-dataset averages CSV</a></p>'
+            )
+        if report["external_comparison"].get("classification_models"):
+            gallery += (
+                '<p>' + html.escape(GLIGUARD_DISPLAY_NAME) + ': '
+                '<a href="classification_model_runs.csv">Per-dataset summary CSV</a> | '
+                '<a href="classification_model_averages.csv">Category and six-dataset averages CSV</a></p>'
             )
         for model in report["external_comparison"].get("summary_models", {}).values():
             gallery += (

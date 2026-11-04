@@ -1,0 +1,23 @@
+{
+  "status": "blocked",
+  "reason": "Fastino returned HTTP 425 / model_warming on all seven readiness requests, including the user-provided example. Four consecutive attempts were spaced 30 seconds apart.",
+  "provider": "fastino-gliguard-300m",
+  "model": "fastino/gliguard-LLMGuardrails-300M",
+  "endpoint": "https://api.fastino.ai/v1/chat/completions",
+  "prompt_version": "v1",
+  "threshold": 0.5,
+  "datasets": {
+    "toxigen": 6789,
+    "hatecheck": 3728,
+    "aegis2": 1964,
+    "detect-jailbreak": 18258,
+    "jailbreak-classification": 1044,
+    "jailbreakhub": 15140
+  },
+  "expected_samples": 46923,
+  "benchmark_samples_processed": 0,
+  "pii_excluded": true,
+  "historical_results_modified": false,
+  "scoring": "Dataset v1 prompt as classification task; safe/unsafe labels with both confidences requested at API threshold zero; direct unsafe confidence compared with benchmark threshold 0.5.",
+  "resume_command": ".venv/bin/python -u -m scripts.run_model_suite --providers fastino-gliguard-300m --datasets toxigen,hatecheck,aegis2,detect-jailbreak,jailbreak-classification,jailbreakhub --prompt-versions v1 --thresholds 0.5 --max-workers 6 --output-dir outputs/fastino_gliguard_300m/20261103T135723Z"
+}

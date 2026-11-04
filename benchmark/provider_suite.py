@@ -57,6 +57,14 @@ PROVIDER_SPECS = {
         "model": "c94233af-98e6-4942-8e26-98ad204851bf",
         "auth": "bearer",
     },
+    "fastino-gliguard-300m": {
+        "kind": "api_key",
+        "api_key_env": "FASTINO_API_KEY",
+        "base_url_env": "FASTINO_BASE_URL",
+        "default_base_url": "https://api.fastino.ai/v1",
+        "model": "fastino/gliguard-LLMGuardrails-300M",
+        "auth": "bearer",
+    },
     "laya-ai.com": {
         "kind": "api_key",
         "api_key_env": "LAYA_API_KEY",
@@ -525,7 +533,10 @@ def call_provider(
             debug=debug,
         )
 
-    if normalize_provider_name(provider_name) == "fastino-ft-gg6-r1-ml2048-s7":
+    if normalize_provider_name(provider_name) in {
+        "fastino-ft-gg6-r1-ml2048-s7",
+        "fastino-gliguard-300m",
+    }:
         return _call_fastino_finetuned(
             prompt=prompt,
             text=text,

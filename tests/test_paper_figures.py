@@ -15,7 +15,8 @@ import pytest
 
 from benchmark.comparison import DATASETS, MODEL_IDENTITIES, MODELS
 from benchmark.external_summary import (
-    DATASET_CATEGORIES, METRICS, QWEN_PROVIDER, attach_finetuned_run, attach_openjev_summary,
+    DATASET_CATEGORIES, GLIGUARD_DISPLAY_NAME, GLIGUARD_PROVIDER, METRICS, QWEN_PROVIDER,
+    attach_finetuned_run, attach_gliguard_run, attach_openjev_summary,
     attach_qwen_summary, category_reference_averages,
     reference_averages, three_dataset_averages, v1_reference_scope_averages,
 )
@@ -36,6 +37,7 @@ from benchmark.paper_figures import (
     three_dataset_averages_figure,
     tradeoff_figure,
     write_paper_figures,
+    write_fastino_comparison,
     write_summary_model_details,
 )
 
@@ -1270,6 +1272,126 @@ def test_finetuned_reference_preserves_existing_models_and_untested_scopes(fine_
     assert focused["f1"] == pytest.approx(2 / 3) and focused["mean_elapsed_ms"] == 2000
     attach_finetuned_run(report, run, log, data)
     assert len([row for row in comparison["runs"] if row["provider"] == provider]) == 6
+
+
+@pytest.fixture
+def gliguard_run(fine_tuned_run):
+    report, run, log, data = fine_tuned_run
+    old_provider = "fastino-ft-gg6-r1-ml2048-s7"
+    model = "fastino/gliguard-LLMGuardrails-300M"
+    (run / old_provider).rename(run / GLIGUARD_PROVIDER)
+    for path in (run / GLIGUARD_PROVIDER).glob("*.csv"):
+        path.write_text(path.read_text().replace(old_provider, GLIGUARD_PROVIDER))
+    metadata = json.loads((run / "run_metadata.json").read_text())
+    status = {
+        "provider": GLIGUARD_PROVIDER, "model": model,
+        "status": "completed_with_errors", "exit_code": 0, "completed_datasets": 6,
+        "prompt_version": "v1", "threshold": 0.5,
+        "processed_rows": 18, "valid_rows": 17, "error_rows": 1,
+        "finished_at": "2026-11-03T15:47:47+00:00",
+        "datasets": {
+            dataset: {"rows": 3, "sha256": metadata["input_sha256"]["data/prepared/" + DATASETS[dataset]]}
+            for dataset in list(DATASETS)[:6]
+        },
+    }
+    (run / "run_status.json").write_text(json.dumps(status))
+    (run / "run.log").write_text(
+        "\n".join(log.read_text().splitlines()[1:]).replace(old_provider, GLIGUARD_PROVIDER)
+    )
+    return report, run, data
+
+
+def test_gliguard_reference_preserves_baseline_and_excludes_untested_scopes(gliguard_run):
+    report, run, data = gliguard_run
+    before = copy.deepcopy(report)
+    attach_gliguard_run(report, run, data)
+    comparison = report["external_comparison"]
+    assert report["providers"] == before["providers"]
+    assert report["runs"] == before["runs"]
+    assert [row for row in comparison["runs"] if row["provider"] != GLIGUARD_PROVIDER] == before["external_comparison"]["runs"]
+    assert GLIGUARD_PROVIDER in external_reference_providers(comparison, "v1")
+    assert GLIGUARD_PROVIDER not in external_reference_providers(comparison, "v2")
+    info = comparison["classification_models"][GLIGUARD_PROVIDER]
+    assert (info["rows"], info["valid"], info["errors"]) == (18, 17, 1)
+    focused = next(row for row in three_dataset_averages(report) if row["provider"] == GLIGUARD_PROVIDER)
+    assert focused["f1"] == pytest.approx(2 / 3)
+    assert focused["mean_elapsed_ms"] == 2000
+    pii = next(row for row in category_reference_averages(report) if row["provider"] == GLIGUARD_PROVIDER and row["category"] == "pii")
+    assert all(pii[metric] is None for metric in METRICS)
+    attach_gliguard_run(report, run, data)
+    assert len([row for row in comparison["runs"] if row["provider"] == GLIGUARD_PROVIDER]) == 6
+
+
+@pytest.mark.parametrize("invalid", ["model", "reference", "incomplete_log", "counts"])
+def test_gliguard_reference_rejects_mismatched_sources(gliguard_run, invalid):
+    report, run, data = gliguard_run
+    if invalid == "reference":
+        (data / DATASETS["toxigen"]).write_text("different reference")
+    elif invalid == "incomplete_log":
+        log = run / "run.log"
+        log.write_text(log.read_text().replace("Progress: 3/3", "Progress: 2/3"))
+    else:
+        path = run / "run_status.json"
+        metadata = json.loads(path.read_text())
+        metadata["model" if invalid == "model" else "valid_rows"] = "fastino/GLiDE" if invalid == "model" else 18
+        path.write_text(json.dumps(metadata))
+    with pytest.raises(ValueError):
+        attach_gliguard_run(report, run, data)
+    assert "classification_models" not in report["external_comparison"]
+
+
+def test_gliguard_reference_exports_identity_counts_and_metrics(gliguard_run, tmp_path):
+    report, run, data = gliguard_run
+    attach_gliguard_run(report, run, data)
+    destination = tmp_path / "figures"
+    manifest = write_paper_figures(report, destination, dpi=72)
+    assert GLIGUARD_PROVIDER in manifest["external_comparison"]["classification_models"]
+    for name in ("index.html", "category_reference_comparison.html", "three_dataset_comparison.html"):
+        page = (destination / name).read_text()
+        assert GLIGUARD_DISPLAY_NAME in page
+        assert "fastino/gliguard-LLMGuardrails-300M" in page
+        assert "1 errors" in page and "not GLiDE Noul" in page
+    for suffix in ("runs", "averages"):
+        with (destination / f"classification_model_{suffix}.csv").open(encoding="utf-8-sig") as stream:
+            rows = list(csv.DictReader(stream))
+        assert all(row["display_name"] == GLIGUARD_DISPLAY_NAME for row in rows)
+        assert all(row["model"] == "fastino/gliguard-LLMGuardrails-300M" for row in rows)
+    assert next(row for row in rows if row["category"] == "pii")["accuracy"] == ""
+
+
+def test_gliguard_long_model_label_does_not_overlap_neighboring_panels(gliguard_run):
+    report, run, data = gliguard_run
+    attach_gliguard_run(report, run, data)
+    figure = three_dataset_averages_figure(report)
+    try:
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        for left, right in zip(figure.axes[::2], figure.axes[1::2]):
+            assert all(
+                label.get_window_extent(renderer).x0 > left.get_window_extent(renderer).x1
+                for label in right.get_yticklabels()
+            )
+        assert GLIGUARD_DISPLAY_NAME in [label.get_text() for label in figure.axes[0].get_yticklabels()]
+    finally:
+        plt.close(figure)
+
+
+def test_fastino_standalone_page_contains_only_two_models_and_embedded_panels(gliguard_run, tmp_path):
+    report, run, data = gliguard_run
+    attach_gliguard_run(report, run, data)
+    before = copy.deepcopy(report)
+    output = tmp_path / "standalone" / "fastino_comparison.html"
+    assert write_fastino_comparison(report, output, dpi=72) == output
+    assert list(output.parent.iterdir()) == [output]
+    page = output.read_text()
+    assert "Fastino GLiDE | request: fastino/GLiDE" in page
+    assert GLIGUARD_DISPLAY_NAME in page
+    assert page.count('src="data:image/png;base64,') == 6
+    assert page.count('class="metric-panel"') == 6
+    assert "GLiGuard was not tested on PII" in page
+    assert "17 successful / 18 rows; 1 errors" in page
+    assert all(name not in page for name in ("TypeSafe", "Laya", "OpenJev", "Qwen3Guard"))
+    assert report == before
 
 
 @pytest.mark.parametrize("invalid", ["model", "reference", "incomplete_log"])
