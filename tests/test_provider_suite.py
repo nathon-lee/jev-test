@@ -338,3 +338,52 @@ def test_systemone_rejects_missing_answer(monkeypatch, provider, payload):
 
     with pytest.raises(ValueError, match=r"answers\.score\.noul"):
         call_provider(provider, "Is this unsafe?", "Example text", api_key="test-key")
+
+
+def _finetuned_ok(url, model):
+    return httpx.Response(200, request=httpx.Request("POST", url), json={
+        "model": model, "x_fastino": None,
+        "choices": [{"message": {"content": (
+            '{"Is this text hateful?": [{"label": "safe", "confidence": 0.8},'
+            '{"label": "unsafe", "confidence": 0.2}]}'
+        )}}],
+    })
+
+
+def test_fastino_waits_out_cold_start(monkeypatch):
+    model = "fastino/gliguard-LLMGuardrails-300M"
+    responses = [425, 425, 200]
+    sleeps = []
+
+    def fake_post(url, *, headers, json, timeout):
+        status = responses.pop(0)
+        if status == 425:
+            return httpx.Response(425, request=httpx.Request("POST", url), headers={"Retry-After": "30"})
+        return _finetuned_ok(url, model)
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    monkeypatch.setattr("benchmark.provider_suite.time.sleep", sleeps.append)
+    score = call_provider(
+        "fastino-gliguard-300m", "Is this text hateful?", "Example",
+        api_key="test-key", base_url="https://api.fastino.ai/v1",
+    )
+    assert score == 0.2
+    assert sleeps == [30.0, 30.0]
+    assert responses == []
+
+
+def test_fastino_cold_start_wait_is_bounded(monkeypatch):
+    calls = []
+
+    def fake_post(url, *, headers, json, timeout):
+        calls.append(url)
+        return httpx.Response(425, request=httpx.Request("POST", url), headers={"Retry-After": "30"})
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    monkeypatch.setattr("benchmark.provider_suite.FASTINO_WARMUP_MAX_WAIT_SECONDS", 0.0)
+    with pytest.raises(httpx.HTTPStatusError):
+        call_provider(
+            "fastino-gliguard-300m", "Is this text hateful?", "Example",
+            api_key="test-key", base_url="https://api.fastino.ai/v1",
+        )
+    assert len(calls) == 1
