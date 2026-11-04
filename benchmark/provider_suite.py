@@ -50,6 +50,16 @@ PROVIDER_SPECS = {
         "model": "fastino/GLiDE",
         "auth": "bearer",
     },
+    # GLiDE-Guardrail is a GLiDE (System One) model, so it is called on
+    # /v1/systemone like base GLiDE, not on /v1/chat/completions.
+    "fastino-glide-guardrail": {
+        "kind": "api_key",
+        "api_key_env": "FASTINO_API_KEY",
+        "base_url_env": "FASTINO_BASE_URL",
+        "default_base_url": "https://api.fastino.ai/v1",
+        "model": "21ac7ad2-f9b5-5e6f-801b-45b52e26bdc9",
+        "auth": "bearer",
+    },
     "fastino-ft-gg6-r1-ml2048-s7": {
         "kind": "api_key",
         "api_key_env": "FASTINO_API_KEY",
@@ -370,6 +380,7 @@ def _call_fastino_systemone(
     base_url: str | None,
     timeout: float,
     debug: bool = False,
+    model: str = "fastino/GLiDE",
 ) -> float:
     if not api_key:
         raise RuntimeError("No API key configured for provider 'fastino.ai'. Set FASTINO_API_KEY or pass --api-key.")
@@ -379,7 +390,7 @@ def _call_fastino_systemone(
         url = url + "/systemone"
 
     payload = {
-        "model": "fastino/GLiDE",
+        "model": model,
         "state": {"user_input": text},
         "questions": {
             "score": {
@@ -550,7 +561,7 @@ def call_provider(
             model=provider.get("model", "jev-latest"),
         )
 
-    if normalize_provider_name(provider_name) == "fastino.ai":
+    if normalize_provider_name(provider_name) in {"fastino.ai", "fastino-glide-guardrail"}:
         return _call_fastino_systemone(
             prompt=prompt,
             text=text,
@@ -558,6 +569,7 @@ def call_provider(
             base_url=resolved_base_url,
             timeout=timeout,
             debug=debug,
+            model=provider["model"],
         )
 
     if normalize_provider_name(provider_name) in {
