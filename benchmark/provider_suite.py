@@ -2,6 +2,7 @@ import json
 import math
 import os
 import re
+import time
 from pathlib import Path
 from typing import Any
 
@@ -336,6 +337,32 @@ def _call_typesafe_sdk(
     return _extract_score(response)
 
 
+# Fastino answers HTTP 425 (or 503) with Retry-After while a model it has scaled to
+# zero starts again. A start usually takes seconds but can take several minutes,
+# so wait it out instead of recording the row as an error.
+FASTINO_WARMUP_STATUSES = {425, 503}
+FASTINO_WARMUP_MAX_WAIT_SECONDS = float(os.getenv("FASTINO_WARMUP_MAX_WAIT_SECONDS", "900"))
+FASTINO_WARMUP_MAX_DELAY_SECONDS = 30.0
+
+
+def _post_fastino(url: str, **kwargs: Any) -> Any:
+    deadline = time.monotonic() + FASTINO_WARMUP_MAX_WAIT_SECONDS
+    while True:
+        response = httpx.post(url, **kwargs)
+        if getattr(response, "status_code", None) not in FASTINO_WARMUP_STATUSES:
+            return response
+        try:
+            retry_after = float(response.headers.get("Retry-After", ""))
+        except ValueError:
+            return response
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return response
+        delay = min(max(retry_after, 1.0), FASTINO_WARMUP_MAX_DELAY_SECONDS, remaining)
+        print(f"Fastino model is starting (HTTP {response.status_code}); retrying in {delay:.0f}s")
+        time.sleep(delay)
+
+
 def _call_fastino_systemone(
     prompt: str,
     text: str,
@@ -366,7 +393,7 @@ def _call_fastino_systemone(
         print("[DEBUG][fastino.ai] HEADERS:", {"Content-Type": "application/json", "Authorization": "Bearer ***"})
         print("[DEBUG][fastino.ai] PAYLOAD:", payload)
 
-    response = httpx.post(
+    response = _post_fastino(
         url,
         headers={
             "Content-Type": "application/json",
@@ -415,7 +442,7 @@ def _call_fastino_finetuned(
     if debug:
         print("[DEBUG][fastino-ft] URL:", url)
         print("[DEBUG][fastino-ft] PAYLOAD:", payload)
-    response = httpx.post(
+    response = _post_fastino(
         url,
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
         json=payload,
