@@ -1,7 +1,6 @@
 ﻿category,provider,prompt,datasets,accuracy,precision,recall,f1,auroc,mean_elapsed_ms,threshold,task_supported
 harmful_content,fastino.ai,v1,"toxigen,hatecheck,aegis2",0.822960479684988,0.9388551936652554,0.7021966663099625,0.7682895679812356,0.9188084803443486,362.50948014166397,0.5,True
 harmful_content,fastino-gliner2.5-decide,v1,"toxigen,hatecheck,aegis2",0.7102408815652884,0.6971689137397147,0.8458287531224589,0.76292352974149,0.7735834309175077,276.03792719163846,0.5,True
-harmful_content,fastino-systemone-21ac7ad2,v1,"toxigen,hatecheck,aegis2",0.9009432776513359,0.90964471857238,0.8973989314336644,0.9034431031121921,0.9529270400975656,495.94898008650193,0.5,True
 harmful_content,fastino-gliguard-300m,v1,"toxigen,hatecheck,aegis2",0.7221124421424006,0.7232395670978085,0.8117723290041682,0.7604294354064951,0.770689568949665,250.82553804144027,0.5,True
 harmful_content,laya-ai.com,v1,"toxigen,hatecheck,aegis2",0.5841744943107454,0.8469586323711736,0.30815752595661583,0.3751621012116918,0.7201254656568579,1060.7949321469714,0.5,True
 harmful_content,typesafe.ai,v1,"toxigen,hatecheck,aegis2",0.832312918054613,0.9104207827207893,0.759490111737386,0.8126536465001857,0.9243040104864543,225.90970941125266,0.5,True
@@ -12,7 +11,6 @@ harmful_content,qwen3guard-stream-8b,v1,"toxigen,hatecheck,aegis2",0.80178533333
 harmful_content,luna,native_presets,"toxigen,hatecheck,aegis2",0.7848666666666667,0.9110666666666667,0.6621333333333334,0.7459333333333333,0.8816666666666666,,0.5,True
 jailbreak,fastino.ai,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.7614386817767291,0.4585191353454841,0.9645285583991204,0.5609011036314808,0.9497679782631814,307.0258976046009,0.5,True
 jailbreak,fastino-gliner2.5-decide,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8113114903945166,0.4719154677146243,0.8160795993658766,0.5680668790043911,0.8705242624586258,281.0833303844457,0.5,True
-jailbreak,fastino-systemone-21ac7ad2,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8856362841632046,0.5985861731334453,0.859180179672595,0.674096984899011,0.9448236697163688,504.85680753735096,0.5,True
 jailbreak,fastino-gliguard-300m,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8143769078420553,0.490110685072341,0.8453504215978784,0.5819822376568947,0.879127267963853,252.56666619677696,0.5,True
 jailbreak,laya-ai.com,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.5601069761285048,0.4173835787735224,0.9637495903648445,0.48208817434009654,0.8069674438419626,1175.198384130445,0.5,True
 jailbreak,typesafe.ai,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8557079255624436,0.5513958689125797,0.8875894189448833,0.6358782974302727,0.940049542362831,230.1858690212581,0.5,True
@@ -23,7 +21,6 @@ jailbreak,qwen3guard-stream-8b,v1,"detect-jailbreak,jailbreak-classification,jai
 jailbreak,luna,native_presets,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8207333333333333,0.5154,0.8853,0.5953333333333334,0.9055,,0.5,True
 pii,fastino.ai,v1,"pii_masking_nano_1k,pii_masking_mini_10k",0.8603333333333334,1.0,0.8603333333333334,0.9249236608544277,,367.63750000000005,0.5,True
 pii,fastino-gliner2.5-decide,v1,"pii_masking_nano_1k,pii_masking_mini_10k",,,,,,,0.5,True
-pii,fastino-systemone-21ac7ad2,v1,"pii_masking_nano_1k,pii_masking_mini_10k",,,,,,,0.5,True
 pii,fastino-gliguard-300m,v1,"pii_masking_nano_1k,pii_masking_mini_10k",,,,,,,0.5,True
 pii,laya-ai.com,v1,"pii_masking_nano_1k,pii_masking_mini_10k",1.0,1.0,1.0,1.0,,580.7884441688889,0.5,True
 pii,typesafe.ai,v1,"pii_masking_nano_1k,pii_masking_mini_10k",0.946388888888889,1.0,0.946388888888889,0.9724535829699372,,223.68757807958332,0.5,True
