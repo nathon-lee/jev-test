@@ -1,6 +1,6 @@
 # 模型能力对比报告
 
-生成时间（UTC）：2026-11-03T16:08:27.662038+00:00
+生成时间（UTC）：2026-11-05T00:31:00.804682+00:00
 
 ## 结论
 
@@ -521,7 +521,9 @@ OpenJev 4B 数值取自用户最初提供的清晰汇总表，分类阈值均为
 | 模型 | 提示词 | 共同数据集 | Average Accuracy | Avg Precision | Avg Recall | Avg F1 | Avg AUROC | Avg latency ms |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | fastino.ai | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 79.22% | 69.87% | 83.34% | 66.46% | 93.43% | 334.77 |
-| Fastino GLiGuard-LLMGuardrails-300M | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 76.83% | 60.67% | 82.83% | 67.11% | 82.49% | 261.01 |
+| Fastino GLiNER2.5-Decide | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 76.08% | 58.45% | 83.10% | 66.55% | 82.21% | 278.56 |
+| Fastino POC model | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 89.33% | 75.41% | 87.83% | 78.88% | 94.89% | 500.40 |
+| Fastino GLiGuard-LLMGuardrails-300M | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 76.82% | 60.67% | 82.86% | 67.12% | 82.49% | 251.70 |
 | laya-ai.com | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 57.21% | 63.22% | 63.60% | 42.86% | 76.35% | 1118.00 |
 | typesafe.ai | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 84.40% | 73.09% | 82.35% | 72.43% | 93.22% | 228.05 |
 | OpenJev 4B | v1 | toxigen、hatecheck、aegis2、detect-jailbreak、jailbreak-classification、jailbreakhub | 83.30% | 74.29% | 75.47% | 72.13% | 89.60% | 938.00 |

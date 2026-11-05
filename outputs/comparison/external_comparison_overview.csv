@@ -1,6 +1,8 @@
 ﻿provider,prompt,datasets,accuracy,precision,recall,f1,auroc,mean_elapsed_ms
 fastino.ai,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.7921995807308586,0.6986871645053697,0.8333626123545415,0.6645953358063582,0.934288229303765,334.76768887313244
-fastino-gliguard-300m,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.7682738522368189,0.6067206951869959,0.828302523412804,0.6711219567154018,0.8248951733367609,261.01188838882877
+fastino-gliner2.5-decide,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.7607761859799025,0.5845421907271695,0.8309541762441677,0.6654952043729405,0.8220538466880667,278.5606287880421
+fastino-systemone-21ac7ad2,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8932897809072703,0.7541154458529127,0.8782895555531297,0.7887700440056016,0.9488753549069672,500.40289381192645
+fastino-gliguard-300m,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.7682446749922279,0.6066751260850748,0.8285613753010233,0.6712058365316949,0.824908418456759,251.69610211910862
 laya-ai.com,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.572140735219625,0.632171105572348,0.6359535581607302,0.42862513777589417,0.7635464547494102,1117.9966581387082
 typesafe.ai,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8440104218085284,0.7309083258166845,0.8235397653411346,0.7242659719652291,0.9321767764246427,228.04778921625538
 openjev,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8329833333333333,0.7429166666666667,0.7546666666666667,0.7213166666666667,0.8959833333333334,937.9983333333333
