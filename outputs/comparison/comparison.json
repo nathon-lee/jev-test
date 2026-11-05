@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-05T00:31:00.804682+00:00",
+  "generated_at": "2026-11-05T04:06:07.482412+00:00",
   "previous_generated_at": "2026-10-30T03:31:18.836634+00:00",
   "input_dir": "outputs",
   "data_dir": "data/prepared",
@@ -13104,7 +13104,8 @@
       "openjev",
       "openjev-32b",
       "microsoft-decision-1",
-      "qwen3guard-stream-8b"
+      "qwen3guard-stream-8b",
+      "luna"
     ],
     "model_identities": {
       "fastino.ai": {
@@ -13156,6 +13157,11 @@
         "resolved_model": "fastino/gliner2.5-decide",
         "response_model": "fastino/gliner2.5-decide",
         "display_name": "Fastino GLiNER2.5-Decide"
+      },
+      "luna": {
+        "display_name": "Luna",
+        "request_model": "not supplied",
+        "resolved_model": null
       }
     },
     "display_names": {
@@ -16596,6 +16602,102 @@
         "auroc": 0.8450437426517801,
         "majority_accuracy": 0.9081446434606286,
         "positive_rate": 0.25224738087191617
+      },
+      {
+        "provider": "luna",
+        "dataset": "jailbreak-classification",
+        "prompt": "native_presets",
+        "threshold": 0.5,
+        "rows": 1044,
+        "valid": 1044,
+        "errors": 0,
+        "source_kind": "user_supplied_aggregate",
+        "accuracy": 0.9569,
+        "precision": 0.9979,
+        "recall": 0.9165,
+        "f1": 0.9555,
+        "auroc": 0.9897,
+        "mean_elapsed_ms": null
+      },
+      {
+        "provider": "luna",
+        "dataset": "toxigen",
+        "prompt": "native_presets",
+        "threshold": 0.5,
+        "rows": 6789,
+        "valid": 6789,
+        "errors": 0,
+        "source_kind": "user_supplied_aggregate",
+        "accuracy": 0.6799,
+        "precision": 0.9189,
+        "recall": 0.3898,
+        "f1": 0.5474,
+        "auroc": 0.8185,
+        "mean_elapsed_ms": null
+      },
+      {
+        "provider": "luna",
+        "dataset": "jailbreakhub",
+        "prompt": "native_presets",
+        "threshold": 0.5,
+        "rows": 15140,
+        "valid": 15140,
+        "errors": 0,
+        "source_kind": "user_supplied_aggregate",
+        "accuracy": 0.7232,
+        "precision": 0.2334,
+        "recall": 0.8676,
+        "f1": 0.3678,
+        "auroc": 0.8445,
+        "mean_elapsed_ms": null
+      },
+      {
+        "provider": "luna",
+        "dataset": "detect-jailbreak",
+        "prompt": "native_presets",
+        "threshold": 0.5,
+        "rows": 18258,
+        "valid": 18258,
+        "errors": 0,
+        "source_kind": "user_supplied_aggregate",
+        "accuracy": 0.7821,
+        "precision": 0.3149,
+        "recall": 0.8718,
+        "f1": 0.4627,
+        "auroc": 0.8823,
+        "mean_elapsed_ms": null
+      },
+      {
+        "provider": "luna",
+        "dataset": "aegis2",
+        "prompt": "native_presets",
+        "threshold": 0.5,
+        "rows": 1964,
+        "valid": 1964,
+        "errors": 0,
+        "source_kind": "user_supplied_aggregate",
+        "accuracy": 0.778,
+        "precision": 0.8889,
+        "recall": 0.6723,
+        "f1": 0.7656,
+        "auroc": 0.8845,
+        "mean_elapsed_ms": null
+      },
+      {
+        "provider": "luna",
+        "dataset": "hatecheck",
+        "prompt": "native_presets",
+        "threshold": 0.5,
+        "rows": 3728,
+        "valid": 3728,
+        "errors": 0,
+        "source_kind": "user_supplied_aggregate",
+        "accuracy": 0.8967,
+        "precision": 0.9254,
+        "recall": 0.9243,
+        "f1": 0.9248,
+        "auroc": 0.942,
+        "mean_elapsed_ms": null
       }
     ],
     "overview": [
@@ -16778,6 +16880,24 @@
         "f1": 0.716328,
         "auroc": 0.8066963333333333,
         "mean_elapsed_ms": 1638.8306195
+      },
+      {
+        "provider": "luna",
+        "prompt": "native_presets",
+        "datasets": [
+          "toxigen",
+          "hatecheck",
+          "aegis2",
+          "detect-jailbreak",
+          "jailbreak-classification",
+          "jailbreakhub"
+        ],
+        "accuracy": 0.8028,
+        "precision": 0.7132333333333334,
+        "recall": 0.7737166666666667,
+        "f1": 0.6706333333333333,
+        "auroc": 0.8935833333333333,
+        "mean_elapsed_ms": null
       },
       {
         "provider": "fastino.ai",
@@ -17185,6 +17305,15 @@
         "detail_page": "qwen3guard_stream_8b_summary.html",
         "summary_csv": "qwen3guard_stream_8b_summary.csv"
       }
+    },
+    "native_preset_models": {
+      "luna": {
+        "source": "data/external/luna_summary.csv",
+        "prompt_version": null,
+        "threshold": 0.5,
+        "source_kind": "user_supplied_aggregate_unverified",
+        "scorer_version_id": null
+      }
     }
   },
   "conclusions": [
@@ -17200,5 +17329,143 @@
     "PII 是“是否含 PII”的普通二分类，不是实体抽取或脱敏任务。当前数据全是正样本，恒预测“含 PII”即可获得 100% 检出率；现有输出没有脱敏文本，不能评价实体定位、泄露率或脱敏质量，不应据此选定脱敏模型。",
     "选型优先参考固定配置的 F1、AUROC、误报/漏报及错误率；表中的最优提示词/阈值是在同一测试集上挑选的探索性上限，部署前需独立验证集重新选参并复测。",
     "OpenJev 4B 及其他内部模型为用户提供的汇总结果，仅加入独立参考图表，未提供逐样本输出，不参与上述共同成功样本基线、排名或重复调用一致性分析。"
-  ]
+  ],
+  "luna_summary": {
+    "display_name": "Luna",
+    "source": "data/external/luna_summary.csv",
+    "source_kind": "user_supplied_aggregate_unverified",
+    "prompt_protocol": "Luna uses original task-specific presets without custom prompts (prompt version: N/A; not v1/v2), with a binary threshold of 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results.",
+    "source_limitations": "Values were transcribed from the user-supplied summary, not inferred. Original summary.json and manifest.json files were not available in the repository; saved metrics, scorer version IDs and input provenance have not been independently verified. Scorer version IDs and latency remain N/A. No missing metrics are reconstructed. Non-PII results appear beside v1 reference results with their native-preset protocol retained. Task-definition differences may affect results; this is not a controlled prompt comparison. Not included in sample-aligned rankings, v2 comparisons or binary PII comparisons.",
+    "pii_dataset": "ai4privacy/pii-masking-mini-10k",
+    "pii_split": "validation",
+    "pii_revision": "7b686c2e7475b02e10e38add1eb54a9f604f4361",
+    "pii_categories": [
+      "credit_card_info",
+      "email",
+      "phone_number",
+      "ssn"
+    ],
+    "summary_csv": "luna_summary.csv",
+    "supplied_rows": [
+      {
+        "dataset": "pii",
+        "rows": 990,
+        "valid": 990,
+        "errors": 0,
+        "task": "document_level_multilabel",
+        "f1_averaging": "micro",
+        "prompt_version": null,
+        "threshold": null,
+        "scorer_version_id": null,
+        "mean_elapsed_ms": null,
+        "accuracy": null,
+        "precision": 0.9767,
+        "recall": 0.7791,
+        "f1": 0.8668,
+        "auroc": null
+      },
+      {
+        "dataset": "jailbreak-classification",
+        "rows": 1044,
+        "valid": 1044,
+        "errors": 0,
+        "task": "binary_classification",
+        "f1_averaging": "binary",
+        "prompt_version": null,
+        "threshold": 0.5,
+        "scorer_version_id": null,
+        "mean_elapsed_ms": null,
+        "accuracy": 0.9569,
+        "precision": 0.9979,
+        "recall": 0.9165,
+        "f1": 0.9555,
+        "auroc": 0.9897
+      },
+      {
+        "dataset": "toxigen",
+        "rows": 6789,
+        "valid": 6789,
+        "errors": 0,
+        "task": "binary_classification",
+        "f1_averaging": "binary",
+        "prompt_version": null,
+        "threshold": 0.5,
+        "scorer_version_id": null,
+        "mean_elapsed_ms": null,
+        "accuracy": 0.6799,
+        "precision": 0.9189,
+        "recall": 0.3898,
+        "f1": 0.5474,
+        "auroc": 0.8185
+      },
+      {
+        "dataset": "jailbreakhub",
+        "rows": 15140,
+        "valid": 15140,
+        "errors": 0,
+        "task": "binary_classification",
+        "f1_averaging": "binary",
+        "prompt_version": null,
+        "threshold": 0.5,
+        "scorer_version_id": null,
+        "mean_elapsed_ms": null,
+        "accuracy": 0.7232,
+        "precision": 0.2334,
+        "recall": 0.8676,
+        "f1": 0.3678,
+        "auroc": 0.8445
+      },
+      {
+        "dataset": "detect-jailbreak",
+        "rows": 18258,
+        "valid": 18258,
+        "errors": 0,
+        "task": "binary_classification",
+        "f1_averaging": "binary",
+        "prompt_version": null,
+        "threshold": 0.5,
+        "scorer_version_id": null,
+        "mean_elapsed_ms": null,
+        "accuracy": 0.7821,
+        "precision": 0.3149,
+        "recall": 0.8718,
+        "f1": 0.4627,
+        "auroc": 0.8823
+      },
+      {
+        "dataset": "aegis2",
+        "rows": 1964,
+        "valid": 1964,
+        "errors": 0,
+        "task": "binary_classification",
+        "f1_averaging": "binary",
+        "prompt_version": null,
+        "threshold": 0.5,
+        "scorer_version_id": null,
+        "mean_elapsed_ms": null,
+        "accuracy": 0.778,
+        "precision": 0.8889,
+        "recall": 0.6723,
+        "f1": 0.7656,
+        "auroc": 0.8845
+      },
+      {
+        "dataset": "hatecheck",
+        "rows": 3728,
+        "valid": 3728,
+        "errors": 0,
+        "task": "binary_classification",
+        "f1_averaging": "binary",
+        "prompt_version": null,
+        "threshold": 0.5,
+        "scorer_version_id": null,
+        "mean_elapsed_ms": null,
+        "accuracy": 0.8967,
+        "precision": 0.9254,
+        "recall": 0.9243,
+        "f1": 0.9248,
+        "auroc": 0.942
+      }
+    ]
+  }
 }

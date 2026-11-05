@@ -16,10 +16,10 @@ import pytest
 from benchmark.comparison import DATASETS, MODEL_IDENTITIES, MODELS
 from benchmark.external_summary import (
     DATASET_CATEGORIES, GLIGUARD_DISPLAY_NAME, GLIGUARD_PROVIDER,
-    GLINER25_DISPLAY_NAME, GLINER25_MODEL, GLINER25_PROVIDER, METRICS,
+    GLINER25_DISPLAY_NAME, GLINER25_MODEL, GLINER25_PROVIDER, LUNA_PROVIDER, METRICS,
     POC_DISPLAY_NAME, POC_MODEL, POC_PROVIDER, QWEN_PROVIDER,
     attach_finetuned_run, attach_gliguard_run, attach_gliner25_run,
-    attach_openjev_summary, attach_poc_run,
+    attach_luna_summary, attach_openjev_summary, attach_poc_run,
     attach_qwen_summary, category_reference_averages,
     reference_averages, three_dataset_averages, v1_reference_scope_averages,
 )
@@ -42,6 +42,7 @@ from benchmark.paper_figures import (
     write_paper_figures,
     write_fastino_comparison,
     write_summary_model_details,
+    luna_summary_section,
 )
 
 
@@ -1574,6 +1575,150 @@ def test_gliner25_reference_rejects_response_alias(gliner25_run):
     before = copy.deepcopy(report)
     with pytest.raises(ValueError, match="response identity"):
         attach_gliner25_run(report, run, data)
+    assert report == before
+
+
+def test_luna_summary_preserves_supplied_metrics_and_separates_protocols(report, tmp_path):
+    source = Path(__file__).parents[1] / "data/external/luna_summary.csv"
+    before = copy.deepcopy(report)
+    attach_luna_summary(report, source)
+    assert {key: value for key, value in report.items() if key != "luna_summary"} == before
+    model = report["luna_summary"]
+    records = {row["dataset"]: row for row in model["supplied_rows"]}
+    assert records["toxigen"]["accuracy"] == 0.6799
+    assert records["toxigen"]["auroc"] == 0.8185
+    assert records["toxigen"]["f1"] == 0.5474
+    assert records["toxigen"]["threshold"] == 0.5
+    pii = records["pii"]
+    assert (pii["rows"], pii["valid"], pii["errors"], pii["f1"]) == (990, 990, 0, 0.8668)
+    assert pii["task"] == "document_level_multilabel"
+    assert pii["f1_averaging"] == "micro"
+    assert pii["accuracy"] is pii["auroc"] is pii["threshold"] is None
+    assert all(row["prompt_version"] is row["scorer_version_id"] is row["mean_elapsed_ms"] is None for row in records.values())
+    page = luna_summary_section(model, tmp_path)
+    assert "not v1/v2" in page
+    assert "original task-specific presets without custom prompts" in page
+    assert "Other models use dataset-specific v1/v2 prompts" in page
+    assert "Task-definition differences may affect results" in page
+    assert "not binary F1 or entity-extraction F1" in page
+    assert "Micro Precision" in page and "Micro Recall" in page and "Micro F1" in page
+    assert "86.68%" in page and "N/A" in page
+    assert model["pii_revision"] in page
+    with (tmp_path / "luna_summary.csv").open(encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    exported_pii = next(row for row in rows if row["dataset"] == "pii")
+    assert exported_pii["accuracy"] == exported_pii["auroc"] == exported_pii["threshold"] == "N/A"
+    assert len(rows) == 7
+
+
+@pytest.mark.parametrize("invalid", ["duplicate", "counts", "metric", "pii_scope"])
+def test_luna_summary_rejects_invalid_values_without_mutation(report, tmp_path, invalid):
+    source = Path(__file__).parents[1] / "data/external/luna_summary.csv"
+    with source.open(newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    if invalid == "duplicate":
+        rows.append(rows[0].copy())
+    elif invalid == "counts":
+        rows[0]["errors"] = "1"
+    elif invalid == "metric":
+        rows[0]["f1"] = "nan"
+    else:
+        rows[0].update(rows="1000", valid="1000")
+    path = tmp_path / "invalid.csv"
+    with path.open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    before = copy.deepcopy(report)
+    with pytest.raises(ValueError):
+        attach_luna_summary(report, path)
+    assert report == before
+
+
+def test_luna_reference_charts_preserve_native_protocol_and_other_models(fine_tuned_run):
+    report, _, _, _ = fine_tuned_run
+    before = copy.deepcopy(report)
+    scopes_before = v1_reference_scope_averages(report)
+    attach_luna_summary(report, Path(__file__).parents[1] / "data/external/luna_summary.csv")
+    comparison = report["external_comparison"]
+    assert report["runs"] == before["runs"]
+    assert report["providers"] == before["providers"]
+    assert [row for row in comparison["runs"] if row["provider"] != LUNA_PROVIDER] == before["external_comparison"]["runs"]
+    native = [row for row in comparison["runs"] if row["provider"] == LUNA_PROVIDER]
+    assert len(native) == 6 and all(row["prompt"] == "native_presets" for row in native)
+    assert all(row["threshold"] == 0.5 and row["mean_elapsed_ms"] is None for row in native)
+    assert not any(row["dataset"].startswith("pii") for row in native)
+    assert LUNA_PROVIDER in external_reference_providers(comparison, "v1")
+    assert LUNA_PROVIDER not in external_reference_providers(comparison, "v2")
+    scopes = v1_reference_scope_averages(report)
+    assert [row for row in scopes if row["provider"] != LUNA_PROVIDER] == scopes_before
+    luna = {row["scope"]: row for row in scopes if row["provider"] == LUNA_PROVIDER}
+    assert luna["non_pii"]["prompt"] == "native_presets"
+    assert luna["non_pii"]["f1"] == pytest.approx((0.9555 + 0.5474 + 0.3678 + 0.4627 + 0.7656 + 0.9248) / 6)
+    assert luna["non_pii"]["shared_elapsed_ms"] is None
+    for scope in ("pii", "all"):
+        assert all(luna[scope][metric] is None for metric in METRICS)
+    focused = next(row for row in three_dataset_averages(report) if row["provider"] == LUNA_PROVIDER)
+    assert focused["prompt"] == "native_presets"
+    assert focused["accuracy"] == pytest.approx((0.6799 + 0.8967 + 0.7780) / 3)
+    attach_luna_summary(report, Path(__file__).parents[1] / "data/external/luna_summary.csv")
+    assert comparison["providers"].count(LUNA_PROVIDER) == 1
+    assert len([row for row in comparison["runs"] if row["provider"] == LUNA_PROVIDER]) == 6
+
+
+@pytest.mark.parametrize("kind", ["dataset", "category", "averages", "three"])
+def test_luna_reference_bar_values_and_protocol_labels(fine_tuned_run, kind):
+    report, _, _, _ = fine_tuned_run
+    attach_luna_summary(report, Path(__file__).parents[1] / "data/external/luna_summary.csv")
+    builders = {
+        "dataset": lambda: external_dataset_figure(report, "v1"),
+        "category": lambda: external_category_figure(report),
+        "averages": lambda: external_averages_figure(report),
+        "three": lambda: three_dataset_averages_figure(report),
+    }
+    figure = builders[kind]()
+    try:
+        figure.canvas.draw()
+        text = "\n".join(item.get_text() for item in figure.texts)
+        assert "Task-definition differences may affect results" in text
+        if kind == "dataset":
+            index = report["external_comparison"]["providers"].index(LUNA_PROVIDER) * len(DATASETS)
+            assert figure.axes[0].patches[index].get_height() == pytest.approx(67.99)
+            assert figure.axes[3].patches[index].get_height() == pytest.approx(54.74)
+            assert math.isnan(figure.axes[0].patches[index + 6].get_height())
+        elif kind == "category":
+            index = report["external_comparison"]["providers"].index(LUNA_PROVIDER) * 3
+            assert figure.axes[0].patches[index].get_height() == pytest.approx((67.99 + 89.67 + 77.80) / 3)
+            assert math.isnan(figure.axes[0].patches[index + 2].get_height())
+        elif kind == "three":
+            labels = [label.get_text() for label in figure.axes[0].get_yticklabels()]
+            assert "Luna (native presets)" in labels
+        if kind != "three":
+            legend = "\n".join(item.get_text() for item in figure.legends[0].texts)
+            assert "Luna | original task-specific presets" in legend
+            assert "prompt: N/A; binary threshold: 0.5" in legend
+    finally:
+        plt.close(figure)
+
+
+def test_luna_summary_appears_in_gallery_and_reference_exports(fine_tuned_run, tmp_path):
+    report, _, _, _ = fine_tuned_run
+    attach_luna_summary(report, Path(__file__).parents[1] / "data/external/luna_summary.csv")
+    before = copy.deepcopy(report)
+    manifest = write_paper_figures(report, tmp_path, dpi=72)
+    page = (tmp_path / "index.html").read_text()
+    assert 'id="luna-summary"' in page
+    assert "original summary.json" in page.lower()
+    assert "Scorer version IDs and latency remain N/A" in page
+    assert "Luna has a separate document-level multilabel PII summary below" in page
+    assert "luna_summary.csv" in page
+    assert manifest["luna_summary"] == report["luna_summary"]
+    assert LUNA_PROVIDER in manifest["external_comparison"]["native_preset_models"]
+    with (tmp_path / "three_dataset_averages.csv").open(encoding="utf-8-sig", newline="") as stream:
+        row = next(row for row in csv.DictReader(stream) if row["provider"] == LUNA_PROVIDER)
+    assert row["prompt"] == "native_presets"
+    assert float(row["f1"]) == pytest.approx((0.5474 + 0.9248 + 0.7656) / 3)
+    assert "Luna: native presets (prompt N/A)" in page
     assert report == before
 
 

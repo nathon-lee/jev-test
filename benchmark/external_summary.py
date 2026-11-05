@@ -23,6 +23,8 @@ POC_DISPLAY_NAME = "Fastino POC model"
 GLINER25_PROVIDER = "fastino-gliner2.5-decide"
 GLINER25_MODEL = "fastino/gliner2.5-decide"
 GLINER25_DISPLAY_NAME = "Fastino GLiNER2.5-Decide"
+LUNA_PROVIDER = "luna"
+NATIVE_PRESET_PROMPT = "native_presets"
 QWEN_PROVIDER = "qwen3guard-stream-8b"
 QWEN_NOTES = (
     "User-supplied summary only; no prediction CSV or source-data integrity audit was performed. "
@@ -158,6 +160,11 @@ def _read_summary(path, internal):
     return records
 
 
+def reference_prompt(row):
+    # Native presets share the v1 reference panels, not the v1 prompting protocol.
+    return "v1" if row["prompt"] == NATIVE_PRESET_PROMPT else row["prompt"]
+
+
 def reference_averages(records, providers, datasets=None, include_pii=False):
     candidates = list(DATASETS if datasets is None else datasets)
     if datasets is not None and (
@@ -166,7 +173,7 @@ def reference_averages(records, providers, datasets=None, include_pii=False):
                for dataset in candidates)
     ):
         raise ValueError("Reference averages require distinct " + ("" if include_pii else "non-PII ") + "datasets")
-    lookup = {(row["provider"], row["dataset"], row["prompt"]): row for row in records}
+    lookup = {(row["provider"], row["dataset"], reference_prompt(row)): row for row in records}
     overview = []
     for prompt in PROMPTS:
         active = [
@@ -194,8 +201,14 @@ def reference_averages(records, providers, datasets=None, include_pii=False):
             for metric in METRICS:
                 values = [row[metric] for row in rows]
                 metrics[metric] = mean(values) if values and all(value is not None for value in values) else None
+            protocols = {
+                row["prompt"] for row in records
+                if row["provider"] == provider and reference_prompt(row) == prompt
+            }
             overview.append({
-                "provider": provider, "prompt": prompt, "datasets": selected, **metrics,
+                "provider": provider,
+                "prompt": next(iter(protocols)) if len(protocols) == 1 else prompt,
+                "datasets": selected, **metrics,
             })
     return overview
 
@@ -204,7 +217,7 @@ def category_reference_averages(report):
     comparison = report["external_comparison"]
     records = [
         row for row in comparison["runs"]
-        if row["prompt"] == "v1" and row["threshold"] == 0.5
+        if reference_prompt(row) == "v1" and row["threshold"] == 0.5
     ]
     result = []
     for category, datasets in DATASET_CATEGORIES.items():
@@ -214,10 +227,13 @@ def category_reference_averages(report):
                 {
                     "category": category, **row, "threshold": 0.5,
                     "task_supported": not (
-                        category == "pii" and provider in comparison.get("summary_models", {})
+                        category == "pii" and (
+                            provider in comparison.get("summary_models", {})
+                            or provider in comparison.get("native_preset_models", {})
+                        )
                     ),
                 }
-                for row in rows if row["prompt"] == "v1"
+                for row in rows if reference_prompt(row) == "v1"
             )
     return result
 
@@ -227,6 +243,7 @@ def reference_comparison_averages(comparison, datasets=None, include_pii=False):
         **comparison.get("fine_tuned_models", {}),
         **comparison.get("classification_models", {}),
         **comparison.get("summary_models", {}),
+        **comparison.get("native_preset_models", {}),
     }
     providers = [provider for provider in comparison["providers"] if provider not in additional]
     rows = reference_averages(comparison["runs"], providers, datasets, include_pii=include_pii)
@@ -234,18 +251,18 @@ def reference_comparison_averages(comparison, datasets=None, include_pii=False):
         return rows
     for provider in additional:
         prompts = {
-            row["prompt"] for row in comparison["runs"] if row["provider"] == provider
+            reference_prompt(row) for row in comparison["runs"] if row["provider"] == provider
         }
         for prompt in prompts:
-            scope = next(row["datasets"] for row in rows if row["prompt"] == prompt)
+            scope = next(row["datasets"] for row in rows if reference_prompt(row) == prompt)
             if not scope:
                 continue
             rows.extend(
                 row for row in reference_averages(
                     comparison["runs"], [provider], scope, include_pii=include_pii,
-                ) if row["prompt"] == prompt
+                ) if reference_prompt(row) == prompt
             )
-    lookup = {(row["provider"], row["prompt"]): row for row in rows}
+    lookup = {(row["provider"], reference_prompt(row)): row for row in rows}
     return [
         lookup[(provider, prompt)] for prompt in PROMPTS for provider in comparison["providers"]
         if (provider, prompt) in lookup
@@ -260,7 +277,7 @@ def v1_reference_scope_averages(report, datasets=None):
     }
     timing, unsupported = {}, set()
     for row in comparison["runs"]:
-        if row["prompt"] != "v1":
+        if reference_prompt(row) != "v1":
             continue
         key = (row["provider"], row["dataset"])
         if row.get("task_supported") is False:
@@ -270,6 +287,7 @@ def v1_reference_scope_averages(report, datasets=None):
             or row["provider"] in comparison.get("fine_tuned_models", {})
             or row["provider"] in comparison.get("classification_models", {})
             or row["provider"] in comparison.get("summary_models", {})
+            or row["provider"] in comparison.get("native_preset_models", {})
         ):
             timing[key] = row["mean_elapsed_ms"]
         else:
@@ -286,14 +304,16 @@ def v1_reference_scope_averages(report, datasets=None):
         rows = [
             row for row in reference_comparison_averages(
                 comparison, selected, include_pii=include_pii,
-            ) if row["prompt"] == "v1"
+            ) if reference_prompt(row) == "v1"
         ]
         scope_datasets = rows[0]["datasets"] if rows else []
         timed = [
             dataset for dataset in scope_datasets
             if all(
                 timing.get((row["provider"], dataset)) is not None
-                for row in rows if row["provider"] not in comparison.get("summary_models", {})
+                for row in rows
+                if row["provider"] not in comparison.get("summary_models", {})
+                and row["provider"] not in comparison.get("native_preset_models", {})
             )
         ]
         for row in rows:
@@ -316,7 +336,7 @@ def three_dataset_averages(report):
     comparison = report["external_comparison"]
     overview = [
         row for row in reference_comparison_averages(comparison, FOCUSED_DATASETS)
-        if row["prompt"] == "v1"
+        if reference_prompt(row) == "v1"
     ]
     timing = {
         (row["provider"], row["dataset"]): row
@@ -329,6 +349,7 @@ def three_dataset_averages(report):
             or row["provider"] in comparison.get("fine_tuned_models", {})
             or row["provider"] in comparison.get("classification_models", {})
             or row["provider"] in comparison.get("summary_models", {})
+            or row["provider"] in comparison.get("native_preset_models", {})
         ):
             continue
         runs = [timing.get((row["provider"], dataset)) for dataset in FOCUSED_DATASETS]
@@ -417,6 +438,91 @@ def attach_qwen_summary(report, path):
         "summary_csv": "qwen3guard_stream_8b_summary.csv",
     }
     comparison["overview"] = reference_comparison_averages(comparison)
+
+
+def attach_luna_summary(report, path):
+    path = Path(path)
+    expected = {*list(DATASETS)[:6], "pii"}
+    records, seen = [], set()
+    with path.open(encoding="utf-8-sig", newline="") as stream:
+        reader = csv.DictReader(stream)
+        required = {"dataset", "rows", "valid", "errors", *METRICS[:-1]}
+        if not required.issubset(reader.fieldnames or []):
+            raise ValueError(f"{path}: missing Luna summary columns")
+        for line, row in enumerate(reader, 2):
+            dataset = row["dataset"]
+            if dataset not in expected or dataset in seen:
+                raise ValueError(f"{path}:{line}: unknown or duplicate Luna dataset")
+            seen.add(dataset)
+            rows, valid, errors = (int(row[key]) for key in ("rows", "valid", "errors"))
+            if rows <= 0 or min(valid, errors) < 0 or valid + errors != rows:
+                raise ValueError(f"{path}:{line}: invalid Luna coverage counts")
+            if dataset == "pii" and rows != 990:
+                raise ValueError(f"{path}:{line}: Luna PII summary requires 990 validation documents")
+            metrics = {}
+            for metric in METRICS[:-1]:
+                value = None if row[metric] in ("", "N/A") else float(row[metric])
+                if value is not None and (not math.isfinite(value) or not 0 <= value <= 1):
+                    raise ValueError(f"{path}:{line}: invalid Luna {metric}")
+                metrics[metric] = value
+            records.append({
+                "dataset": dataset, "rows": rows, "valid": valid, "errors": errors,
+                "task": "document_level_multilabel" if dataset == "pii" else "binary_classification",
+                "f1_averaging": "micro" if dataset == "pii" else "binary",
+                "prompt_version": None, "threshold": None if dataset == "pii" else 0.5,
+                "scorer_version_id": None, "mean_elapsed_ms": None, **metrics,
+            })
+    if seen != expected:
+        raise ValueError(f"{path}: Luna summary must contain six non-PII datasets and one PII dataset")
+    report["luna_summary"] = {
+        "display_name": "Luna", "source": str(path),
+        "source_kind": "user_supplied_aggregate_unverified",
+        "prompt_protocol": (
+            "Luna uses original task-specific presets without custom prompts "
+            "(prompt version: N/A; not v1/v2), with a binary threshold of 0.5. "
+            "Other models use dataset-specific v1/v2 prompts. "
+            "Task-definition differences may affect results."
+        ),
+        "source_limitations": (
+            "Values were transcribed from the user-supplied summary, not inferred. "
+            "Original summary.json and manifest.json files were not available in the repository; "
+            "saved metrics, scorer version IDs and input provenance have not been independently verified. "
+            "Scorer version IDs and latency remain N/A. No missing metrics are reconstructed. "
+            "Non-PII results appear beside v1 reference results with their native-preset protocol retained. "
+            "Task-definition differences may affect results; this is not a controlled prompt comparison. "
+            "Not included in sample-aligned rankings, v2 comparisons or binary PII comparisons."
+        ),
+        "pii_dataset": "ai4privacy/pii-masking-mini-10k",
+        "pii_split": "validation",
+        "pii_revision": "7b686c2e7475b02e10e38add1eb54a9f604f4361",
+        "pii_categories": ["credit_card_info", "email", "phone_number", "ssn"],
+        "summary_csv": "luna_summary.csv", "supplied_rows": records,
+    }
+    if report.get("external_comparison"):
+        comparison = report["external_comparison"]
+        comparison["runs"] = [
+            row for row in comparison["runs"] if row["provider"] != LUNA_PROVIDER
+        ] + [
+            {
+                "provider": LUNA_PROVIDER, "dataset": row["dataset"],
+                "prompt": NATIVE_PRESET_PROMPT, "threshold": row["threshold"],
+                "rows": row["rows"], "valid": row["valid"], "errors": row["errors"],
+                "source_kind": "user_supplied_aggregate",
+                **{metric: row[metric] for metric in METRICS},
+            }
+            for row in records if row["dataset"] != "pii"
+        ]
+        if LUNA_PROVIDER not in comparison["providers"]:
+            comparison["providers"].append(LUNA_PROVIDER)
+        comparison["model_identities"][LUNA_PROVIDER] = {
+            "display_name": "Luna", "request_model": "not supplied", "resolved_model": None,
+        }
+        comparison.setdefault("native_preset_models", {})[LUNA_PROVIDER] = {
+            "source": str(path), "prompt_version": None, "threshold": 0.5,
+            "source_kind": "user_supplied_aggregate_unverified",
+            "scorer_version_id": None,
+        }
+        comparison["overview"] = reference_comparison_averages(comparison)
 
 
 def attach_finetuned_run(report, run_dir, log_path, data_dir=Path("data/prepared")):

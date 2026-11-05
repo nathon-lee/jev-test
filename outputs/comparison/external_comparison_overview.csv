@@ -9,6 +9,7 @@ openjev,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-cl
 openjev-32b,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8150951666666666,0.87065,0.6782418333333333,0.7454875,0.8828516666666667,1568.9994911666668
 microsoft-decision-1,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8146538333333333,0.7131821666666667,0.8180203333333333,0.688979,0.924596,1242.8153255
 qwen3guard-stream-8b,v1,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8264041666666666,0.696766,0.8044891666666667,0.716328,0.8066963333333333,1638.8306195
+luna,native_presets,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8028,0.7132333333333334,0.7737166666666667,0.6706333333333333,0.8935833333333333,
 fastino.ai,v2,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.43814747606579946,0.39847435827101674,0.8885238042386406,0.5116589490596175,0.6267600545882743,
 laya-ai.com,v2,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.4046978014823088,0.4046978014823088,1.0,0.5356382990164746,0.43369740317704,
 typesafe.ai,v2,"['toxigen', 'hatecheck', 'aegis2', 'detect-jailbreak', 'jailbreak-classification', 'jailbreakhub']",0.8419828736915326,0.7299649853772254,0.8209083103948284,0.7215794665556226,0.9303780069371551,228.01373556530035

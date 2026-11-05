@@ -25,7 +25,8 @@ from benchmark.comparison import DATASETS, PROMPTS, STABILITY_METRICS, THRESHOLD
 from benchmark.external_summary import (
     FINE_TUNED_DISPLAY_NAME, GLIGUARD_DISPLAY_NAME, GLIGUARD_PROVIDER,
     GLINER25_DISPLAY_NAME, GLINER25_PROVIDER,
-    INTERNAL_IDENTITIES, METRICS, POC_DISPLAY_NAME, POC_PROVIDER, QWEN_PROVIDER, category_reference_averages,
+    INTERNAL_IDENTITIES, LUNA_PROVIDER, METRICS, POC_DISPLAY_NAME, POC_PROVIDER,
+    QWEN_PROVIDER, category_reference_averages, reference_prompt,
     three_dataset_averages, v1_reference_scope_averages,
 )
 
@@ -38,6 +39,7 @@ COLORS = {
     POC_PROVIDER: "#009E73",
     GLINER25_PROVIDER: "#D55E00",
     QWEN_PROVIDER: "#56B4E9",
+    LUNA_PROVIDER: "#8C564B",
 }
 NAMES = {
     "fastino.ai": "Fastino", "laya-ai.com": "Laya", "typesafe.ai": "TypeSafe", "openjev": "OpenJev 4B",
@@ -47,6 +49,7 @@ NAMES = {
     POC_PROVIDER: POC_DISPLAY_NAME,
     GLINER25_PROVIDER: GLINER25_DISPLAY_NAME,
     QWEN_PROVIDER: "Qwen3Guard-Stream-8B",
+    LUNA_PROVIDER: "Luna (native presets)",
 }
 MARKERS = {
     "fastino.ai": "o", "laya-ai.com": "s", "typesafe.ai": "D", "openjev": "^",
@@ -56,6 +59,7 @@ MARKERS = {
     POC_PROVIDER: "P",
     GLINER25_PROVIDER: "s",
     QWEN_PROVIDER: "X",
+    LUNA_PROVIDER: "*",
 }
 HATCHES = {
     "fastino.ai": "", "laya-ai.com": "///", "typesafe.ai": "...", "openjev": "xxx",
@@ -65,6 +69,7 @@ HATCHES = {
     POC_PROVIDER: "///",
     GLINER25_PROVIDER: "\\\\",
     QWEN_PROVIDER: "oo",
+    LUNA_PROVIDER: "--",
 }
 DATASET_NAMES = {
     "aegis2": "AEGIS2",
@@ -97,6 +102,8 @@ STYLE = {
 
 
 def model_label(report, provider):
+    if provider in report.get("native_preset_models", {}):
+        return "Luna | original task-specific presets\nprompt: N/A; binary threshold: 0.5\nPII: separate multilabel evaluation"
     if provider in report.get("classification_models", {}):
         model = report["classification_models"][provider]
         response = (
@@ -727,8 +734,9 @@ def external_reference_providers(comparison, prompt):
         if (provider not in INTERNAL_IDENTITIES
             and provider not in comparison.get("fine_tuned_models", {})
             and provider not in comparison.get("classification_models", {})
-            and provider not in comparison.get("summary_models", {}))
-        or any(row["provider"] == provider and row["prompt"] == prompt for row in comparison["runs"])
+            and provider not in comparison.get("summary_models", {})
+            and provider not in comparison.get("native_preset_models", {}))
+        or any(row["provider"] == provider and reference_prompt(row) == prompt for row in comparison["runs"])
     ]
 
 
@@ -743,12 +751,20 @@ def fine_tuned_note(report):
 
 
 def summary_model_note(report):
-    if QWEN_PROVIDER not in report.get("external_comparison", {}).get("summary_models", {}):
-        return ""
-    return (
-        "Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only).\n"
-        "Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking."
-    )
+    comparison = report.get("external_comparison", {})
+    notes = []
+    if QWEN_PROVIDER in comparison.get("summary_models", {}):
+        notes.append(
+            "Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only).\n"
+            "Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking."
+        )
+    if LUNA_PROVIDER in comparison.get("native_preset_models", {}):
+        notes.append(
+            "Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5.\n"
+            "Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results.\n"
+            "Luna PII micro-F1 is separate; binary PII and latency are N/A. Supplied metrics; scorer versions unverified."
+        )
+    return "\n".join(notes)
 
 
 def reference_latency_log_axis(fig):
@@ -815,7 +831,7 @@ def external_dataset_figure(report, prompt):
     comparison = {**source, "providers": external_reference_providers(source, prompt)}
     lookup = {
         (row["provider"], row["dataset"]): row for row in comparison["runs"]
-        if row["prompt"] == prompt
+        if reference_prompt(row) == prompt
     }
     labels = [DATASET_NAMES[dataset].replace("-", "-\n") for dataset in DATASETS]
     records = [
@@ -919,6 +935,7 @@ def three_dataset_averages_figure(report):
         else "internal" if (
             row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
             or row["provider"] in report["external_comparison"].get("summary_models", {})
+            or row["provider"] in report["external_comparison"].get("native_preset_models", {})
         )
         else "dynamo" if row["provider"].startswith("Dynamo ") else "other"
         for row in rows
@@ -1383,6 +1400,55 @@ def write_summary_model_details(comparison, output_dir):
         (output_dir / model["detail_page"]).write_text(page, encoding="utf-8")
 
 
+def luna_summary_section(model, output_dir):
+    records = model["supplied_rows"]
+    with (output_dir / model["summary_csv"]).open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(records[0]))
+        writer.writeheader()
+        writer.writerows({
+            key: "N/A" if value is None else value for key, value in row.items()
+        } for row in records)
+
+    def table(rows, micro=False):
+        prefix = "Micro " if micro else ""
+        headings = ("Dataset", "Success / Requests", "Errors", prefix + "Precision",
+                    prefix + "Recall", prefix + "F1", "Accuracy", "AUROC")
+        body = []
+        for row in rows:
+            values = [
+                DATASET_NAMES.get(row["dataset"], row["dataset"]),
+                f"{row['valid']:,} / {row['rows']:,}", str(row["errors"]),
+            ] + [
+                "N/A" if row[key] is None else f"{row[key] * 100:.2f}%"
+                for key in ("precision", "recall", "f1", "accuracy", "auroc")
+            ]
+            body.append("<tr>" + "".join("<td>" + html.escape(value) + "</td>" for value in values) + "</tr>")
+        return (
+            '<div class="table-scroll"><table class="scope-table"><thead><tr>'
+            + "".join("<th>" + html.escape(value) + "</th>" for value in headings)
+            + "</tr></thead><tbody>" + "".join(body) + "</tbody></table></div>"
+        )
+
+    return (
+        '<section id="luna-summary"><h2>Luna: native presets (separate evaluation protocol)</h2>'
+        '<p class="report-note">' + html.escape(model["prompt_protocol"])
+        + " Prompt version: N/A. Non-PII decision threshold: 0.5. "
+        + html.escape(model["source_limitations"]) + "</p>"
+        "<h3>Non-PII binary classification</h3>"
+        + table([row for row in records if row["dataset"] != "pii"])
+        + '<h3>PII: document-level multilabel classification (micro averages)</h3>'
+        '<p class="report-note">PII uses category labels, not a numeric classification threshold. '
+        'PII F1 is micro-averaged across document/category pairs, not binary F1 or entity-extraction F1. '
+        'This is not comparable to the main binary PII charts.</p>'
+        "<p>All 990 validation documents from " + html.escape(model["pii_dataset"])
+        + "; pinned revision: <code>" + html.escape(model["pii_revision"]) + "</code>. "
+        "Mapped categories: " + html.escape(", ".join(model["pii_categories"])) + ".</p>"
+        + table([row for row in records if row["dataset"] == "pii"], micro=True)
+        + '<p><a href="' + html.escape(model["summary_csv"])
+        + '">Download Luna supplied metrics and protocol (CSV)</a></p></section>'
+    )
+
+
 def write_fastino_comparison(report, output_path, dpi=300):
     source = report["external_comparison"]
     providers = ["fastino.ai", GLIGUARD_PROVIDER]
@@ -1404,7 +1470,7 @@ def write_fastino_comparison(report, output_path, dpi=300):
             provider: model for provider, model in source.get("classification_models", {}).items()
             if provider in providers
         },
-        "fine_tuned_models": {}, "summary_models": {},
+        "fine_tuned_models": {}, "summary_models": {}, "native_preset_models": {},
     }
     selected = {**report, "external_comparison": comparison}
     title = "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5)"
@@ -1500,6 +1566,8 @@ def write_paper_figures(report, output_dir, dpi=300):
         "dpi": dpi, "figures": [],
         "warnings": [english_warning(warning) for warning in report.get("warnings", [])],
     }
+    if report.get("luna_summary"):
+        manifest["luna_summary"] = report["luna_summary"]
     figures = FIGURES
     if report.get("external_comparison"):
         figures += EXTERNAL_FIGURES
@@ -1518,6 +1586,8 @@ def write_paper_figures(report, output_dir, dpi=300):
             manifest["external_comparison"]["classification_models"] = comparison["classification_models"]
         if comparison.get("summary_models"):
             manifest["external_comparison"]["summary_models"] = comparison["summary_models"]
+        if comparison.get("native_preset_models"):
+            manifest["external_comparison"]["native_preset_models"] = comparison["native_preset_models"]
     with plt.rc_context(STYLE), PdfPages(output_dir / "paper_figures.pdf") as bundle:
         for stem, builder, title, caption in figures:
             if stem in {item[0] for item in EXTERNAL_FIGURES} and stem != "fig11_openjev_reference_v2":
@@ -1535,6 +1605,12 @@ def write_paper_figures(report, output_dir, dpi=300):
             elif stem == "fig11_openjev_reference_v2":
                 providers = external_reference_providers(report["external_comparison"], "v2")
                 scoped_title += " (" + ", ".join(NAMES[provider] for provider in providers) + ")"
+            if (
+                report.get("external_comparison", {}).get("native_preset_models")
+                and stem in {item[0] for item in EXTERNAL_FIGURES}
+                and stem != "fig11_openjev_reference_v2"
+            ):
+                scoped_title += " | Luna: native presets (prompt N/A)"
             fig = builder(report)
             panels = []
             try:
@@ -1825,7 +1901,9 @@ def write_paper_figures(report, output_dir, dpi=300):
         '<p class="report-note">Reference comparisons use different successful samples and timing protocols; '
         'they are not fair rankings. Arrows and outlined bars mark the highest available score or lowest time '
         'within each group; exact ties are all highlighted, and missing values are excluded. '
-        'PII is ordinary binary classification (present vs absent), not masking quality.</p>'
+        'The main PII comparison plots use ordinary binary classification (present vs absent), not masking quality.'
+        + (" Luna has a separate document-level multilabel PII summary below." if report.get("luna_summary") else "")
+        + '</p>'
         '<div class="report-resources"><details><summary>Data &amp; Downloads</summary>'
         '<p>PDF and SVG are vector formats; PNG defaults to 300 DPI.</p>'
         '<p><a href="table01_baseline.tex">Download the LaTeX comparison table</a></p>'
@@ -1879,6 +1957,8 @@ def write_paper_figures(report, output_dir, dpi=300):
             'The added internal models use supplied single-run timings. Protocols differ; timings are reference-only.</p>'
         )
     gallery += "</details></div>"
+    if report.get("luna_summary"):
+        gallery += luna_summary_section(report["luna_summary"], output_dir)
     card_order = list(cards)
     if report.get("external_comparison"):
         leading = [

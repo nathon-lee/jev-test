@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--poc-run", type=Path, help="Add a completed Fastino SystemOne POC run to reference-only comparisons")
     parser.add_argument("--gliner25-run", type=Path, help="Add a completed Fastino GLiNER2.5-Decide run to reference-only comparisons")
     parser.add_argument("--qwen-summary", type=Path, help="User-supplied 12-dataset Qwen3Guard summary CSV (v1 / 0.5)")
+    parser.add_argument("--luna-summary", type=Path, help="User-supplied Luna summary CSV; native presets are displayed separately from v1/v2 comparisons")
     parser.add_argument("--fastino-page", type=Path, help="Write only a self-contained per-dataset Fastino comparison HTML page")
     args = parser.parse_args()
     if args.dpi < 72:
@@ -44,13 +45,17 @@ def main():
         from benchmark.external_summary import attach_qwen_summary
 
         attach_qwen_summary(report, args.qwen_summary)
-    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run:
+    if args.luna_summary:
+        from benchmark.external_summary import attach_luna_summary
+
+        attach_luna_summary(report, args.luna_summary)
+    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run or args.luna_summary:
         report["generated_at"] = datetime.now(timezone.utc).isoformat()
     if args.fastino_page:
         write_fastino_comparison(report, args.fastino_page, dpi=args.dpi)
         print(f"Fastino comparison: {args.fastino_page}")
         return
-    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run:
+    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run or args.luna_summary:
         from benchmark.comparison import write_report
 
         write_report(report, args.report.parent)
