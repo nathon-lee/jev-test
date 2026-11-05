@@ -38,6 +38,7 @@ PREPARED_TASKS = {
 }
 PI_REVISION = "5f68a89245ce067ba4258c92198633dbebd02dac"
 PII_REVISION = "7b686c2e7475b02e10e38add1eb54a9f604f4361"
+PII_NANO_REVISION = "ca0a26dffb2c1f35947fa6d8d71b0d61e3373985"
 PII_MAP = {"CREDITCARDNUMBER": "credit_card_info", "EMAIL": "email",
            "TELEPHONENUM": "phone_number", "SOCIALNUM": "ssn"}
 PII_CLASSES = sorted(PII_MAP.values())
@@ -98,7 +99,7 @@ def download(client, cache, repo, revision, filename):
     return path
 
 
-def load_sources(cache, pi_size, seed, metric):
+def load_sources(cache, pi_size, seed, metric, pii_dataset="mini", pii_split="validation"):
     """Download pinned public data; never send the Galileo key to Hugging Face."""
     sources, provenance = {}, {}
     with httpx.Client(follow_redirects=True, timeout=180,
@@ -126,12 +127,22 @@ def load_sources(cache, pi_size, seed, metric):
                                 "sampling": "proportional stratified, without replacement",
                                 "file_sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
         if metric in ("both", "pii"):
-            path = download(client, cache, "ai4privacy/pii-masking-mini-10k",
-                            PII_REVISION, "data/validation.jsonl")
-            with path.open(encoding="utf-8") as handle:
-                data = [json.loads(line) for line in handle if line.strip()]
-            if not {"source_text", "privacy_mask", "language", "uid"} <= set(data[0]):
-                raise ValueError("PII dataset schema changed")
+            if pii_dataset not in ("mini", "nano") or pii_split not in ("train", "validation", "all"):
+                raise ValueError("Unsupported PII dataset or split")
+            repo = f"ai4privacy/pii-masking-{'nano-1k' if pii_dataset == 'nano' else 'mini-10k'}"
+            revision = PII_NANO_REVISION if pii_dataset == "nano" else PII_REVISION
+            splits = ("train", "validation") if pii_split == "all" else (pii_split,)
+            data, hashes = [], {}
+            for split in splits:
+                path = download(client, cache, repo, revision, f"data/{split}.jsonl")
+                with path.open(encoding="utf-8") as handle:
+                    records = [json.loads(line) for line in handle if line.strip()]
+                if not records or any(
+                        not {"source_text", "privacy_mask", "language", "uid"} <= set(row)
+                        for row in records):
+                    raise ValueError(f"PII dataset schema changed: {repo}/{split}")
+                data.extend(records)
+                hashes[split] = hashlib.sha256(path.read_bytes()).hexdigest()
             sources["pii"] = []
             for i, row in enumerate(data):
                 labels = {span["label"] for span in row["privacy_mask"]}
@@ -140,10 +151,9 @@ def load_sources(cache, pi_size, seed, metric):
                     "gold": sorted({PII_MAP[x] for x in labels if x in PII_MAP}),
                     "language": row["language"], "dataset_labels": sorted(labels),
                 })
-            provenance["pii"] = {"dataset": "ai4privacy/pii-masking-mini-10k",
-                                 "revision": PII_REVISION, "split": "validation",
+            provenance["pii"] = {"dataset": repo, "revision": revision, "split": pii_split,
                                  "mapping": PII_MAP, "file_sha256":
-                                 hashlib.sha256(path.read_bytes()).hexdigest()}
+                                 hashes[pii_split] if pii_split != "all" else hashes}
     return sources, provenance
 
 
@@ -430,6 +440,8 @@ def main():
     parser.add_argument("--output", type=Path, default=Path("results"))
     parser.add_argument("--cache", type=Path, default=Path(".cache"))
     parser.add_argument("--metric", choices=["both", "pi", "pii"], default="both")
+    parser.add_argument("--pii-dataset", choices=["mini", "nano"], default="mini")
+    parser.add_argument("--pii-split", choices=["train", "validation", "all"], default="validation")
     parser.add_argument("--pi-size", type=int, default=1000, help="Stratified train sample size")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--workers", type=int, default=4)
@@ -474,12 +486,14 @@ def main():
         except (ValueError, OSError) as exc:
             parser.error(str(exc))
         if args.metric == "both":
-            pii_sources, pii_provenance = load_sources(args.cache, args.pi_size, args.seed, "pii")
+            pii_sources, pii_provenance = load_sources(
+                args.cache, args.pi_size, args.seed, "pii", args.pii_dataset, args.pii_split)
             sources.update(pii_sources)
             provenance.update(pii_provenance)
             presets["pii"] = PRESETS["pii"]
     else:
-        sources, provenance = load_sources(args.cache, args.pi_size, args.seed, args.metric)
+        sources, provenance = load_sources(
+            args.cache, args.pi_size, args.seed, args.metric, args.pii_dataset, args.pii_split)
     args.output.mkdir(parents=True, exist_ok=True)
     if args.limit:
         sources = {key: value[:args.limit] for key, value in sources.items()}
@@ -495,6 +509,10 @@ def main():
                 raise ValueError("Existing results have a different configuration. Use a new --output folder.")
             if any(state["metrics"][metric]["scorer_name"] != presets[metric] for metric in sources):
                 raise ValueError("Preset mapping changed. Use a new --output folder.")
+            if "pii" in sources and any(
+                    state["datasets"]["pii"][key] != provenance["pii"][key]
+                    for key in ("dataset", "revision", "split")):
+                raise ValueError("PII dataset configuration changed. Use a new --output folder.")
             if state.get("dataset_subdirectories", False) != (args.dataset_workers > 1):
                 raise ValueError("Dataset checkpoint layout changed. Use a new --output folder.")
         else:

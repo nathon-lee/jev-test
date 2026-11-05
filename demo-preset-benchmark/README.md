@@ -59,6 +59,28 @@ python benchmark.py --pi-size 18258 --workers 4 --output results-all-pi
 python benchmark.py --output results --retry-errors
 ```
 
+### Nano PII download and evaluation
+
+`--pii-dataset nano` downloads the pinned public
+`ai4privacy/pii-masking-nano-1k` dataset without uploading a local CSV.
+Use `--pii-split all` to evaluate all 990 documents (900 train + 90 validation),
+or select `train` or `validation` separately. The original default remains
+`--pii-dataset mini --pii-split validation` (990 validation documents).
+
+```bash
+# Connectivity test, then full nano evaluation:
+python benchmark.py --metric pii --pii-dataset nano --pii-split all --limit 3 --output results-nano-smoke
+python benchmark.py --metric pii --pii-dataset nano --pii-split all --workers 4 --output results-nano
+# Resume and retry errors:
+python benchmark.py --metric pii --pii-dataset nano --pii-split all --workers 4 --retry-errors --output results-nano
+```
+
+Both PII datasets use the unchanged `input_pii` scorer and four-category
+document-level multilabel evaluation described below. These are not full
+19-label or entity-extraction scores. Dataset revision, split, and file hashes
+are recorded in the manifest. Use separate output folders for different datasets
+and splits; the prediction key remains `pii`, with its identity in the manifest.
+
 Re-running an identical configuration resumes its JSONL checkpoint. Use a new
 output folder when changing the cluster, project, selected datasets, or sample.
 Environment variables take precedence over the `.env` file. Failed calls are
@@ -79,6 +101,11 @@ non-PII CSVs from `../data/prepared`:
 | `hatecheck` | `GALILEO_HATE_PRESET` |
 | `aegis2` | `GALILEO_SAFETY_PRESET` |
 | `detect_jailbreak`, `jailbreak_classification`, `jailbreakhub` | `prompt_injection_luna` |
+
+The environment template selects the catalog-confirmed `input_toxicity_luna`
+for toxicity; its positive-class score direction still needs verification.
+Hate and safety remain placeholders because no matching presets were confirmed.
+Custom LLM scorers are not yet supported by this script.
 
 Set the three task-specific environment variables in `.env` to actual original
 SLM preset names in your cluster. They must return a positive-class probability

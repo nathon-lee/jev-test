@@ -58,6 +58,48 @@ def test_failed_calls_are_not_counted_as_zero_quality():
     assert "f1" not in result
 
 
+@pytest.mark.parametrize("dataset, split, expected_splits", [
+    ("mini", "validation", ["validation"]),
+    ("nano", "validation", ["validation"]),
+    ("nano", "train", ["train"]),
+    ("nano", "all", ["train", "validation"]),
+])
+def test_pii_dataset_selection(tmp_path, monkeypatch, dataset, split, expected_splits):
+    class Client:
+        def __init__(self, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+    calls = []
+
+    def download(client, cache, repo, revision, filename):
+        calls.append((repo, revision, filename))
+        path = tmp_path / Path(filename).name
+        path.write_text(json.dumps({
+            "uid": filename, "source_text": "unchanged text",
+            "privacy_mask": [{"label": "EMAIL"}, {"label": "SURNAME"}],
+            "language": "en",
+        }) + "\n", encoding="utf-8")
+        return path
+
+    monkeypatch.setattr(benchmark.httpx, "Client", Client)
+    monkeypatch.setattr(benchmark.truststore, "SSLContext", lambda *args: None)
+    monkeypatch.setattr(benchmark, "download", download)
+    sources, provenance = benchmark.load_sources(tmp_path, 1000, 42, "pii", dataset, split)
+    repo = f"ai4privacy/pii-masking-{'nano-1k' if dataset == 'nano' else 'mini-10k'}"
+    revision = benchmark.PII_NANO_REVISION if dataset == "nano" else benchmark.PII_REVISION
+    assert calls == [(repo, revision, f"data/{value}.jsonl") for value in expected_splits]
+    assert len(sources["pii"]) == len(expected_splits)
+    assert all(row["gold"] == ["email"] for row in sources["pii"])
+    assert provenance["pii"]["dataset"] == repo
+    assert provenance["pii"]["split"] == split
+
+
 def write_prepared(path, rows):
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle)
