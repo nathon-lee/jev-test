@@ -230,9 +230,9 @@ def decorate(fig, report, title, subtitle, note, legend_style="markers", stacked
     subtitle_y = min(0.975, 0.995 - 30 / height_points) if stacked else 0.925
     legend_y = min(0.955, subtitle_y - 24 / height_points) if stacked else 0.015
     fig.suptitle(title, fontsize=15, y=0.995 if stacked else 0.98)
-    fig.text(0.5, subtitle_y, subtitle, ha="center", fontsize=9)
+    fig.text(0.5, subtitle_y, subtitle, ha="center", fontsize=9, gid="figure-subtitle")
     note_y = 0.055 if stacked else 0.25 if len(report["providers"]) > 4 else 0.19
-    fig.text(0.07, note_y, note, fontsize=9 if stacked else 8, va="top")
+    fig.text(0.07, note_y, note, fontsize=9 if stacked else 8, va="top", gid="figure-note")
     handles = []
     for provider in report["providers"]:
         label = model_label(report, provider)
@@ -250,6 +250,83 @@ def decorate(fig, report, title, subtitle, note, legend_style="markers", stacked
         bbox_to_anchor=(0.5, legend_y),
         ncol=3 if len(handles) > 4 else len(handles), frameon=False, handlelength=2.2, columnspacing=2,
     )
+
+
+def layout_reference_figure(fig):
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    margin = 18 * fig.dpi / 72
+    gap = 10 * fig.dpi / 72
+    width = fig.bbox.width - 2 * margin
+    title = fig._suptitle
+    subtitle = next(text for text in fig.texts if text.get_gid() == "figure-subtitle")
+    footers = [text for text in fig.texts if text.get_gid() in ("figure-note", "figure-notice")]
+
+    def wrap(text):
+        lines = []
+        for paragraph in text.get_text().split("\n"):
+            line = ""
+            for word in paragraph.split():
+                candidate = (line + " " + word).strip()
+                measured = renderer.get_text_width_height_descent(
+                    candidate, text.get_fontproperties(), ismath=False,
+                )[0]
+                if line and measured > width:
+                    lines.append(line)
+                    line = word
+                else:
+                    line = candidate
+            lines.append(line)
+        text.set_text("\n".join(lines))
+        text.set_va("top")
+
+    for text in [title, subtitle, *footers]:
+        wrap(text)
+    legends = []
+    for legend in list(fig.legends):
+        labels = [text.get_text() for text in legend.get_texts()]
+        handles = legend.legend_handles
+        font = legend.get_texts()[0].get_fontproperties()
+        widths = [text.get_window_extent(renderer).width for text in legend.get_texts()]
+        handle_space = font.get_size_in_points() * fig.dpi / 72 * 5
+        columns = min(3, len(labels))
+        while columns > 1:
+            groups = np.array_split(widths, columns)
+            if sum(max(group) + handle_space for group in groups) <= width:
+                break
+            columns -= 1
+        legend.remove()
+        legends.append(fig.legend(
+            handles=handles, labels=labels, loc="upper center", bbox_to_anchor=(0.5, 1),
+            ncol=columns, frameon=False, handlelength=2.2, columnspacing=2, prop=font,
+        ))
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    heights = {text: text.get_window_extent(renderer).height for text in [title, subtitle, *footers]}
+    plot_boxes = [ax.get_window_extent(renderer) for ax in fig.axes]
+    tight_boxes = [ax.get_tightbbox(renderer) for ax in fig.axes]
+    top_overhang = max(box.y1 for box in tight_boxes) - max(box.y1 for box in plot_boxes)
+    bottom_overhang = min(box.y0 for box in plot_boxes) - min(box.y0 for box in tight_boxes)
+    header = margin + heights[title] + gap + heights[subtitle] + gap
+    header += sum(legend.get_window_extent(renderer).height + gap for legend in legends)
+    header += max(top_overhang, 0) + gap
+    footer = margin + sum(heights[text] + gap for text in footers) + max(bottom_overhang, 0) + gap
+    plot_height = (fig.subplotpars.top - fig.subplotpars.bottom) * fig.bbox.height
+    height = max(fig.bbox.height, header + footer + plot_height)
+    fig.set_size_inches(fig.get_figwidth(), height / fig.dpi, forward=True)
+    cursor = height - margin
+    for text in (title, subtitle):
+        text.set_position((0.5, cursor / height))
+        cursor -= heights[text] + gap
+    for legend in legends:
+        legend.set_bbox_to_anchor((0.5, cursor / height))
+        cursor -= legend.get_window_extent(renderer).height + gap
+    cursor = margin
+    for text in footers:
+        cursor += heights[text]
+        text.set_position((margin / fig.bbox.width, cursor / height))
+        cursor += gap
+    fig.subplots_adjust(top=(height - header) / height, bottom=footer / height)
 
 
 def style_axis(ax, grid="y"):
@@ -544,10 +621,14 @@ def metric_bars(ax, report, labels, records, metric, title, latency=False,
                 label,
                 (bar.get_x() + bar.get_width() / 2, value if available else 0),
                 xytext=(0, 4), textcoords="offset points", ha="center",
-                fontsize=label_fontsize, rotation=90 if len(labels) > 4 else 0,
+                fontsize=label_fontsize,
+                rotation=90 if len(labels) > 4 or len(report["providers"]) > 4 else 0,
                 color="#172438" if available else "#566170",
+                gid="bar-value-label",
             )
     ax.set_xticks(x, labels)
+    if len(labels):
+        ax.set_xlim(-0.5, len(labels) - 0.5)
     ax.set_title(title)
     ax.set_ylabel(ylabel or ("ms / sample (lower is better)" if latency else "% (higher is better)"))
     ax.set_ylim(0, max(max(finite_values, default=0) * 1.3, 1) if latency or autoscale else 120)
@@ -559,7 +640,8 @@ def metric_bars(ax, report, labels, records, metric, title, latency=False,
 def six_metric_panels(report, labels, records, latency_labels=None, single_column=False):
     expanded = len(report["providers"]) > 4
     if single_column:
-        fig, axes = plt.subplots(6, 1, figsize=(14.5, 28))
+        width = max(14.5, len(labels) * len(report["providers"]) * 14 / 72 / 0.76 / 0.895)
+        fig, axes = plt.subplots(6, 1, figsize=(width, 28))
         fig.subplots_adjust(
             left=0.09, right=0.985, top=0.88 if len(report["providers"]) > 6 else 0.90,
             bottom=0.09, hspace=0.65,
@@ -789,6 +871,7 @@ def highlight_pii_task(fig, stacked=False):
         "PII = ordinary binary classification (present vs absent), NOT masking quality.",
         fontsize=12, fontweight="bold", color="#78350F", va="top",
         bbox={"facecolor": "#FFF3CD", "edgecolor": "#D97706", "linewidth": 1.2, "boxstyle": "round,pad=0.4"},
+        gid="figure-notice",
     )
 
 
@@ -823,6 +906,7 @@ def external_category_figure(report):
         legend_style="bars", stacked=True,
     )
     highlight_pii_task(fig, stacked=True)
+    layout_reference_figure(fig)
     return fig
 
 
@@ -873,6 +957,8 @@ def external_dataset_figure(report, prompt):
         stacked=stacked,
     )
     highlight_pii_task(fig, stacked=stacked)
+    if stacked:
+        layout_reference_figure(fig)
     return fig
 
 
@@ -916,6 +1002,7 @@ def external_averages_figure(report, datasets=None):
         stacked=True,
     )
     fig.texts[-1].set_y(0.11)
+    layout_reference_figure(fig)
     return fig
 
 
@@ -1001,7 +1088,7 @@ def three_dataset_averages_figure(report):
     fig.suptitle("Three-dataset model reference averages", fontsize=17, y=0.98)
     fig.text(
         0.5, 0.955, "Computed averages: ToxiGen / HateCheck / AEGIS2 | supplied-model dataset scopes unverified",
-        ha="center", fontsize=11,
+        ha="center", fontsize=11, gid="figure-subtitle",
     )
     fig.text(
         0.07, 0.09,
@@ -1012,7 +1099,7 @@ def three_dataset_averages_figure(report):
         "* F1 = 2PR / (P + R) from supplied averages; not a mean of per-dataset F1. N/A = unavailable.\n"
         "Successful samples and timing protocols are not aligned; descriptive reference only, not a fair ranking."
         + ("\n" + summary_model_note(report) if summary_model_note(report) else ""),
-        fontsize=9, va="top",
+        fontsize=9, va="top", gid="figure-note",
     )
     if report["external_comparison"].get("fine_tuned_models"):
         models = report["external_comparison"]["fine_tuned_models"]
@@ -1031,7 +1118,9 @@ def three_dataset_averages_figure(report):
             0.07, 0.025,
             "\n".join(f"{model['display_name']} | model ID: {model['model_id']}" for model in models.values()),
             fontsize=9, va="top",
+            gid="figure-note",
         )
+    layout_reference_figure(fig)
     return fig
 
 
@@ -1301,10 +1390,11 @@ h1{margin-bottom:6px}
 .report-resources p{font-size:14px}
 summary{cursor:pointer;font-weight:600}
 .model-legend{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.model-legend li{display:flex;gap:8px;font-size:13px;white-space:pre-line}
+.model-legend li{display:flex;gap:8px;font-size:13px;white-space:pre-line;min-width:0}
+.legend-label{min-width:0;overflow-wrap:anywhere}
 .legend-swatch{flex:0 0 14px;height:14px;margin-top:5px;border:1px solid #263238}
 .legend-swatch.fine-tuned-swatch{background-image:repeating-linear-gradient(135deg,#172438 0,#172438 1px,transparent 1px,transparent 5px);border:2px solid #172438}
-.metric-panel{margin:24px 0}.metric-downloads{font-size:14px}
+.metric-panel{margin:24px 0;overflow-x:auto}.metric-downloads{font-size:14px}
 .reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
 .reference-grid .metric-panel{margin:0;min-width:0}
 .table-scroll{overflow-x:auto}.scope-table{border-collapse:collapse;width:100%;font-size:14px}
@@ -1507,9 +1597,9 @@ def write_fastino_comparison(report, output_path, dpi=300):
         page += '<p class="report-note">' + html.escape(note).replace("\n", "<br>") + "</p>"
     page += '<ul class="model-legend">' + "".join(
         '<li><span class="legend-swatch" style="background-color:' + COLORS[provider] + '"></span>'
-        + html.escape(
+        + '<span class="legend-label">' + html.escape(
             model_label(comparison, provider).replace("Fastino |", "Fastino GLiDE |", 1)
-        ) + "</li>"
+        ) + "</span></li>"
         for provider in providers
     ) + "</ul>"
     primary, detailed = [], []
@@ -1616,6 +1706,8 @@ def write_paper_figures(report, output_dir, dpi=300):
             try:
                 if scoped_title != title:
                     fig.suptitle(scoped_title, fontsize=15, y=0.98)
+                    if stem in {item[0] for item in EXTERNAL_FIGURES} and stem != "fig11_openjev_reference_v2":
+                        layout_reference_figure(fig)
                 for extension in ("png", "svg", "pdf"):
                     fig.savefig(output_dir / f"{stem}.{extension}", dpi=dpi)
                 bundle.savefig(fig)
@@ -1653,6 +1745,7 @@ def write_paper_figures(report, output_dir, dpi=300):
                             fig.savefig(output_dir / f"{panel_stem}.{extension}", dpi=dpi, bbox_inches=bounds)
                         panels.append({
                             "metric": metric, "title": ax.get_title(),
+                            "display_min_width": round(bounds.width * 72),
                             "files": {ext: f"{panel_stem}.{ext}" for ext in ("png", "svg", "pdf")},
                         })
             finally:
@@ -1757,7 +1850,8 @@ def write_paper_figures(report, output_dir, dpi=300):
                 '<li><span class="legend-swatch'
                 + (" fine-tuned-swatch" if provider in report["external_comparison"].get("fine_tuned_models", {}) else "")
                 + '" style="background-color:' + COLORS[provider] + '"></span>'
-                + html.escape(model_label(report["external_comparison"], provider)) + "</li>"
+                + '<span class="legend-label">'
+                + html.escape(model_label(report["external_comparison"], provider)) + "</span></li>"
                 for provider in report["external_comparison"]["providers"]
             ) + "</ul>"
             primary, detailed, overview_panels = [], [], []
@@ -1774,7 +1868,9 @@ def write_paper_figures(report, output_dir, dpi=300):
                 )
                 panel_card = (
                     '<div class="metric-panel" data-metric="' + panel["metric"] + '">'
-                    + f'<img src="{panel["files"]["svg"]}" alt="{html.escape(panel["title"])}" loading="lazy">'
+                    + f'<img src="{panel["files"]["svg"]}" alt="{html.escape(panel["title"])}" loading="lazy"'
+                    + (f' style="min-width:{panel["display_min_width"]}px"' if panel["display_min_width"] > 1100 else "")
+                    + '>'
                     + timing_note
                     + '<p class="metric-downloads">' + links + "</p></div>"
                 )

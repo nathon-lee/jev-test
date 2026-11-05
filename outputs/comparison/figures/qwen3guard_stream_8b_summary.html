@@ -18,10 +18,11 @@ h1{margin-bottom:6px}
 .report-resources p{font-size:14px}
 summary{cursor:pointer;font-weight:600}
 .model-legend{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.model-legend li{display:flex;gap:8px;font-size:13px;white-space:pre-line}
+.model-legend li{display:flex;gap:8px;font-size:13px;white-space:pre-line;min-width:0}
+.legend-label{min-width:0;overflow-wrap:anywhere}
 .legend-swatch{flex:0 0 14px;height:14px;margin-top:5px;border:1px solid #263238}
 .legend-swatch.fine-tuned-swatch{background-image:repeating-linear-gradient(135deg,#172438 0,#172438 1px,transparent 1px,transparent 5px);border:2px solid #172438}
-.metric-panel{margin:24px 0}.metric-downloads{font-size:14px}
+.metric-panel{margin:24px 0;overflow-x:auto}.metric-downloads{font-size:14px}
 .reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
 .reference-grid .metric-panel{margin:0;min-width:0}
 .table-scroll{overflow-x:auto}.scope-table{border-collapse:collapse;width:100%;font-size:14px}

@@ -6,6 +6,7 @@ import html
 import json
 import math
 import re
+from itertools import combinations
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -43,6 +44,7 @@ from benchmark.paper_figures import (
     write_fastino_comparison,
     write_summary_model_details,
     luna_summary_section,
+    layout_reference_figure,
 )
 
 
@@ -1720,6 +1722,72 @@ def test_luna_summary_appears_in_gallery_and_reference_exports(fine_tuned_run, t
     assert float(row["f1"]) == pytest.approx((0.5474 + 0.9248 + 0.7656) / 3)
     assert "Luna: native presets (prompt N/A)" in page
     assert report == before
+
+
+@pytest.fixture
+def dense_reference_report(gliner25_run):
+    report, run, data = gliner25_run
+    attach_gliner25_run(report, run, data)
+    comparison = report["external_comparison"]
+    for provider in ("openjev-32b", "microsoft-decision-1"):
+        comparison["providers"].append(provider)
+        comparison["model_identities"][provider] = {
+            "request_model": "not supplied", "resolved_model": None,
+        }
+        comparison["runs"].extend([
+            {**row, "provider": provider}
+            for row in comparison["runs"] if row["provider"] == "openjev" and row["prompt"] == "v1"
+        ])
+    external = Path(__file__).parents[1] / "data/external"
+    attach_qwen_summary(report, external / "qwen3guard_stream_8b_summary.csv")
+    attach_luna_summary(report, external / "luna_summary.csv")
+    return report
+
+
+@pytest.mark.parametrize("kind", ["dataset", "category", "averages", "three"])
+def test_dense_reference_labels_legends_and_notes_do_not_overlap(dense_reference_report, kind):
+    report = dense_reference_report
+    builders = {
+        "dataset": lambda: external_dataset_figure(report, "v1"),
+        "category": lambda: external_category_figure(report),
+        "averages": lambda: external_averages_figure(report),
+        "three": lambda: three_dataset_averages_figure(report),
+    }
+    figure = builders[kind]()
+    try:
+        figure.suptitle(
+            "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5) | "
+            "Luna: native presets (prompt N/A)",
+            fontsize=15, y=0.98,
+        )
+        layout_reference_figure(figure)
+        size = figure.get_size_inches().copy()
+        layout_reference_figure(figure)
+        assert figure.get_size_inches() == pytest.approx(size, abs=1 / figure.dpi)
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        for axis in figure.axes:
+            numbers = [
+                text for text in axis.texts
+                if text.get_text() and text.get_gid() != "reference-highlight-label"
+            ]
+            boxes = [text.get_window_extent(renderer) for text in numbers]
+            assert all(box.width > 1 and box.height > 1 for box in boxes)
+            assert all(not left.overlaps(right) for left, right in combinations(boxes, 2))
+            assert all(box.x0 >= 0 and box.x1 <= figure.bbox.x1 for box in boxes)
+        for legend in figure.legends:
+            box = legend.get_window_extent(renderer)
+            assert box.x0 >= 0 and box.x1 <= figure.bbox.x1
+            assert all(not box.overlaps(axis.get_tightbbox(renderer)) for axis in figure.axes)
+        boxes = [text.get_window_extent(renderer) for text in figure.texts if text.get_text()]
+        assert all(
+            box.x0 >= 0 and box.y0 >= 0
+            and box.x1 <= figure.bbox.x1 and box.y1 <= figure.bbox.y1
+            for box in boxes
+        )
+        assert all(not left.overlaps(right) for left, right in combinations(boxes, 2))
+    finally:
+        plt.close(figure)
 
 
 @pytest.mark.parametrize("invalid", ["model", "reference", "incomplete_log"])
