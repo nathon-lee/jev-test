@@ -215,8 +215,18 @@ live verification of this integration.
   file hashes, pinned scorer/version IDs, stream IDs, and control IDs.
 - `pi-predictions.jsonl` and `pii-predictions.jsonl`: input, gold labels, model
   scores, predictions, and the matching scorer execution, including errors.
-- `summary.json`: overall metrics, confusion counts, call coverage/errors, and
-  PII language breakdowns. Metric values are fractions between 0 and 1.
+- `summary.json`: overall metrics, confusion counts, call coverage/errors, mean
+  latency of successful API calls in seconds and milliseconds, the number of
+  latency samples, and PII language breakdowns. Latency is the client-observed
+  wall time for one evaluator call (including token refresh when needed, network,
+  Agent Control, scoring, and response validation), not isolated model inference
+  time. Metric values are fractions between 0 and 1.
+
+Per-row `latency_seconds` is saved in prediction JSONL for successful and failed
+evaluator attempts. The summary average uses successful calls only. Completed
+checkpoints already contain per-row latency, so rerunning
+the same command with the same output directory recalculates the summary without
+repeating successful API calls. Failed rows can be timed when retried.
 
 The console prints an easy-to-read percentage table. Runtime bearer tokens and
 API keys are never saved in results. Keep `.env` local; share only the script,

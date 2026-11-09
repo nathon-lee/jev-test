@@ -56,6 +56,7 @@ def test_failed_calls_are_not_counted_as_zero_quality():
     assert result["failed_rows"] == 1
     assert result["coverage"] == 0
     assert "f1" not in result
+    assert result["mean_latency_ms"] is None
 
 
 @pytest.mark.parametrize("dataset, split, expected_splits", [
@@ -222,6 +223,47 @@ def test_evaluator_binary_tasks_and_original_pii(metric, score, prediction):
     assert result["error"] is None
     assert result["score"] == score
     assert result["prediction"] == prediction
+    assert result["latency_seconds"] >= 0
+
+
+def test_summary_averages_successful_call_latency_only():
+    result = benchmark.summarize("toxigen", [
+        {"error": None, "gold": 1, "prediction": 1, "score": 0.9,
+         "latency_seconds": 0.1},
+        {"error": None, "gold": 0, "prediction": 0, "score": 0.1,
+         "latency_seconds": 0.3},
+        {"error": "failed", "gold": 1, "prediction": None, "score": None,
+         "latency_seconds": 10.0},
+        {"error": None, "gold": 1, "prediction": 1, "score": 0.9},
+    ], requested=4)
+
+    assert result["latency_sample_count"] == 2
+    assert result["mean_latency_seconds"] == pytest.approx(0.2)
+    assert result["mean_latency_ms"] == pytest.approx(200)
+
+
+def test_existing_checkpoint_rebuilds_latency_summary_without_api_call(tmp_path, monkeypatch):
+    row = {"index": 0, "source_index": "0", "input": "text", "gold": 1}
+    record = {**row, "score": 0.9, "prediction": 1, "error": None,
+              "scorer_version_id": "v1", "latency_seconds": 0.125}
+    (tmp_path / "toxigen-predictions.jsonl").write_text(
+        json.dumps(record) + "\n", encoding="utf-8")
+
+    class UnexpectedEvaluator:
+        def __init__(self, *args):
+            pass
+
+        def evaluate(self, *args):
+            raise AssertionError("A completed sample should be resumed from its checkpoint")
+
+    monkeypatch.setattr(benchmark, "Evaluator", UnexpectedEvaluator)
+    result = benchmark.run(
+        SimpleNamespace(key="test-key"),
+        {"metrics": {"toxigen": {"scorer_version_id": "v1"}}},
+        {"toxigen": [row]}, tmp_path, 1, False,
+    )
+    assert result["metrics"]["toxigen"]["mean_latency_seconds"] == pytest.approx(0.125)
+    assert result["metrics"]["toxigen"]["mean_latency_ms"] == pytest.approx(125)
 
 
 def test_retry_errors_replaces_latest_checkpoint(tmp_path, monkeypatch):

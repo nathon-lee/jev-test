@@ -274,12 +274,13 @@ class Evaluator:
             response = None
             for attempt in range(2):
                 try:
+                    token = self.bearer(refresh=bool(attempt))
                     response = self.api.request("POST", "/agent-control/api/v1/evaluation", {
                         "agent_name": info["agent_name"], "stage": "post",
                         "target_type": "log_stream", "target_id": info["stream_id"],
                         "step": {"type": "trace", "name": info["scorer_name"],
                                  "input": row["input"], "output": ""}}, headers={
-                        "Authorization": "Bearer " + self.bearer(refresh=bool(attempt)),
+                        "Authorization": "Bearer " + token,
                         "X-Trace-Id": trace_id, "X-Span-Id": uuid.uuid4().hex[:16]})
                     break
                 except RuntimeError as exc:
@@ -315,7 +316,8 @@ class Evaluator:
         except (RuntimeError, ValueError, KeyError, TypeError) as exc:
             return {**row, "score": None, "prediction": None,
                     "error": str(exc).replace(self.api.key, "[REDACTED]"),
-                    "scorer_version_id": info["scorer_version_id"], "trace_id": trace_id}
+                    "scorer_version_id": info["scorer_version_id"], "trace_id": trace_id,
+                    "latency_seconds": time.perf_counter() - start}
 
 
 def binary(rows, label=None):
@@ -345,9 +347,21 @@ def multilabel(rows):
 
 def summarize(metric, records, requested):
     valid = [r for r in records if r["error"] is None]
+    measured_latencies = [
+        r["latency_seconds"] for r in valid
+        if isinstance(r.get("latency_seconds"), (int, float))
+        and not isinstance(r.get("latency_seconds"), bool)
+        and math.isfinite(r["latency_seconds"])
+        and r["latency_seconds"] >= 0
+    ]
     summary = {"requested_rows": requested, "successful_rows": len(valid),
                "failed_rows": len(records) - len(valid), "coverage": len(valid) / requested,
-               "error_counts": dict(Counter(r["error"] for r in records if r["error"]))}
+               "error_counts": dict(Counter(r["error"] for r in records if r["error"])),
+               "latency_sample_count": len(measured_latencies),
+               "mean_latency_seconds": (sum(measured_latencies) / len(measured_latencies)
+                                        if measured_latencies else None),
+               "mean_latency_ms": (sum(measured_latencies) * 1000 / len(measured_latencies)
+                                   if measured_latencies else None)}
     if not valid:
         return summary  # Never present infrastructure failure as zero model F1.
     if metric != "pii":
@@ -531,6 +545,12 @@ def main():
             for label, value in statistics.items():
                 if "f1" in value:
                     print(f"{label:38} {value['precision']:9.2%} {value['recall']:9.2%} {value['f1']:9.2%}")
+        print("\nAverage API latency (successful calls)")
+        for metric, summary in result["metrics"].items():
+            mean_latency_ms = summary["mean_latency_ms"]
+            latency = f"{mean_latency_ms:.2f} ms" if mean_latency_ms is not None else "N/A"
+            print(f"{metric}: {latency} "
+                  f"({summary['latency_sample_count']}/{summary['successful_rows']} calls)")
         print(f"\nSaved predictions, pinned scorer IDs and metrics to {args.output.resolve()}")
         return int(any(r["failed_rows"] for r in result["metrics"].values()))
     finally:
