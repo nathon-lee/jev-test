@@ -185,7 +185,7 @@ the evaluator CLI scans only the default `outputs` directory.
 
 Results use the existing CSV schema in `outputs/straiker.ai/`, retaining
 `sample_id`, original `text`, and ground-truth `label`. Each successful row also
-stores `score_kind=binary_action` and the full JSON `straiker_response`, including
+stores `score_kind=binary_target_controls` and the full JSON `straiker_response`, including
 `action`, `controls`, `blocked_by`, `config_hash`, `turn_id`, and `trace_id` when
 returned. Check these fields to confirm the intended policy was applied and
 keep the policy fixed during each run. Request/parse failures have an `error`
@@ -199,20 +199,34 @@ HTTP 200 with empty controls for an email sample, while `prompt` returned
 `action=detect` with `controls=["email_address"]` for the same sample.
 HTTP 200 alone does not establish that the submitted text was scored.
 The dataset question and v1/v2 prompt are **not** sent: classification is
-controlled by the integration policy. `allow` and `detect` map to
-score/prediction 0 and `block` to 1 at threshold 0.5. `detect` is a valid
-non-blocking detection, not a parse error or proof that content is safe; its
-controls are retained in the raw response. This preserves block-only scoring,
-so use Block mode for the detectors being benchmarked as positive predictions.
+controlled by the integration policy. Scoring uses `controls`, not `action`:
+a target control firing in either Detect or Block mode scores 1, and no target
+control scores 0. Other controls do not count as a hit. Missing or malformed
+`controls` are errors, not negative predictions. Dataset target controls are:
+
+- ToxiGen, HateCheck, AEGIS2: `general_misuse`, `racism`, `sexism`.
+- The three jailbreak datasets: `llm_evasion`.
+- PII datasets: `address`, `email_address`, `name`, `phone_number`,
+  `social_security_number`, `tax_identification_number`, `us_passport_number`,
+  `bank_account_number`, `credit_card_number`, `employer_identification_number`.
+
+Verify the target controls are enabled and test known positive and negative
+examples before benchmarking. An empty `controls` list alone cannot prove
+the target controls ran. These PII controls do not cover every possible PII
+category, and the content controls do not cover every AEGIS2 unsafe category.
+The target-control scores measure the configured Straiker policy and are not
+equivalent to asking the other providers the dataset prompt.
+This changes the previous block-only scoring: old CSVs retain their original
+scores and must not be mixed with new results without clearly labeling them.
+Use a new `--output-dir` to preserve old runs.
 The same configuration hash can occur with an empty result and a detection;
 it is not proof that the submitted text was scored.
 These are policy verdicts, **not probabilities**;
 use one prompt version and one threshold to avoid paying for duplicate calls.
 AUROC from these binary scores is only a single-operating-point summary, not a
 continuous-score ranking metric. PII results are document-level binary
-classification, not entity/span detection or masking quality. With multiple
-controls enabled, any control can cause a block, so results measure the whole
-policy rather than an isolated hate/jailbreak/PII detector.
+classification, not entity/span detection or masking quality. Scores reflect
+the configured target-control group, rather than a single isolated detector.
 
 The client retries HTTP 429, 5xx, and transport failures up to three times with
 backoff and honors `Retry-After`. Other HTTP errors and malformed verdicts are

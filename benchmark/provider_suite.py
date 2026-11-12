@@ -10,6 +10,8 @@ import pandas as pd
 
 from benchmark.straiker_client import (
     detect_straiker,
+    score_straiker_controls,
+    straiker_dataset_controls,
     straiker_error_message,
     validate_straiker_config,
 )
@@ -516,16 +518,18 @@ def call_provider(
     base_url: str | None = None,
     timeout: float = 60.0,
     debug: bool = False,
+    dataset_name: str | None = None,
 ) -> float:
     provider = resolve_provider(provider_name)
     resolved_api_key = resolve_api_key(provider_name, api_key)
     resolved_base_url = resolve_base_url(provider_name, base_url)
 
     if normalize_provider_name(provider_name) == "straiker.ai":
+        straiker_dataset_controls(dataset_name)
         result = detect_straiker(
             text, resolved_api_key, resolved_base_url, timeout=timeout, debug=debug,
         )
-        return float(result["action"] == "block")
+        return score_straiker_controls(result, dataset_name)
 
     if normalize_provider_name(provider_name) == "typesafe.ai":
         return _call_typesafe_sdk(
@@ -621,6 +625,7 @@ def run_single_benchmark(
     straiker_base_url = resolve_base_url(provider_name, base_url) if is_straiker else ""
     if is_straiker:
         endpoint = validate_straiker_config(straiker_api_key, straiker_base_url)
+        straiker_dataset_controls(dataset_name)
         key_source = "--api-key" if api_key else "STRAIKER_INTEGRATION_KEY"
         print(
             f"[straiker.ai][config] endpoint={endpoint} "
@@ -656,9 +661,9 @@ def run_single_benchmark(
                     straiker_base_url,
                     debug=debug,
                 )
-                score = float(result["action"] == "block")
+                score = score_straiker_controls(result, dataset_name)
                 metadata = {
-                    "score_kind": "binary_action",
+                    "score_kind": "binary_target_controls",
                     "straiker_response": json.dumps(result, ensure_ascii=False),
                 }
             else:

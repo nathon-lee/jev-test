@@ -8,6 +8,34 @@ from typing import Any
 import httpx
 
 
+_CONTENT_CONTROLS = frozenset({"general_misuse", "racism", "sexism"})
+_JAILBREAK_CONTROLS = frozenset({"llm_evasion"})
+_PII_CONTROLS = frozenset({
+    "address", "email_address", "name", "phone_number", "social_security_number",
+    "tax_identification_number", "us_passport_number", "bank_account_number",
+    "credit_card_number", "employer_identification_number",
+})
+_DATASET_CONTROLS = {
+    **dict.fromkeys(("toxigen", "hatecheck", "aegis2"), _CONTENT_CONTROLS),
+    **dict.fromkeys(("detect-jailbreak", "jailbreak-classification", "jailbreakhub"), _JAILBREAK_CONTROLS),
+    **dict.fromkeys(("pii_masking_nano_1k", "pii_masking_mini_10k"), _PII_CONTROLS),
+}
+
+
+def straiker_dataset_controls(dataset_name: str | None) -> frozenset[str]:
+    if dataset_name not in _DATASET_CONTROLS:
+        raise ValueError(f"Unknown Straiker dataset for target-control scoring: {dataset_name!r}")
+    return _DATASET_CONTROLS[dataset_name]
+
+
+def score_straiker_controls(result: dict[str, Any], dataset_name: str | None) -> float:
+    target_controls = straiker_dataset_controls(dataset_name)
+    controls = result.get("controls")
+    if not isinstance(controls, list) or not all(isinstance(item, str) for item in controls):
+        raise ValueError("Invalid Straiker response: controls must be a list of strings.")
+    return float(bool(target_controls.intersection(controls)))
+
+
 def _retry_delay(retry_after: str | None, attempt: int) -> float:
     if retry_after:
         try:
@@ -80,7 +108,7 @@ def straiker_error_message(error: Exception) -> str:
     if isinstance(error, json.JSONDecodeError):
         return "Invalid Straiker response: expected JSON, but the response could not be decoded."
     if isinstance(error, ValueError):
-        return "Invalid Straiker response: expected a JSON object with action 'allow', 'detect', or 'block'."
+        return "Invalid Straiker response: expected a valid action and a controls list of strings."
     return f"{type(error).__name__}: Straiker request processing failed."
 
 

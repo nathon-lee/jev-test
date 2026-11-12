@@ -7,7 +7,7 @@ import httpx
 import pytest
 
 from benchmark.provider_suite import call_provider, run_single_benchmark, save_rows
-from benchmark.straiker_client import _retry_delay, detect_straiker
+from benchmark.straiker_client import _retry_delay, detect_straiker, score_straiker_controls
 from scripts.evaluate_model_suite import summarize_file
 from scripts.run_model_suite import provider_list
 from scripts.run_model_suite import main as run_suite
@@ -25,15 +25,17 @@ def response(payload, status=200, headers=None):
 
 
 @pytest.mark.parametrize("base", [BASE, BASE + "/", BASE + "/api/v3/detect"])
-@pytest.mark.parametrize("action,score", [("allow", 0.0), ("detect", 0.0), ("block", 1.0)])
-def test_straiker_sends_original_content_and_maps_only_action(monkeypatch, capsys, base, action, score):
-    post = Mock(return_value=response({"action": action, "score": 1 - score}))
+@pytest.mark.parametrize("action,score", [("allow", 0.0), ("detect", 1.0), ("block", 1.0)])
+def test_straiker_sends_original_content_and_scores_target_controls(monkeypatch, capsys, base, action, score):
+    controls = [] if action == "allow" else ["general_misuse"]
+    post = Mock(return_value=response({"action": action, "controls": controls, "score": 1 - score}))
     monkeypatch.setattr(httpx, "post", post)
     monkeypatch.setenv("STRAIKER_INTEGRATION_KEY", KEY)
     monkeypatch.setenv("STRAIKER_BASE", base)
     text = 'Original text\nwith "quotes" and \u4e2d\u6587'
 
-    assert call_provider("straiker", "This prompt must not be sent", text, debug=True) == score
+    assert call_provider("straiker", "This prompt must not be sent", text, debug=True,
+                         dataset_name="hatecheck") == score
 
     post.assert_called_once_with(
         BASE + "/api/v3/detect",
@@ -61,7 +63,7 @@ def test_straiker_requires_explicit_tenant_region(monkeypatch):
     monkeypatch.setattr(httpx, "post", post)
     monkeypatch.delenv("STRAIKER_BASE", raising=False)
     with pytest.raises(ValueError, match="STRAIKER_BASE"):
-        call_provider("straiker", "question", "Example", api_key=KEY)
+        call_provider("straiker", "question", "Example", api_key=KEY, dataset_name="hatecheck")
     post.assert_not_called()
 
 
@@ -134,7 +136,7 @@ def test_straiker_local_dataset_output_and_existing_evaluator(monkeypatch, tmp_p
         {"action": "allow", "controls": [], "blocked_by": [], "config_hash": "config-1"},
         {"action": "detect", "controls": ["email_address"], "blocked_by": [],
          "config_hash": "config-1"},
-        {"action": "block", "controls": ["hate"], "blocked_by": ["hate"],
+        {"action": "block", "controls": ["general_misuse"], "blocked_by": ["general_misuse"],
          "config_hash": "config-1", "turn_id": "turn-1", "trace_id": "trace-1"},
     ]
     post = Mock(side_effect=[response(item) for item in verdicts] + [response({}, 401)])
@@ -148,13 +150,58 @@ def test_straiker_local_dataset_output_and_existing_evaluator(monkeypatch, tmp_p
     assert rows[0]["text"] == "Hello\nworld"
     assert json.loads(rows[1]["straiker_response"]) == verdicts[1]
     assert json.loads(rows[2]["straiker_response"]) == verdicts[2]
-    assert rows[1]["score_kind"] == "binary_action"
+    assert rows[1]["score_kind"] == "binary_target_controls"
     assert "401" in rows[3]["error"]
 
     path = save_rows(rows, "straiker.ai", "hatecheck", "v1", 0.5, output_dir=tmp_path)
     summary = summarize_file(path)
     assert (summary["rows"], summary["valid"], summary["error"]) == (4, 3, 1)
     assert summary["accuracy"] == summary["precision"] == summary["recall"] == summary["f1"] == 1.0
+
+
+@pytest.mark.parametrize("dataset,controls,expected", [
+    ("hatecheck", ["general_misuse"], 1.0),
+    ("toxigen", ["sexism"], 1.0),
+    ("aegis2", ["racism"], 1.0),
+    ("hatecheck", ["email_address"], 0.0),
+    ("detect-jailbreak", ["llm_evasion"], 1.0),
+    ("jailbreakhub", ["general_misuse"], 0.0),
+    ("pii_masking_nano_1k", ["email_address"], 1.0),
+    ("pii_masking_mini_10k", ["social_security_number"], 1.0),
+    ("pii_masking_nano_1k", ["general_misuse"], 0.0),
+    ("hatecheck", [], 0.0),
+])
+def test_straiker_scores_only_dataset_target_controls(dataset, controls, expected):
+    assert score_straiker_controls({"controls": controls}, dataset) == expected
+
+
+@pytest.mark.parametrize("controls", [None, "general_misuse", ["general_misuse", None], [42]])
+def test_straiker_rejects_missing_or_malformed_control_lists(controls):
+    with pytest.raises(ValueError, match="controls"):
+        score_straiker_controls({"controls": controls}, "hatecheck")
+
+
+def test_straiker_requires_known_dataset_for_target_scoring():
+    with pytest.raises(ValueError, match="dataset"):
+        score_straiker_controls({"controls": []}, "unknown")
+
+
+def test_straiker_runner_scores_detect_and_ignores_unrelated_block(monkeypatch, tmp_path):
+    monkeypatch.setattr("benchmark.provider_suite.DATA_DIR", tmp_path)
+    (tmp_path / "hatecheck.csv").write_text(
+        "sample_id,text,label\n0,first,1\n1,second,0\n2,third,0\n", encoding="utf-8",
+    )
+    monkeypatch.setattr(httpx, "post", Mock(side_effect=[
+        response({"action": "detect", "controls": ["general_misuse"]}),
+        response({"action": "block", "controls": ["email_address"]}),
+        response({"action": "allow"}),
+    ]))
+
+    rows = run_single_benchmark("straiker", "hatecheck", "v1", 0.5,
+                                api_key=KEY, base_url=BASE)
+    assert [row["prediction"] for row in rows] == [1, 0, None]
+    assert "controls" in rows[2]["error"]
+
 
 
 @pytest.mark.parametrize("workers", [1, 2])
@@ -202,8 +249,8 @@ def test_suite_reports_sample_counts_and_fails_for_api_errors(
     monkeypatch.setenv("STRAIKER_INTEGRATION_KEY", KEY)
     monkeypatch.setenv("STRAIKER_BASE", BASE)
     monkeypatch.setattr(httpx, "post", Mock(side_effect=[
-        response({"action": "allow"}),
-        response({"action": "allow", "private": KEY}, status),
+        response({"action": "allow", "controls": []}),
+        response({"action": "allow", "controls": [], "private": KEY}, status),
     ]))
     output = tmp_path / "output"
     monkeypatch.setattr("sys.argv", [
