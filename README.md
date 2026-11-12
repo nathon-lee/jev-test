@@ -115,6 +115,51 @@ These are process environment variables. `run_model_suite` does not
 automatically load `.env`; setting values only in that file is insufficient.
 Do not commit keys or put real credentials in command examples or logs.
 
+On Linux, activate the virtual environment and set the variables in the same
+shell that will run the benchmark:
+
+```bash
+source .venv/bin/activate
+export STRAIKER_BASE='https://api-euc1.prod.straiker.ai'  # EU; use your tenant's region
+read -rsp 'Integration key (sk_agt_...): ' STRAIKER_INTEGRATION_KEY
+echo
+export STRAIKER_INTEGRATION_KEY
+```
+
+### Safe diagnostics on Linux
+
+```bash
+set -o pipefail
+python -u -m scripts.run_model_suite \
+  --providers straiker --datasets hatecheck \
+  --prompt-versions v1 --thresholds 0.5 \
+  --max-workers 1 --limit 3 --debug \
+  2>&1 | tee straiker-smoke.log
+echo "Benchmark exit status: $?"
+```
+
+Configuration is checked before reading the dataset or making requests.
+Invalid credentials fail with `credential_type=missing`, `PAT`, `JWT`,
+`whitespace`, or `unknown`. Creating another PAT does not produce an integration
+key: follow the integration/key creation steps above. A valid-looking key
+passes only the local format check; the API still decides whether it is valid.
+The successful configuration diagnostic identifies the endpoint and key source,
+never the key value. `STRAIKER_BASE` must not contain URL credentials, a query,
+or a fragment.
+
+For Straiker, `--debug` logs request attempts, content length, HTTP status,
+elapsed request time, and the final action, but not credentials, input text,
+headers, or response bodies. Failed samples produce a row-numbered error even
+without `--debug`; HTTP 401/403/404/429 errors include troubleshooting hints.
+Transport and parse errors use safe summaries in both logs and the CSV error
+column, without copying arbitrary exception text.
+
+The suite runner saves available results and prints `valid`/`error` counts.
+Any failed sample makes the command exit with status 1, in both serial and
+parallel mode, rather than reporting all runs complete. A configuration failure
+does not write a new result CSV; an existing CSV from an earlier run is left
+untouched. Diagnose the current run's log, not an older CSV.
+
 ### Smoke test, full run, and evaluation
 
 Start with three local samples:
@@ -145,8 +190,8 @@ stores `score_kind=binary_action` and the full JSON `straiker_response`, includi
 returned. Check these fields to confirm the intended policy was applied and
 keep the policy fixed during each run. Request/parse failures have an `error`
 and no prediction; the evaluator reports them separately and excludes them
-from quality metrics. Always inspect the error count, even if the runner says
-the output was saved.
+from quality metrics. An output file being saved does not mean all requests
+succeeded; inspect the error count and the runner's exit status.
 
 Requests send only `{"content": <original text>, "role": "user"}`.
 The dataset question and v1/v2 prompt are **not** sent: classification is

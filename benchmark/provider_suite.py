@@ -8,7 +8,11 @@ from typing import Any
 import httpx
 import pandas as pd
 
-from benchmark.straiker_client import detect_straiker
+from benchmark.straiker_client import (
+    detect_straiker,
+    straiker_error_message,
+    validate_straiker_config,
+)
 
 try:
     from typesafe_sdk import Noul, TypeSafeClient
@@ -612,6 +616,17 @@ def run_single_benchmark(
     base_url: str | None = None,
     debug: bool = False,
 ) -> list[dict[str, Any]]:
+    is_straiker = normalize_provider_name(provider_name) == "straiker.ai"
+    straiker_api_key = resolve_api_key(provider_name, api_key) if is_straiker else None
+    straiker_base_url = resolve_base_url(provider_name, base_url) if is_straiker else ""
+    if is_straiker:
+        endpoint = validate_straiker_config(straiker_api_key, straiker_base_url)
+        key_source = "--api-key" if api_key else "STRAIKER_INTEGRATION_KEY"
+        print(
+            f"[straiker.ai][config] endpoint={endpoint} "
+            f"credential_type=integration_key key_source={key_source}"
+        )
+
     dataset_path = DATA_DIR / DATASET_SPECS[dataset_name]["path"]
     if not dataset_path.exists():
         raise FileNotFoundError(
@@ -634,11 +649,11 @@ def run_single_benchmark(
         label = int(row.get("label", 0))
         metadata: dict[str, Any] = {}
         try:
-            if normalize_provider_name(provider_name) == "straiker.ai":
+            if is_straiker:
                 result = detect_straiker(
                     text,
-                    resolve_api_key(provider_name, api_key),
-                    resolve_base_url(provider_name, base_url),
+                    straiker_api_key,
+                    straiker_base_url,
                     debug=debug,
                 )
                 score = float(result["action"] == "block")
@@ -672,6 +687,12 @@ def run_single_benchmark(
                 }
             )
         except Exception as exc:  # pragma: no cover - network/SDK errors are expected in live runs
+            error = straiker_error_message(exc) if is_straiker else repr(exc)
+            if is_straiker:
+                print(
+                    f"[straiker.ai][ERROR] dataset={dataset_name} "
+                    f"row={idx + 1}/{total_rows} {error}"
+                )
             rows.append(
                 {
                     "dataset": dataset_name,
@@ -683,7 +704,7 @@ def run_single_benchmark(
                     "score": None,
                     "prediction": None,
                     "provider": provider_name,
-                    "error": repr(exc),
+                    "error": error,
                 }
             )
 

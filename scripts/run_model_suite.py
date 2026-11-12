@@ -61,7 +61,7 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=None, help="Optional output root; results use provider subdirectories (default: outputs)")
     parser.add_argument("--api-key", default=None, help="Optional API key override for the selected provider")
     parser.add_argument("--base-url", default=None, help="Optional base URL override for the selected provider")
-    parser.add_argument("--debug", action="store_true", help="Print the exact outgoing request URL, headers, and payload for each provider call")
+    parser.add_argument("--debug", action="store_true", help="Print provider request diagnostics; Straiker omits credentials, text, and raw response bodies")
     args = parser.parse_args()
 
     providers = provider_list(args.providers)
@@ -98,6 +98,15 @@ def main() -> None:
             debug=args.debug,
         )
         saved_path = save_rows(rows, provider, dataset, prompt_version, threshold, output_dir=args.output_dir)
+        error_count = sum(bool(row.get("error")) for row in rows)
+        if error_count:
+            print(
+                f"Saved: {saved_path} (rows={len(rows)}, "
+                f"valid={len(rows) - error_count}, error={error_count})"
+            )
+            raise RuntimeError(
+                f"{error_count}/{len(rows)} samples failed; inspect the error column in {saved_path}."
+            )
         return saved_path, len(rows)
 
     failures: list[tuple[tuple[str, str, str, float], Exception]] = []
@@ -107,7 +116,7 @@ def main() -> None:
             provider, dataset, prompt_version, threshold = task
             try:
                 saved_path, row_count = run_task(task)
-                print(f"Saved: {saved_path} (rows={row_count})")
+                print(f"Saved: {saved_path} (rows={row_count}, valid={row_count}, error=0)")
             except Exception as exc:
                 failures.append((task, exc))
                 print(
@@ -126,7 +135,8 @@ def main() -> None:
                     saved_path, row_count = future.result()
                     print(
                         f"[{completed}/{total}] Saved: {saved_path} "
-                        f"({provider} | {dataset} | {prompt_version} | t={threshold} | rows={row_count})"
+                        f"({provider} | {dataset} | {prompt_version} | t={threshold} | "
+                        f"rows={row_count}, valid={row_count}, error=0)"
                     )
                 except Exception as exc:
                     failures.append((task, exc))

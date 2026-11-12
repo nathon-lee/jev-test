@@ -10,6 +10,7 @@ from benchmark.provider_suite import call_provider, run_single_benchmark, save_r
 from benchmark.straiker_client import _retry_delay, detect_straiker
 from scripts.evaluate_model_suite import summarize_file
 from scripts.run_model_suite import provider_list
+from scripts.run_model_suite import main as run_suite
 
 
 KEY = "sk_agt_test_key"
@@ -40,7 +41,9 @@ def test_straiker_sends_original_content_and_maps_only_action(monkeypatch, capsy
         json={"content": text, "role": "user"},
         timeout=60.0,
     )
-    assert KEY not in capsys.readouterr().out
+    log = capsys.readouterr().out
+    assert KEY not in log
+    assert "Original text" not in log
     assert "straiker.ai" in provider_list("all")
 
 
@@ -148,3 +151,114 @@ def test_straiker_local_dataset_output_and_existing_evaluator(monkeypatch, tmp_p
     summary = summarize_file(path)
     assert (summary["rows"], summary["valid"], summary["error"]) == (3, 2, 1)
     assert summary["accuracy"] == summary["precision"] == summary["recall"] == summary["f1"] == 1.0
+
+
+@pytest.mark.parametrize("workers", [1, 2])
+@pytest.mark.parametrize("key,kind", [
+    ("", "missing"), ("s6r_pat_test_private", "PAT"),
+    ("eyJ.private.jwt", "JWT"), (KEY + "\n", "whitespace"),
+])
+def test_suite_straiker_preflight_fails_without_reading_data_or_exposing_key(
+    monkeypatch, tmp_path, capsys, workers, key, kind,
+):
+    post = Mock()
+    monkeypatch.setattr(httpx, "post", post)
+    monkeypatch.setenv("STRAIKER_INTEGRATION_KEY", key)
+    monkeypatch.setenv("STRAIKER_BASE", BASE)
+    monkeypatch.setattr("benchmark.provider_suite.DATA_DIR", tmp_path / "missing-data")
+    monkeypatch.setattr("sys.argv", [
+        "run_model_suite", "--providers", "straiker", "--datasets", "hatecheck",
+        "--prompt-versions", "v1", "--thresholds", "0.5",
+        "--max-workers", str(workers), "--output-dir", str(tmp_path / "output"),
+    ])
+
+    with pytest.raises(SystemExit) as exc:
+        run_suite()
+    assert exc.value.code == 1
+    log = capsys.readouterr().out
+    assert f"credential_type={kind}" in log
+    assert "All benchmark runs are complete." not in log
+    if key:
+        assert key not in log
+    assert not (tmp_path / "output").exists()
+    post.assert_not_called()
+
+
+@pytest.mark.parametrize("workers", [1, 2])
+@pytest.mark.parametrize("status", [200, 401, 403, 404])
+def test_suite_reports_sample_counts_and_fails_for_api_errors(
+    monkeypatch, tmp_path, capsys, workers, status,
+):
+    private_text = "private-sample-content"
+    monkeypatch.setattr("benchmark.provider_suite.DATA_DIR", tmp_path)
+    (tmp_path / "hatecheck.csv").write_text(
+        f"sample_id,text,label\n0,first-private-sample,0\n1,{private_text},0\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("STRAIKER_INTEGRATION_KEY", KEY)
+    monkeypatch.setenv("STRAIKER_BASE", BASE)
+    monkeypatch.setattr(httpx, "post", Mock(side_effect=[
+        response({"action": "allow"}),
+        response({"action": "allow", "private": KEY}, status),
+    ]))
+    output = tmp_path / "output"
+    monkeypatch.setattr("sys.argv", [
+        "run_model_suite", "--providers", "straiker", "--datasets", "hatecheck",
+        "--prompt-versions", "v1", "--thresholds", "0.5", "--debug",
+        "--max-workers", str(workers), "--output-dir", str(output),
+    ])
+    if status == 200:
+        run_suite()
+    else:
+        with pytest.raises(SystemExit) as exc:
+            run_suite()
+        assert exc.value.code == 1
+    log = capsys.readouterr().out
+    assert "credential_type=integration_key" in log
+    assert f"HTTP {status}" in log
+    assert KEY not in log
+    assert private_text not in log
+    assert "first-private-sample" not in log
+    assert ("All benchmark runs are complete." in log) == (status == 200)
+    assert f"valid={1 + int(status == 200)}" in log
+    assert f"error={int(status != 200)}" in log
+    with (output / "straiker.ai" / "hatecheck_v1_t0.5.csv").open(newline="") as file:
+        first_row, row = list(csv.DictReader(file))
+    assert first_row["error"] == ""
+    assert float(first_row["prediction"]) == 0.0
+    assert bool(row["error"]) == (status != 200)
+    assert KEY not in row["error"]
+
+
+def test_straiker_transport_error_details_cannot_leak_into_logs_or_error_column(
+    monkeypatch, tmp_path, capsys,
+):
+    monkeypatch.setattr("benchmark.provider_suite.DATA_DIR", tmp_path)
+    (tmp_path / "hatecheck.csv").write_text(
+        "sample_id,text,label\n0,private-sample-content,0\n", encoding="utf-8",
+    )
+    monkeypatch.setattr(httpx, "post", Mock(side_effect=httpx.ConnectError(KEY)))
+    monkeypatch.setattr("benchmark.straiker_client.time.sleep", Mock())
+    rows = run_single_benchmark(
+        "straiker", "hatecheck", "v1", 0.5, api_key=KEY, base_url=BASE, debug=True,
+    )
+    assert "ConnectError" in rows[0]["error"]
+    assert KEY not in rows[0]["error"]
+    log = capsys.readouterr().out
+    assert KEY not in log
+    assert "private-sample-content" not in log
+
+
+@pytest.mark.parametrize("base", [
+    f"https://user:{KEY}@straiker.example.test",
+    f"{BASE}?api_key={KEY}",
+    f"{BASE}#{KEY}",
+])
+def test_straiker_rejects_secret_bearing_urls_without_logging_them(monkeypatch, capsys, base):
+    post = Mock()
+    monkeypatch.setattr(httpx, "post", post)
+    with pytest.raises(ValueError, match="STRAIKER_BASE") as exc:
+        detect_straiker("Example", KEY, base, debug=True)
+    assert KEY not in str(exc.value)
+    assert KEY not in capsys.readouterr().out
+    post.assert_not_called()
