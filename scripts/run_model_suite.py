@@ -22,6 +22,7 @@ def provider_list(raw_value: str | None) -> list[str]:
             "openjev",
             "galileo.ai",
             "microsoft-decision-1",
+            "straiker.ai",
         ]))
     return [normalize_provider_name(part.strip()) for part in raw_value.split(",") if part.strip()]
 

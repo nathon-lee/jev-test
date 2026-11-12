@@ -11,6 +11,7 @@ Supported providers:
 - openjev
 - galileo.ai
 - microsoft-decision-1
+- straiker.ai
 
 Supported datasets:
 - toxigen
@@ -72,6 +73,99 @@ Each dataset thread makes sequential requests. PII remains the original 990-row
 validation dataset with four-category multilabel scoring, not the local PII CSVs.
 Prepared non-PII mode preserves local sample IDs, input text, and binary labels;
 outputs remain JSONL and are not directly consumed by the existing CSV evaluator.
+
+## Straiker Defend API (local prepared datasets)
+
+The `straiker` / `straiker.ai` provider uses the supplied runbook's
+`POST /api/v3/detect` protocol. It reads the same `data/prepared/*.csv` files
+as the other providers; no dataset conversion or separate download is needed.
+Install the root requirements and run commands from the repository root.
+On Windows, use standard CPython (for example from python.org), not
+MSYS2/MinGW Python, so the numerical dependencies have compatible wheels;
+WSL Python is another option.
+
+### Configure the integration
+
+1. Use a dedicated test integration, not a production integration. Follow the
+   supplied runbook to create an API integration and issue its integration key.
+   If starting with a PAT: exchange it at `/auth/token`, create the integration
+   at `/api/v3/integrations` using the returned JWT, then issue a key at
+   `/api/v3/integrations/{id}/keys`. Save the returned `api_key` immediately:
+   its full value is only shown once. The benchmark does not create resources
+   or change your tenant's configuration.
+2. In the Straiker Console, enable the Defend AI controls appropriate for the
+   dataset: content/toxicity/hate policy for `toxigen`, `hatecheck`, `aegis2`;
+   prompt injection/jailbreak for the three jailbreak datasets; sensitive
+   data/PII for the PII datasets. **New integrations have no enabled controls
+   and allow everything.** Check the policy and verify a known positive and
+   negative example before measuring quality.
+3. Configure the full `sk_agt_...` integration key and the tenant's actual region.
+   Detect does not accept a PAT, JWT, or `X-API-Key` authentication.
+
+PowerShell (after activating your Python environment):
+
+```powershell
+$env:STRAIKER_INTEGRATION_KEY = "sk_agt_REPLACE_WITH_YOUR_INTEGRATION_KEY"
+# Choose your tenant's region; do not assume EU.
+$env:STRAIKER_BASE = "https://api-euc1.prod.straiker.ai"
+# US alternative: https://api.prod.straiker.ai
+```
+
+These are process environment variables. `run_model_suite` does not
+automatically load `.env`; setting values only in that file is insufficient.
+Do not commit keys or put real credentials in command examples or logs.
+
+### Smoke test, full run, and evaluation
+
+Start with three local samples:
+
+```powershell
+python -m scripts.run_model_suite --providers straiker --datasets hatecheck --prompt-versions v1 --thresholds 0.5 --max-workers 1 --limit 3
+python -m scripts.evaluate_model_suite --provider straiker.ai
+```
+
+Remove `--limit` for the full selected dataset. To test multiple datasets with
+the **same configured policy**, use a comma-separated selection, for example:
+
+```powershell
+python -m scripts.run_model_suite --providers straiker --datasets detect-jailbreak,jailbreak-classification,jailbreakhub --prompt-versions v1 --thresholds 0.5 --max-workers 1
+```
+
+`--datasets all` includes every registered dataset and requires every prepared
+CSV to exist; use an explicit selection for the files you already have.
+If you change controls or integration keys between dataset groups, use a new
+`--output-dir` to avoid overwriting earlier runs. For a custom output root,
+evaluate an exact CSV with `summarize_file` from `scripts.evaluate_model_suite`;
+the evaluator CLI scans only the default `outputs` directory.
+
+Results use the existing CSV schema in `outputs/straiker.ai/`, retaining
+`sample_id`, original `text`, and ground-truth `label`. Each successful row also
+stores `score_kind=binary_action` and the full JSON `straiker_response`, including
+`action`, `controls`, `blocked_by`, `config_hash`, `turn_id`, and `trace_id` when
+returned. Check these fields to confirm the intended policy was applied and
+keep the policy fixed during each run. Request/parse failures have an `error`
+and no prediction; the evaluator reports them separately and excludes them
+from quality metrics. Always inspect the error count, even if the runner says
+the output was saved.
+
+Requests send only `{"content": <original text>, "role": "user"}`.
+The dataset question and v1/v2 prompt are **not** sent: classification is
+controlled by the integration policy. `allow` maps to score/prediction 0 and
+`block` to 1 at threshold 0.5. These are policy verdicts, **not probabilities**;
+use one prompt version and one threshold to avoid paying for duplicate calls.
+AUROC from these binary scores is only a single-operating-point summary, not a
+continuous-score ranking metric. PII results are document-level binary
+classification, not entity/span detection or masking quality. With multiple
+controls enabled, any control can cause a block, so results measure the whole
+policy rather than an isolated hate/jailbreak/PII detector.
+
+The client retries HTTP 429, 5xx, and transport failures up to three times with
+backoff and honors `Retry-After`. Other HTTP errors and malformed verdicts are
+not retried. Start with one worker; this adapter does not impose a global
+requests-per-second cap. Confirm tenant limits with Straiker before large runs
+(especially over 10,000 prompts) or increasing concurrency. Only send data you
+are authorized to process with Straiker; requests are real tenant traffic,
+and output CSVs retain the input text.
 
 ## Create a virtual environment
 

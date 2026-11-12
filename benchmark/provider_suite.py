@@ -8,6 +8,8 @@ from typing import Any
 import httpx
 import pandas as pd
 
+from benchmark.straiker_client import detect_straiker
+
 try:
     from typesafe_sdk import Noul, TypeSafeClient
 except Exception:  # pragma: no cover - optional at import time for non-Typesafe environments
@@ -30,9 +32,18 @@ PROVIDER_ALIASES = {
     "galileo.ai": "galileo.ai",
     "microsoft": "microsoft-decision-1",
     "microsoft-decision-1": "microsoft-decision-1",
+    "straiker": "straiker.ai",
+    "straiker.ai": "straiker.ai",
 }
 
 PROVIDER_SPECS = {
+    "straiker.ai": {
+        "kind": "api_key",
+        "api_key_env": "STRAIKER_INTEGRATION_KEY",
+        "base_url_env": "STRAIKER_BASE",
+        "default_base_url": "",
+        "auth": "bearer",
+    },
     "typesafe.ai": {
         "kind": "api_key",
         "api_key_env": "TYPESAFE_API_KEY",
@@ -506,6 +517,12 @@ def call_provider(
     resolved_api_key = resolve_api_key(provider_name, api_key)
     resolved_base_url = resolve_base_url(provider_name, base_url)
 
+    if normalize_provider_name(provider_name) == "straiker.ai":
+        result = detect_straiker(
+            text, resolved_api_key, resolved_base_url, timeout=timeout, debug=debug,
+        )
+        return float(result["action"] == "block")
+
     if normalize_provider_name(provider_name) == "typesafe.ai":
         return _call_typesafe_sdk(
             prompt=prompt,
@@ -615,15 +632,29 @@ def run_single_benchmark(
         sample_id = row.get("sample_id", len(rows))
         text = str(row.get("text", ""))
         label = int(row.get("label", 0))
+        metadata: dict[str, Any] = {}
         try:
-            score = call_provider(
-                provider_name=provider_name,
-                prompt=prompt,
-                text=text,
-                api_key=api_key,
-                base_url=base_url,
-                debug=debug,
-            )
+            if normalize_provider_name(provider_name) == "straiker.ai":
+                result = detect_straiker(
+                    text,
+                    resolve_api_key(provider_name, api_key),
+                    resolve_base_url(provider_name, base_url),
+                    debug=debug,
+                )
+                score = float(result["action"] == "block")
+                metadata = {
+                    "score_kind": "binary_action",
+                    "straiker_response": json.dumps(result, ensure_ascii=False),
+                }
+            else:
+                score = call_provider(
+                    provider_name=provider_name,
+                    prompt=prompt,
+                    text=text,
+                    api_key=api_key,
+                    base_url=base_url,
+                    debug=debug,
+                )
             prediction = int(score >= threshold)
             rows.append(
                 {
@@ -637,6 +668,7 @@ def run_single_benchmark(
                     "prediction": prediction,
                     "provider": provider_name,
                     "error": "",
+                    **metadata,
                 }
             )
         except Exception as exc:  # pragma: no cover - network/SDK errors are expected in live runs
