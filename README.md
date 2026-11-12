@@ -193,10 +193,20 @@ and no prediction; the evaluator reports them separately and excludes them
 from quality metrics. An output file being saved does not mean all requests
 succeeded; inspect the error count and the runner's exit status.
 
-Requests send only `{"content": <original text>, "role": "user"}`.
+Requests send only `{"prompt": <original text>}`. This format was verified on
+the EUC1 endpoint: the older runbook's top-level `content`/`role` payload returned
+HTTP 200 with empty controls for an email sample, while `prompt` returned
+`action=detect` with `controls=["email_address"]` for the same sample.
+HTTP 200 alone does not establish that the submitted text was scored.
 The dataset question and v1/v2 prompt are **not** sent: classification is
-controlled by the integration policy. `allow` maps to score/prediction 0 and
-`block` to 1 at threshold 0.5. These are policy verdicts, **not probabilities**;
+controlled by the integration policy. `allow` and `detect` map to
+score/prediction 0 and `block` to 1 at threshold 0.5. `detect` is a valid
+non-blocking detection, not a parse error or proof that content is safe; its
+controls are retained in the raw response. This preserves block-only scoring,
+so use Block mode for the detectors being benchmarked as positive predictions.
+The same configuration hash can occur with an empty result and a detection;
+it is not proof that the submitted text was scored.
+These are policy verdicts, **not probabilities**;
 use one prompt version and one threshold to avoid paying for duplicate calls.
 AUROC from these binary scores is only a single-operating-point summary, not a
 continuous-score ranking metric. PII results are document-level binary

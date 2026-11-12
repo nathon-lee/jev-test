@@ -25,7 +25,7 @@ def response(payload, status=200, headers=None):
 
 
 @pytest.mark.parametrize("base", [BASE, BASE + "/", BASE + "/api/v3/detect"])
-@pytest.mark.parametrize("action,score", [("allow", 0.0), ("block", 1.0)])
+@pytest.mark.parametrize("action,score", [("allow", 0.0), ("detect", 0.0), ("block", 1.0)])
 def test_straiker_sends_original_content_and_maps_only_action(monkeypatch, capsys, base, action, score):
     post = Mock(return_value=response({"action": action, "score": 1 - score}))
     monkeypatch.setattr(httpx, "post", post)
@@ -38,7 +38,7 @@ def test_straiker_sends_original_content_and_maps_only_action(monkeypatch, capsy
     post.assert_called_once_with(
         BASE + "/api/v3/detect",
         headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"},
-        json={"content": text, "role": "user"},
+        json={"prompt": text},
         timeout=60.0,
     )
     log = capsys.readouterr().out
@@ -127,10 +127,13 @@ def test_straiker_local_dataset_output_and_existing_evaluator(monkeypatch, tmp_p
     with (tmp_path / "hatecheck.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["sample_id", "text", "label"])
-        writer.writerows([["safe-id", "Hello\nworld", 0], ["unsafe-id", "Test input", 1],
+        writer.writerows([["safe-id", "Hello\nworld", 0], ["detected-id", "Test email", 0],
+                          ["unsafe-id", "Test input", 1],
                           ["error-id", "Failed request", 1]])
     verdicts = [
         {"action": "allow", "controls": [], "blocked_by": [], "config_hash": "config-1"},
+        {"action": "detect", "controls": ["email_address"], "blocked_by": [],
+         "config_hash": "config-1"},
         {"action": "block", "controls": ["hate"], "blocked_by": ["hate"],
          "config_hash": "config-1", "turn_id": "turn-1", "trace_id": "trace-1"},
     ]
@@ -139,17 +142,18 @@ def test_straiker_local_dataset_output_and_existing_evaluator(monkeypatch, tmp_p
 
     rows = run_single_benchmark("straiker.ai", "hatecheck", "v1", 0.5,
                                 api_key=KEY, base_url=BASE)
-    assert [row["sample_id"] for row in rows] == ["safe-id", "unsafe-id", "error-id"]
-    assert [row["prediction"] for row in rows] == [0, 1, None]
-    assert [row["score"] for row in rows] == [0.0, 1.0, None]
+    assert [row["sample_id"] for row in rows] == ["safe-id", "detected-id", "unsafe-id", "error-id"]
+    assert [row["prediction"] for row in rows] == [0, 0, 1, None]
+    assert [row["score"] for row in rows] == [0.0, 0.0, 1.0, None]
     assert rows[0]["text"] == "Hello\nworld"
     assert json.loads(rows[1]["straiker_response"]) == verdicts[1]
+    assert json.loads(rows[2]["straiker_response"]) == verdicts[2]
     assert rows[1]["score_kind"] == "binary_action"
-    assert "401" in rows[2]["error"]
+    assert "401" in rows[3]["error"]
 
     path = save_rows(rows, "straiker.ai", "hatecheck", "v1", 0.5, output_dir=tmp_path)
     summary = summarize_file(path)
-    assert (summary["rows"], summary["valid"], summary["error"]) == (3, 2, 1)
+    assert (summary["rows"], summary["valid"], summary["error"]) == (4, 3, 1)
     assert summary["accuracy"] == summary["precision"] == summary["recall"] == summary["f1"] == 1.0
 
 

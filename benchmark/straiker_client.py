@@ -80,7 +80,7 @@ def straiker_error_message(error: Exception) -> str:
     if isinstance(error, json.JSONDecodeError):
         return "Invalid Straiker response: expected JSON, but the response could not be decoded."
     if isinstance(error, ValueError):
-        return "Invalid Straiker response: expected a JSON object with action 'allow' or 'block'."
+        return "Invalid Straiker response: expected a JSON object with action 'allow', 'detect', or 'block'."
     return f"{type(error).__name__}: Straiker request processing failed."
 
 
@@ -92,14 +92,14 @@ def detect_straiker(
     debug: bool = False,
 ) -> dict[str, Any]:
     url = validate_straiker_config(api_key, base_url)
-    payload = {"content": text, "role": "user"}
+    payload = {"prompt": text}
 
     for attempt in range(4):
         started = time.perf_counter()
         if debug:
             print(
                 f"[DEBUG][straiker.ai] POST {url} attempt={attempt + 1}/4 "
-                f"role=user content_chars={len(text)}"
+                f"prompt_chars={len(text)}"
             )
         try:
             response = httpx.post(
@@ -130,8 +130,8 @@ def detect_straiker(
                 continue
         response.raise_for_status()
         result = response.json()
-        if not isinstance(result, dict) or result.get("action") not in ("allow", "block"):
-            raise ValueError("Invalid Straiker response: action must be 'allow' or 'block'.")
+        if not isinstance(result, dict) or result.get("action") not in ("allow", "detect", "block"):
+            raise ValueError("Invalid Straiker response: action must be 'allow', 'detect', or 'block'.")
         if debug:
             print(f"[DEBUG][straiker.ai] action={result['action']}")
         return result
