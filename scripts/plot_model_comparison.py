@@ -18,6 +18,8 @@ def main():
     parser.add_argument("--gliner25-run", type=Path, help="Add a completed Fastino GLiNER2.5-Decide run to reference-only comparisons")
     parser.add_argument("--qwen-summary", type=Path, help="User-supplied 12-dataset Qwen3Guard summary CSV (v1 / 0.5)")
     parser.add_argument("--luna-summary", type=Path, help="User-supplied Luna summary CSV; native presets are displayed separately from v1/v2 comparisons")
+    parser.add_argument("--straiker-summary", type=Path, help="User-supplied eight-dataset Straiker metrics and log timing (v1; threshold unknown)")
+    parser.add_argument("--luna-three-dataset-latency-ms", type=float, help="User-measured Luna reference latency for ToxiGen / HateCheck / AEGIS2 only")
     parser.add_argument("--fastino-page", type=Path, help="Write only a self-contained per-dataset Fastino comparison HTML page")
     args = parser.parse_args()
     if args.dpi < 72:
@@ -49,13 +51,21 @@ def main():
         from benchmark.external_summary import attach_luna_summary
 
         attach_luna_summary(report, args.luna_summary)
-    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run or args.luna_summary:
+    if args.straiker_summary:
+        from benchmark.external_summary import attach_straiker_summary
+
+        attach_straiker_summary(report, args.straiker_summary)
+    if args.luna_three_dataset_latency_ms is not None:
+        from benchmark.external_summary import attach_luna_reference_latency
+
+        attach_luna_reference_latency(report, args.luna_three_dataset_latency_ms)
+    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run or args.luna_summary or args.straiker_summary or args.luna_three_dataset_latency_ms is not None:
         report["generated_at"] = datetime.now(timezone.utc).isoformat()
     if args.fastino_page:
         write_fastino_comparison(report, args.fastino_page, dpi=args.dpi)
         print(f"Fastino comparison: {args.fastino_page}")
         return
-    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run or args.luna_summary:
+    if args.fine_tuned_run or args.gliguard_run or args.poc_run or args.gliner25_run or args.luna_summary or args.straiker_summary or args.luna_three_dataset_latency_ms is not None:
         from benchmark.comparison import write_report
 
         write_report(report, args.report.parent)

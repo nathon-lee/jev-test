@@ -9,6 +9,7 @@ harmful_content,openjev-32b,v1,"toxigen,hatecheck,aegis2",0.7799446666666666,0.9
 harmful_content,microsoft-decision-1,v1,"toxigen,hatecheck,aegis2",0.8318953333333333,0.936145,0.72204,0.7990336666666666,0.918753,1239.601246,0.5,True
 harmful_content,qwen3guard-stream-8b,v1,"toxigen,hatecheck,aegis2",0.8017853333333333,0.8273010000000001,0.807762,0.807799,0.7707783333333333,1649.0928346666667,0.5,True
 harmful_content,luna,native_presets,"toxigen,hatecheck,aegis2",0.7848666666666667,0.9110666666666667,0.6621333333333334,0.7459333333333333,0.8816666666666666,,0.5,True
+harmful_content,straiker.ai,v1,"toxigen,hatecheck,aegis2",0.8025333333333333,0.9394806666666666,0.6651103333333334,0.756677,0.8011623333333333,1630.7233333333334,,True
 jailbreak,fastino.ai,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.7614386817767291,0.4585191353454841,0.9645285583991204,0.5609011036314808,0.9497679782631814,307.0258976046009,0.5,True
 jailbreak,fastino-gliner2.5-decide,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8113114903945166,0.4719154677146243,0.8160795993658766,0.5680668790043911,0.8705242624586258,281.0833303844457,0.5,True
 jailbreak,fastino-gliguard-300m,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8143769078420553,0.490110685072341,0.8453504215978784,0.5819822376568947,0.879127267963853,252.56666619677696,0.5,True
@@ -19,6 +20,7 @@ jailbreak,openjev-32b,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub
 jailbreak,microsoft-decision-1,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.7974123333333334,0.49021933333333334,0.9140006666666667,0.5789243333333334,0.930439,1246.029405,0.5,True
 jailbreak,qwen3guard-stream-8b,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.851023,0.5662309999999999,0.8012163333333333,0.624857,0.8426143333333334,1628.5684043333333,0.5,True
 jailbreak,luna,native_presets,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8207333333333333,0.5154,0.8853,0.5953333333333334,0.9055,,0.5,True
+jailbreak,straiker.ai,v1,"detect-jailbreak,jailbreak-classification,jailbreakhub",0.8599786666666667,0.563697,0.8437303333333334,0.634916,0.8618003333333334,1705.42,,True
 pii,fastino.ai,v1,"pii_masking_nano_1k,pii_masking_mini_10k",0.8603333333333334,1.0,0.8603333333333334,0.9249236608544277,,367.63750000000005,0.5,True
 pii,fastino-gliner2.5-decide,v1,"pii_masking_nano_1k,pii_masking_mini_10k",,,,,,,0.5,True
 pii,fastino-gliguard-300m,v1,"pii_masking_nano_1k,pii_masking_mini_10k",,,,,,,0.5,True
@@ -29,3 +31,4 @@ pii,openjev-32b,v1,"pii_masking_nano_1k,pii_masking_mini_10k",0.955577,1.0,0.955
 pii,microsoft-decision-1,v1,"pii_masking_nano_1k,pii_masking_mini_10k",0.9483805000000001,1.0,0.9483805000000001,0.9735065,,1238.7807739999998,0.5,True
 pii,qwen3guard-stream-8b,v1,"pii_masking_nano_1k,pii_masking_mini_10k",,,,,,,0.5,False
 pii,luna,native_presets,"pii_masking_nano_1k,pii_masking_mini_10k",,,,,,,0.5,False
+pii,straiker.ai,v1,"pii_masking_nano_1k,pii_masking_mini_10k",0.8651115,1.0,0.8651115,0.9276770000000001,,2682.2,,True

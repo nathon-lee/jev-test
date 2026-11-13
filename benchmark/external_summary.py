@@ -26,6 +26,18 @@ GLINER25_DISPLAY_NAME = "Fastino GLiNER2.5-Decide"
 LUNA_PROVIDER = "luna"
 NATIVE_PRESET_PROMPT = "native_presets"
 QWEN_PROVIDER = "qwen3guard-stream-8b"
+STRAIKER_PROVIDER = "straiker.ai"
+STRAIKER_NOTES = (
+    "User-supplied aggregate results from outputs-straiker-full-vzs8KFDy; raw predictions and logs "
+    "were not available for independent verification. Prompt v1; decision threshold and resolved "
+    "model/version were not supplied (N/A), unlike the threshold-0.5 reference runs. "
+    "All eight runs completed; JailbreakHub has one error. Quality excludes failed samples. "
+    "Latency is single-run log elapsed/processed, including failures and client/network overhead, "
+    "not successful-request mean latency or pure server inference time. "
+    "PII is binary present/absent classification, not extraction or masking quality; "
+    "positives-only PII FPR and AUROC are undefined. Equal dataset weights; no sample-aligned "
+    "ranking, v2 comparison or repeat-call consistency is inferred."
+)
 QWEN_NOTES = (
     "User-supplied summary only; no prediction CSV or source-data integrity audit was performed. "
     "Prompt v1, threshold 0.5; 12 reported prediction CSVs. "
@@ -217,7 +229,9 @@ def category_reference_averages(report):
     comparison = report["external_comparison"]
     records = [
         row for row in comparison["runs"]
-        if reference_prompt(row) == "v1" and row["threshold"] == 0.5
+        if reference_prompt(row) == "v1" and (
+            row["threshold"] == 0.5 or row["provider"] in comparison.get("aggregate_models", {})
+        )
     ]
     result = []
     for category, datasets in DATASET_CATEGORIES.items():
@@ -225,7 +239,8 @@ def category_reference_averages(report):
             rows = reference_averages(records, [provider], datasets, include_pii=True)
             result.extend(
                 {
-                    "category": category, **row, "threshold": 0.5,
+                    "category": category, **row,
+                    "threshold": None if provider in comparison.get("aggregate_models", {}) else 0.5,
                     "task_supported": not (
                         category == "pii" and (
                             provider in comparison.get("summary_models", {})
@@ -244,6 +259,7 @@ def reference_comparison_averages(comparison, datasets=None, include_pii=False):
         **comparison.get("classification_models", {}),
         **comparison.get("summary_models", {}),
         **comparison.get("native_preset_models", {}),
+        **comparison.get("aggregate_models", {}),
     }
     providers = [provider for provider in comparison["providers"] if provider not in additional]
     rows = reference_averages(comparison["runs"], providers, datasets, include_pii=include_pii)
@@ -288,6 +304,7 @@ def v1_reference_scope_averages(report, datasets=None):
             or row["provider"] in comparison.get("classification_models", {})
             or row["provider"] in comparison.get("summary_models", {})
             or row["provider"] in comparison.get("native_preset_models", {})
+            or row["provider"] in comparison.get("aggregate_models", {})
         ):
             timing[key] = row["mean_elapsed_ms"]
         else:
@@ -320,7 +337,9 @@ def v1_reference_scope_averages(report, datasets=None):
             own = [timing.get((row["provider"], dataset)) for dataset in scope_datasets]
             supported = not any((row["provider"], dataset) in unsupported for dataset in scope_datasets)
             result.append({
-                "scope": scope, **row, "threshold": 0.5, "timing_datasets": timed,
+                "scope": scope, **row,
+                "threshold": None if row["provider"] in comparison.get("aggregate_models", {}) else 0.5,
+                "timing_datasets": timed,
                 "mean_elapsed_ms": mean(own) if supported and own and all(value is not None for value in own) else None,
                 "shared_elapsed_ms": (
                     mean(timing[(row["provider"], dataset)] for dataset in timed)
@@ -344,12 +363,16 @@ def three_dataset_averages(report):
     }
     for row in overview:
         row["f1_source"] = "mean_per_dataset" if row["f1"] is not None else "unavailable"
+        supplied_latency = report.get("luna_summary", {}).get("three_dataset_latency")
+        if row["provider"] == LUNA_PROVIDER and supplied_latency:
+            row["mean_elapsed_ms"] = supplied_latency["mean_elapsed_ms"]
         if (
             row["provider"] == "openjev" or row["provider"] in INTERNAL_IDENTITIES
             or row["provider"] in comparison.get("fine_tuned_models", {})
             or row["provider"] in comparison.get("classification_models", {})
             or row["provider"] in comparison.get("summary_models", {})
             or row["provider"] in comparison.get("native_preset_models", {})
+            or row["provider"] in comparison.get("aggregate_models", {})
         ):
             continue
         runs = [timing.get((row["provider"], dataset)) for dataset in FOCUSED_DATASETS]
@@ -366,6 +389,75 @@ def three_dataset_averages(report):
             "auroc": auroc, "mean_elapsed_ms": latency,
         })
     return overview
+
+
+def attach_straiker_summary(report, path):
+    path = Path(path)
+    records, seen = [], set()
+    counts = ("rows", "valid", "errors", "tp", "tn", "fp", "fn")
+    scores = (*METRICS[:-1], "fpr", "fnr")
+    required = {*counts, *scores, "dataset", "prompt", "progress", "complete",
+                "elapsed_s", "mean_elapsed_ms"}
+    with path.open(encoding="utf-8-sig", newline="") as stream:
+        reader = csv.DictReader(stream)
+        if not required.issubset(reader.fieldnames or []):
+            raise ValueError(f"{path}: missing Straiker summary columns")
+        for line, supplied in enumerate(reader, 2):
+            dataset = supplied["dataset"]
+            if dataset not in DATASETS or dataset in seen:
+                raise ValueError(f"{path}:{line}: unknown or duplicate Straiker dataset")
+            seen.add(dataset)
+            row = {key: int(supplied[key]) for key in counts}
+            if (
+                row["rows"] <= 0 or row["valid"] <= 0 or min(row.values()) < 0
+                or row["valid"] + row["errors"] != row["rows"]
+                or sum(row[key] for key in ("tp", "tn", "fp", "fn")) != row["valid"]
+            ):
+                raise ValueError(f"{path}:{line}: invalid Straiker counts")
+            if (
+                supplied["prompt"] != "v1" or supplied["complete"] != "True"
+                or supplied["progress"] != f'{row["rows"]}/{row["rows"]}'
+            ):
+                raise ValueError(f"{path}:{line}: Straiker summary requires complete v1 runs")
+            for key in (*scores, "elapsed_s", "mean_elapsed_ms"):
+                value = None if supplied[key] in ("", "NaN") else float(supplied[key])
+                undefined = key in ("fpr", "auroc") and row["tn"] + row["fp"] == 0
+                if (
+                    (value is None and not undefined) or (undefined and value is not None)
+                    or (value is not None and (
+                        not math.isfinite(value) or value < 0 or (key in scores and value > 1)
+                    ))
+                ):
+                    raise ValueError(f"{path}:{line}: invalid Straiker {key}")
+                row[key] = value
+            if abs(row["elapsed_s"] * 1000 / row["rows"] - row["mean_elapsed_ms"]) > 0.01:
+                raise ValueError(f"{path}:{line}: Straiker timing does not match elapsed/processed")
+            records.append({
+                "provider": STRAIKER_PROVIDER, "dataset": dataset, "prompt": "v1",
+                "threshold": None, **row, "progress": supplied["progress"], "complete": True,
+                "source_kind": "user_supplied_aggregate",
+                "latency_source_kind": "single_complete_run",
+                "result_directory": "outputs-straiker-full-vzs8KFDy",
+            })
+    if seen != set(DATASETS):
+        raise ValueError(f"{path}: Straiker summary must contain all eight datasets")
+    comparison = report["external_comparison"]
+    comparison["runs"] = [
+        row for row in comparison["runs"] if row["provider"] != STRAIKER_PROVIDER
+    ] + records
+    if STRAIKER_PROVIDER not in comparison["providers"]:
+        comparison["providers"].append(STRAIKER_PROVIDER)
+    comparison["model_identities"][STRAIKER_PROVIDER] = {
+        "request_model": "not supplied", "resolved_model": None, "display_name": "Straiker",
+    }
+    comparison.setdefault("aggregate_models", {})[STRAIKER_PROVIDER] = {
+        "display_name": "Straiker", "source": str(path), "notes": STRAIKER_NOTES,
+        "rows": sum(row["rows"] for row in records),
+        "valid": sum(row["valid"] for row in records),
+        "errors": sum(row["errors"] for row in records), "supplied_rows": records,
+        "detail_page": "straiker_summary.html", "summary_csv": "straiker_summary.csv",
+    }
+    comparison["overview"] = reference_comparison_averages(comparison)
 
 
 def attach_qwen_summary(report, path):
@@ -438,6 +530,27 @@ def attach_qwen_summary(report, path):
         "summary_csv": "qwen3guard_stream_8b_summary.csv",
     }
     comparison["overview"] = reference_comparison_averages(comparison)
+
+
+def attach_luna_reference_latency(report, mean_elapsed_ms):
+    if not math.isfinite(mean_elapsed_ms) or mean_elapsed_ms <= 0:
+        raise ValueError("Luna three-dataset latency must be finite and positive")
+    if "luna_summary" not in report:
+        raise ValueError("Luna latency requires an existing Luna summary")
+    model = report["luna_summary"]
+    model["three_dataset_latency"] = {
+        "datasets": list(FOCUSED_DATASETS), "mean_elapsed_ms": mean_elapsed_ms,
+        "source_kind": "user_supplied_measurement",
+        "notes": (
+            "User-measured latency for the ToxiGen / HateCheck / AEGIS2 reference average only. "
+            "Timing protocol and dataset weighting were not supplied. "
+            "Not imputed to individual datasets, other scopes or PII."
+        ),
+    }
+    model["source_limitations"] = model["source_limitations"].replace(
+        "Scorer version IDs and latency remain N/A.",
+        "Scorer version IDs and per-dataset latency remain N/A.",
+    )
 
 
 def attach_luna_summary(report, path):

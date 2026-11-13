@@ -1,5 +1,5 @@
 {
-  "source_generated_at": "2026-11-05T04:06:07.482412+00:00",
+  "source_generated_at": "2026-11-13T06:47:37.375722+00:00",
   "model_identities": {
     "fastino.ai": {
       "request_model": "fastino/GLiDE",
@@ -127,8 +127,8 @@
     },
     {
       "name": "fig14_category_reference_averages",
-      "title": "Dataset-Category Multi-Model Reference Averages (v1 / Threshold 0.5) | Luna: native presets (prompt N/A)",
-      "caption": "Fixed prompt v1 and threshold 0.5. Harmful content averages ToxiGen, HateCheck and AEGIS2; Jailbreak averages Detect-Jailbreak, Jailbreak-Classification and JailbreakHub; PII averages Nano-1K and Mini-10K. Every dataset within a category has equal weight. All six metrics are averaged separately from per-dataset values; F1 is not recomputed from mean Precision/Recall. Missing required data or undefined metrics remain N/A; no category drops datasets to fill missing values. PII is ordinary binary classification (PII present vs absent), not entity extraction or masking quality. Its current labels contain positives only, so AUROC is undefined. Quality uses each model's own successful samples or supplied aggregates, not sample-aligned comparisons. Latency averages the reference timings used in the per-dataset chart, including network and failure waits; single-run and four-run timing protocols differ and are reference-only. Historical PII and other models' snapshots are retained; categories need not share an evaluation date. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details. Fastino GLiGuard-LLMGuardrails-300M | model ID: fastino/gliguard-LLMGuardrails-300M 46,225 successful / 46,923 rows; 698 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. Single-run elapsed includes failed requests, client and network overhead. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Fastino GLiNER2.5-Decide | model ID: fastino/gliner2.5-decide 46,205 successful / 46,923 rows; 718 errors. Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. Both labels were requested at API threshold zero; no normalization or complement. Inputs were not truncated; overlength inputs are recorded as errors. Requested model: fastino/gliner2.5-decide; response model: fastino/gliner2.5-decide. v1 / 0.5; six non-PII datasets. Quality excludes failed requests. HTTP 400: 698 errors. HTTP 502: 20 errors. Latency is the successful-request mean from CSV latency_ms, including per-request retry waits and client/network overhead, but excluding initial preflight warmup; it differs from GLiDE/GLiGuard log elapsed/processed timing. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only). Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking. Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results. Luna PII micro-F1 is separate; binary PII and latency are N/A. Supplied metrics; scorer versions unverified.",
+      "title": "Dataset-Category Multi-Model Reference Averages (v1 / Threshold 0.5) | Luna: native presets (prompt N/A) | Straiker: threshold N/A",
+      "caption": "Fixed prompt v1 and threshold 0.5. Harmful content averages ToxiGen, HateCheck and AEGIS2; Jailbreak averages Detect-Jailbreak, Jailbreak-Classification and JailbreakHub; PII averages Nano-1K and Mini-10K. Every dataset within a category has equal weight. All six metrics are averaged separately from per-dataset values; F1 is not recomputed from mean Precision/Recall. Missing required data or undefined metrics remain N/A; no category drops datasets to fill missing values. PII is ordinary binary classification (PII present vs absent), not entity extraction or masking quality. Its current labels contain positives only, so AUROC is undefined. Quality uses each model's own successful samples or supplied aggregates, not sample-aligned comparisons. Latency averages the reference timings used in the per-dataset chart, including network and failure waits; single-run and four-run timing protocols differ and are reference-only. Historical PII and other models' snapshots are retained; categories need not share an evaluation date. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details. Fastino GLiGuard-LLMGuardrails-300M | model ID: fastino/gliguard-LLMGuardrails-300M 46,225 successful / 46,923 rows; 698 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. Single-run elapsed includes failed requests, client and network overhead. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Fastino GLiNER2.5-Decide | model ID: fastino/gliner2.5-decide 46,205 successful / 46,923 rows; 718 errors. Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. Both labels were requested at API threshold zero; no normalization or complement. Inputs were not truncated; overlength inputs are recorded as errors. Requested model: fastino/gliner2.5-decide; response model: fastino/gliner2.5-decide. v1 / 0.5; six non-PII datasets. Quality excludes failed requests. HTTP 400: 698 errors. HTTP 502: 20 errors. Latency is the successful-request mean from CSV latency_ms, including per-request retry waits and client/network overhead, but excluding initial preflight warmup; it differs from GLiDE/GLiGuard log elapsed/processed timing. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only). Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking. Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results. Luna three-dataset reference latency: 181.97 ms (user-measured; timing/weights unspecified). Per-dataset latency and binary PII: N/A; PII micro-F1 is separate. Scorer versions unverified. Straiker: supplied v1 aggregates; threshold and model/version N/A (not confirmed as 0.5). Single-run log elapsed/processed includes failures; JailbreakHub: 1 error. PII: binary classification. Raw files unverified; own valid samples only, not a sample-aligned ranking.",
       "files": {
         "png": "fig14_category_reference_averages.png",
         "svg": "fig14_category_reference_averages.svg",
@@ -138,7 +138,7 @@
         {
           "metric": "accuracy",
           "title": "Accuracy",
-          "display_min_width": 1011,
+          "display_min_width": 1001,
           "files": {
             "png": "fig14_category_reference_averages_accuracy.png",
             "svg": "fig14_category_reference_averages_accuracy.svg",
@@ -148,7 +148,7 @@
         {
           "metric": "precision",
           "title": "Precision",
-          "display_min_width": 1011,
+          "display_min_width": 1001,
           "files": {
             "png": "fig14_category_reference_averages_precision.png",
             "svg": "fig14_category_reference_averages_precision.svg",
@@ -158,7 +158,7 @@
         {
           "metric": "recall",
           "title": "Recall",
-          "display_min_width": 1011,
+          "display_min_width": 1001,
           "files": {
             "png": "fig14_category_reference_averages_recall.png",
             "svg": "fig14_category_reference_averages_recall.svg",
@@ -168,7 +168,7 @@
         {
           "metric": "f1",
           "title": "F1",
-          "display_min_width": 1011,
+          "display_min_width": 1001,
           "files": {
             "png": "fig14_category_reference_averages_f1.png",
             "svg": "fig14_category_reference_averages_f1.svg",
@@ -178,7 +178,7 @@
         {
           "metric": "auroc",
           "title": "AUROC",
-          "display_min_width": 1011,
+          "display_min_width": 1001,
           "files": {
             "png": "fig14_category_reference_averages_auroc.png",
             "svg": "fig14_category_reference_averages_auroc.svg",
@@ -188,7 +188,7 @@
         {
           "metric": "mean_elapsed_ms",
           "title": "AVG latency (ms)",
-          "display_min_width": 1011,
+          "display_min_width": 1001,
           "files": {
             "png": "fig14_category_reference_averages_mean_elapsed_ms.png",
             "svg": "fig14_category_reference_averages_mean_elapsed_ms.svg",
@@ -199,8 +199,8 @@
     },
     {
       "name": "fig10_openjev_reference_v1",
-      "title": "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5) | Luna: native presets (prompt N/A)",
-      "caption": "Fixed threshold 0.5. The original OpenJev is labeled 4B; OpenJev 32B and Microsoft Decision-1 have v1 summaries only. Internal models use user-supplied aggregate results; other models use their own successful samples. Sample-level alignment with OpenJev is unavailable, so this is not a fair ranking. The Rows field counts total rows, not valid samples. PII is ordinary binary classification (PII present vs absent), not extraction or masking quality; single-class AUROC is N/A. The original four models prefer complete four-run averages for timing. For local APIs in v1, when no complete four-run mean is available, elapsed/processed from a complete threshold-0.5 run is used only if log counts match the full CSV. The two added models use supplied single-run timing. Asterisks mark single-run timings, not four-run means; protocols differ. Timing includes failure waits, client and network overhead; unverifiable timing is N/A. All five ToxiGen quality metrics for 32B are now supplied; tasks with many errors reflect successful samples only. The original sample-aligned baseline and stability analyses are unchanged and exclude aggregate-only internal models. One enlarged metric chart is shown per row, with a shared model legend at the top. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details. Latency uses a logarithmic vertical axis with actual ms/sample labels. The complete six-metric figure and each individual metric are available for download. Fastino GLiGuard-LLMGuardrails-300M | model ID: fastino/gliguard-LLMGuardrails-300M 46,225 successful / 46,923 rows; 698 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. Single-run elapsed includes failed requests, client and network overhead. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Fastino GLiNER2.5-Decide | model ID: fastino/gliner2.5-decide 46,205 successful / 46,923 rows; 718 errors. Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. Both labels were requested at API threshold zero; no normalization or complement. Inputs were not truncated; overlength inputs are recorded as errors. Requested model: fastino/gliner2.5-decide; response model: fastino/gliner2.5-decide. v1 / 0.5; six non-PII datasets. Quality excludes failed requests. HTTP 400: 698 errors. HTTP 502: 20 errors. Latency is the successful-request mean from CSV latency_ms, including per-request retry waits and client/network overhead, but excluding initial preflight warmup; it differs from GLiDE/GLiGuard log elapsed/processed timing. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only). Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking. Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results. Luna PII micro-F1 is separate; binary PII and latency are N/A. Supplied metrics; scorer versions unverified.",
+      "title": "Per-Dataset Multi-Model Reference Comparison (v1 / Threshold 0.5) | Luna: native presets (prompt N/A) | Straiker: threshold N/A",
+      "caption": "Fixed threshold 0.5. The original OpenJev is labeled 4B; OpenJev 32B and Microsoft Decision-1 have v1 summaries only. Internal models use user-supplied aggregate results; other models use their own successful samples. Sample-level alignment with OpenJev is unavailable, so this is not a fair ranking. The Rows field counts total rows, not valid samples. PII is ordinary binary classification (PII present vs absent), not extraction or masking quality; single-class AUROC is N/A. The original four models prefer complete four-run averages for timing. For local APIs in v1, when no complete four-run mean is available, elapsed/processed from a complete threshold-0.5 run is used only if log counts match the full CSV. The two added models use supplied single-run timing. Asterisks mark single-run timings, not four-run means; protocols differ. Timing includes failure waits, client and network overhead; unverifiable timing is N/A. All five ToxiGen quality metrics for 32B are now supplied; tasks with many errors reflect successful samples only. The original sample-aligned baseline and stability analyses are unchanged and exclude aggregate-only internal models. One enlarged metric chart is shown per row, with a shared model legend at the top. Accuracy, F1 and Latency are visible by default; expand Precision, Recall and AUROC for details. Latency uses a logarithmic vertical axis with actual ms/sample labels. The complete six-metric figure and each individual metric are available for download. Fastino GLiGuard-LLMGuardrails-300M | model ID: fastino/gliguard-LLMGuardrails-300M 46,225 successful / 46,923 rows; 698 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. Single-run elapsed includes failed requests, client and network overhead. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Fastino GLiNER2.5-Decide | model ID: fastino/gliner2.5-decide 46,205 successful / 46,923 rows; 718 errors. Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. Both labels were requested at API threshold zero; no normalization or complement. Inputs were not truncated; overlength inputs are recorded as errors. Requested model: fastino/gliner2.5-decide; response model: fastino/gliner2.5-decide. v1 / 0.5; six non-PII datasets. Quality excludes failed requests. HTTP 400: 698 errors. HTTP 502: 20 errors. Latency is the successful-request mean from CSV latency_ms, including per-request retry waits and client/network overhead, but excluding initial preflight warmup; it differs from GLiDE/GLiGuard log elapsed/processed timing. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only). Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking. Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results. Luna three-dataset reference latency: 181.97 ms (user-measured; timing/weights unspecified). Per-dataset latency and binary PII: N/A; PII micro-F1 is separate. Scorer versions unverified. Straiker: supplied v1 aggregates; threshold and model/version N/A (not confirmed as 0.5). Single-run log elapsed/processed includes failures; JailbreakHub: 1 error. PII: binary classification. Raw files unverified; own valid samples only, not a sample-aligned ranking.",
       "files": {
         "png": "fig10_openjev_reference_v1.png",
         "svg": "fig10_openjev_reference_v1.svg",
@@ -210,7 +210,7 @@
         {
           "metric": "accuracy",
           "title": "Accuracy",
-          "display_min_width": 1540,
+          "display_min_width": 1687,
           "files": {
             "png": "fig10_openjev_reference_v1_accuracy.png",
             "svg": "fig10_openjev_reference_v1_accuracy.svg",
@@ -220,7 +220,7 @@
         {
           "metric": "precision",
           "title": "Precision",
-          "display_min_width": 1540,
+          "display_min_width": 1687,
           "files": {
             "png": "fig10_openjev_reference_v1_precision.png",
             "svg": "fig10_openjev_reference_v1_precision.svg",
@@ -230,7 +230,7 @@
         {
           "metric": "recall",
           "title": "Recall",
-          "display_min_width": 1540,
+          "display_min_width": 1687,
           "files": {
             "png": "fig10_openjev_reference_v1_recall.png",
             "svg": "fig10_openjev_reference_v1_recall.svg",
@@ -240,7 +240,7 @@
         {
           "metric": "f1",
           "title": "F1",
-          "display_min_width": 1540,
+          "display_min_width": 1687,
           "files": {
             "png": "fig10_openjev_reference_v1_f1.png",
             "svg": "fig10_openjev_reference_v1_f1.svg",
@@ -250,7 +250,7 @@
         {
           "metric": "auroc",
           "title": "AUROC",
-          "display_min_width": 1540,
+          "display_min_width": 1687,
           "files": {
             "png": "fig10_openjev_reference_v1_auroc.png",
             "svg": "fig10_openjev_reference_v1_auroc.svg",
@@ -260,7 +260,7 @@
         {
           "metric": "mean_elapsed_ms",
           "title": "AVG latency (ms)",
-          "display_min_width": 1538,
+          "display_min_width": 1685,
           "files": {
             "png": "fig10_openjev_reference_v1_mean_elapsed_ms.png",
             "svg": "fig10_openjev_reference_v1_mean_elapsed_ms.svg",
@@ -281,8 +281,8 @@
     },
     {
       "name": "fig12_openjev_reference_averages",
-      "title": "Multi-Model Reference Averages (v1 / Threshold 0.5) | Luna: native presets (prompt N/A)",
-      "caption": "Fixed prompt v1 and threshold 0.5; only v1 is shown. The main charts give equal weight to six jointly tested non-PII datasets. PII is ordinary binary classification (PII present vs absent), not extraction or masking quality. The two PII datasets are summarized separately, and the eight-dataset averages are supplementary only. AUROC is undefined for both the PII and all-eight-dataset scopes and remains N/A. Average Accuracy, Precision, Recall, F1, AUROC and latency are shown. Only dataset names are shared; successful samples are not aligned across models, so these results must not be ranked together with the original sample-aligned model averages. Quality averages retain the full shared dataset scope; a missing metric on any dataset makes that average N/A. Latency gives equal weight to the shared subset with available timing for every model; the figure states its scope and count. Latency is N/A only when no shared timing subset exists; datasets are never dropped separately for individual models. The three APIs use single-run v1 / 0.5 logs, without substituting other thresholds or four-run averages. OpenJev 4B retains supplied summary timing; 32B and Decision-1 use supplied single-run timing. Protocols differ, so timing is reference-only. 32B's ToxiGen metrics are now complete and included normally in quality averages. All six metrics are visible in two columns and three rows: Accuracy / F1, Precision / Recall, AUROC / Latency. Narrow screens use one column; the shared model color legend appears at the top. Fastino GLiGuard-LLMGuardrails-300M | model ID: fastino/gliguard-LLMGuardrails-300M 46,225 successful / 46,923 rows; 698 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. Single-run elapsed includes failed requests, client and network overhead. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Fastino GLiNER2.5-Decide | model ID: fastino/gliner2.5-decide 46,205 successful / 46,923 rows; 718 errors. Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. Both labels were requested at API threshold zero; no normalization or complement. Inputs were not truncated; overlength inputs are recorded as errors. Requested model: fastino/gliner2.5-decide; response model: fastino/gliner2.5-decide. v1 / 0.5; six non-PII datasets. Quality excludes failed requests. HTTP 400: 698 errors. HTTP 502: 20 errors. Latency is the successful-request mean from CSV latency_ms, including per-request retry waits and client/network overhead, but excluding initial preflight warmup; it differs from GLiDE/GLiGuard log elapsed/processed timing. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only). Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking. Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results. Luna PII micro-F1 is separate; binary PII and latency are N/A. Supplied metrics; scorer versions unverified.",
+      "title": "Multi-Model Reference Averages (v1 / Threshold 0.5) | Luna: native presets (prompt N/A) | Straiker: threshold N/A",
+      "caption": "Fixed prompt v1 and threshold 0.5; only v1 is shown. The main charts give equal weight to six jointly tested non-PII datasets. PII is ordinary binary classification (PII present vs absent), not extraction or masking quality. The two PII datasets are summarized separately, and the eight-dataset averages are supplementary only. AUROC is undefined for both the PII and all-eight-dataset scopes and remains N/A. Average Accuracy, Precision, Recall, F1, AUROC and latency are shown. Only dataset names are shared; successful samples are not aligned across models, so these results must not be ranked together with the original sample-aligned model averages. Quality averages retain the full shared dataset scope; a missing metric on any dataset makes that average N/A. Latency gives equal weight to the shared subset with available timing for every model; the figure states its scope and count. Latency is N/A only when no shared timing subset exists; datasets are never dropped separately for individual models. The three APIs use single-run v1 / 0.5 logs, without substituting other thresholds or four-run averages. OpenJev 4B retains supplied summary timing; 32B and Decision-1 use supplied single-run timing. Protocols differ, so timing is reference-only. 32B's ToxiGen metrics are now complete and included normally in quality averages. All six metrics are visible in two columns and three rows: Accuracy / F1, Precision / Recall, AUROC / Latency. Narrow screens use one column; the shared model color legend appears at the top. Fastino GLiGuard-LLMGuardrails-300M | model ID: fastino/gliguard-LLMGuardrails-300M 46,225 successful / 46,923 rows; 698 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. Single-run elapsed includes failed requests, client and network overhead. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Fastino GLiNER2.5-Decide | model ID: fastino/gliner2.5-decide 46,205 successful / 46,923 rows; 718 errors. Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. Both labels were requested at API threshold zero; no normalization or complement. Inputs were not truncated; overlength inputs are recorded as errors. Requested model: fastino/gliner2.5-decide; response model: fastino/gliner2.5-decide. v1 / 0.5; six non-PII datasets. Quality excludes failed requests. HTTP 400: 698 errors. HTTP 502: 20 errors. Latency is the successful-request mean from CSV latency_ms, including per-request retry waits and client/network overhead, but excluding initial preflight warmup; it differs from GLiDE/GLiGuard log elapsed/processed timing. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only). Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking. Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results. Luna three-dataset reference latency: 181.97 ms (user-measured; timing/weights unspecified). Per-dataset latency and binary PII: N/A; PII micro-F1 is separate. Scorer versions unverified. Straiker: supplied v1 aggregates; threshold and model/version N/A (not confirmed as 0.5). Single-run log elapsed/processed includes failures; JailbreakHub: 1 error. PII: binary classification. Raw files unverified; own valid samples only, not a sample-aligned ranking.",
       "files": {
         "png": "fig12_openjev_reference_averages.png",
         "svg": "fig12_openjev_reference_averages.svg",
@@ -353,8 +353,8 @@
     },
     {
       "name": "fig13_three_dataset_averages",
-      "title": "ToxiGen, HateCheck, AEGIS2: Multi-model Reference Averages | Luna: native presets (prompt N/A)",
-      "caption": "For Fastino, Laya, TypeSafe, OpenJev 4B, OpenJev 32B and Microsoft Decision-1, Accuracy, Precision, Recall, F1, AUROC and average latency are reported for ToxiGen, HateCheck and AEGIS2, with equal weights of one third per dataset; Detect-Jailbreak and all other datasets are excluded from these means. These six models use prompt v1 at threshold 0.5, each with its own successful samples; OpenJev 4B, OpenJev 32B and Microsoft Decision-1 results are supplied internal summaries. Local model latency is elapsed/processed from each dataset's v1 / 0.5 run, averaged equally across datasets; OpenJev latency comes from the corresponding supplied summary entries. Missing quality results or complete timing for any required dataset make the corresponding mean N/A; the dataset scope is not reduced. Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied averages retained as provided. These means are not averaged again; their prompts, thresholds and timing protocols were not supplied. For these five supplied-average models, missing F1 is derived as 2PR / (P + R) from the supplied Precision and Recall (zero if both are zero), and marked with an asterisk. This derived F1 is not a mean of per-dataset F1; existing per-dataset F1 averages are retained unchanged. The CSV f1_source column distinguishes the two methods. Unreported AUROC remains N/A. The latency axis uses a logarithmic scale above 1 ms. Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking. All six metrics are visible together in a two-column grid (one column on narrow screens). Model order is fixed across panels, with light group separators; methodology can be expanded separately. Additional dataset-scope limitation: no internal dataset was available when the six models above were evaluated, so their averages use only the three shared datasets. Other model evaluations may also have included an additional internal dataset. Whether that dataset contributed to their supplied averages has not been confirmed; their dataset coverage must not be assumed identical to the six-model three-dataset scope. Fastino GLiGuard-LLMGuardrails-300M | model ID: fastino/gliguard-LLMGuardrails-300M 46,225 successful / 46,923 rows; 698 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. Single-run elapsed includes failed requests, client and network overhead. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Fastino GLiNER2.5-Decide | model ID: fastino/gliner2.5-decide 46,205 successful / 46,923 rows; 718 errors. Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. Both labels were requested at API threshold zero; no normalization or complement. Inputs were not truncated; overlength inputs are recorded as errors. Requested model: fastino/gliner2.5-decide; response model: fastino/gliner2.5-decide. v1 / 0.5; six non-PII datasets. Quality excludes failed requests. HTTP 400: 698 errors. HTTP 502: 20 errors. Latency is the successful-request mean from CSV latency_ms, including per-request retry waits and client/network overhead, but excluding initial preflight warmup; it differs from GLiDE/GLiGuard log elapsed/processed timing. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only). Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking. Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results. Luna PII micro-F1 is separate; binary PII and latency are N/A. Supplied metrics; scorer versions unverified.",
+      "title": "ToxiGen, HateCheck, AEGIS2: Multi-model Reference Averages | Luna: native presets (prompt N/A) | Straiker: threshold N/A",
+      "caption": "For Fastino, Laya, TypeSafe, OpenJev 4B, OpenJev 32B and Microsoft Decision-1, Accuracy, Precision, Recall, F1, AUROC and average latency are reported for ToxiGen, HateCheck and AEGIS2, with equal weights of one third per dataset; Detect-Jailbreak and all other datasets are excluded from these means. These six models use prompt v1 at threshold 0.5, each with its own successful samples; OpenJev 4B, OpenJev 32B and Microsoft Decision-1 results are supplied internal summaries. Local model latency is elapsed/processed from each dataset's v1 / 0.5 run, averaged equally across datasets; OpenJev latency comes from the corresponding supplied summary entries. Missing quality results or complete timing for any required dataset make the corresponding mean N/A; the dataset scope is not reduced. Dynamo CPU, Dynamo GPU (A100), Dynamo GPU (L4), Mistral and Warden use user-supplied averages retained as provided. These means are not averaged again; their prompts, thresholds and timing protocols were not supplied. For these five supplied-average models, missing F1 is derived as 2PR / (P + R) from the supplied Precision and Recall (zero if both are zero), and marked with an asterisk. This derived F1 is not a mean of per-dataset F1; existing per-dataset F1 averages are retained unchanged. The CSV f1_source column distinguishes the two methods. Unreported AUROC remains N/A. The latency axis uses a logarithmic scale above 1 ms. Successful samples and timing protocols are not aligned across models; this is a descriptive reference, not a fair ranking. All six metrics are visible together in a two-column grid (one column on narrow screens). Model order is fixed across panels, with light group separators; methodology can be expanded separately. Additional dataset-scope limitation: no internal dataset was available when the six models above were evaluated, so their averages use only the three shared datasets. Other model evaluations may also have included an additional internal dataset. Whether that dataset contributed to their supplied averages has not been confirmed; their dataset coverage must not be assumed identical to the six-model three-dataset scope. Fastino GLiGuard-LLMGuardrails-300M | model ID: fastino/gliguard-LLMGuardrails-300M 46,225 successful / 46,923 rows; 698 errors. v1 / 0.5; six datasets only. Direct unsafe confidence from independent safe/unsafe scores, not GLiDE Noul. Quality excludes failed requests; truncated inputs are recorded as errors. Single-run elapsed includes failed requests, client and network overhead. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Fastino GLiNER2.5-Decide | model ID: fastino/gliner2.5-decide 46,205 successful / 46,923 rows; 718 errors. Direct unsafe label confidence from independent safe/unsafe scores, not GLiDE Noul. Both labels were requested at API threshold zero; no normalization or complement. Inputs were not truncated; overlength inputs are recorded as errors. Requested model: fastino/gliner2.5-decide; response model: fastino/gliner2.5-decide. v1 / 0.5; six non-PII datasets. Quality excludes failed requests. HTTP 400: 698 errors. HTTP 502: 20 errors. Latency is the successful-request mean from CSV latency_ms, including per-request retry waits and client/network overhead, but excluding initial preflight warmup; it differs from GLiDE/GLiGuard log elapsed/processed timing. PII, v2 and repeat consistency were not tested. Not a sample-aligned ranking. Qwen3Guard-Stream-8B: binary safety labels; PII unsupported (historical proxies are audit-only). Qwen mean latency: log elapsed/processed (failures included); CSV P95: successful requests. No ranking. Luna: original task-specific presets, no custom prompts (prompt N/A); binary threshold 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results. Luna three-dataset reference latency: 181.97 ms (user-measured; timing/weights unspecified). Per-dataset latency and binary PII: N/A; PII micro-F1 is separate. Scorer versions unverified. Straiker: supplied v1 aggregates; threshold and model/version N/A (not confirmed as 0.5). Single-run log elapsed/processed includes failures; JailbreakHub: 1 error. PII: binary classification. Raw files unverified; own valid samples only, not a sample-aligned ranking.",
       "files": {
         "png": "fig13_three_dataset_averages.png",
         "svg": "fig13_three_dataset_averages.svg",
@@ -464,7 +464,7 @@
     "source": "data/external/luna_summary.csv",
     "source_kind": "user_supplied_aggregate_unverified",
     "prompt_protocol": "Luna uses original task-specific presets without custom prompts (prompt version: N/A; not v1/v2), with a binary threshold of 0.5. Other models use dataset-specific v1/v2 prompts. Task-definition differences may affect results.",
-    "source_limitations": "Values were transcribed from the user-supplied summary, not inferred. Original summary.json and manifest.json files were not available in the repository; saved metrics, scorer version IDs and input provenance have not been independently verified. Scorer version IDs and latency remain N/A. No missing metrics are reconstructed. Non-PII results appear beside v1 reference results with their native-preset protocol retained. Task-definition differences may affect results; this is not a controlled prompt comparison. Not included in sample-aligned rankings, v2 comparisons or binary PII comparisons.",
+    "source_limitations": "Values were transcribed from the user-supplied summary, not inferred. Original summary.json and manifest.json files were not available in the repository; saved metrics, scorer version IDs and input provenance have not been independently verified. Scorer version IDs and per-dataset latency remain N/A. No missing metrics are reconstructed. Non-PII results appear beside v1 reference results with their native-preset protocol retained. Task-definition differences may affect results; this is not a controlled prompt comparison. Not included in sample-aligned rankings, v2 comparisons or binary PII comparisons.",
     "pii_dataset": "ai4privacy/pii-masking-mini-10k",
     "pii_split": "validation",
     "pii_revision": "7b686c2e7475b02e10e38add1eb54a9f604f4361",
@@ -595,7 +595,17 @@
         "f1": 0.9248,
         "auroc": 0.942
       }
-    ]
+    ],
+    "three_dataset_latency": {
+      "datasets": [
+        "toxigen",
+        "hatecheck",
+        "aegis2"
+      ],
+      "mean_elapsed_ms": 181.97,
+      "source_kind": "user_supplied_measurement",
+      "notes": "User-measured latency for the ToxiGen / HateCheck / AEGIS2 reference average only. Timing protocol and dataset weighting were not supplied. Not imputed to individual datasets, other scopes or PII."
+    }
   },
   "external_comparison": {
     "source": "data/external/openjev_summary.csv",
@@ -611,7 +621,8 @@
       "openjev-32b",
       "microsoft-decision-1",
       "qwen3guard-stream-8b",
-      "luna"
+      "luna",
+      "straiker.ai"
     ],
     "model_identities": {
       "fastino.ai": {
@@ -662,6 +673,11 @@
         "display_name": "Luna",
         "request_model": "not supplied",
         "resolved_model": null
+      },
+      "straiker.ai": {
+        "request_model": "not supplied",
+        "resolved_model": null,
+        "display_name": "Straiker"
       }
     },
     "classification_threshold": 0.5,
@@ -1000,6 +1016,236 @@
         "threshold": 0.5,
         "source_kind": "user_supplied_aggregate_unverified",
         "scorer_version_id": null
+      }
+    },
+    "aggregate_models": {
+      "straiker.ai": {
+        "display_name": "Straiker",
+        "source": "data/external/straiker_summary.csv",
+        "notes": "User-supplied aggregate results from outputs-straiker-full-vzs8KFDy; raw predictions and logs were not available for independent verification. Prompt v1; decision threshold and resolved model/version were not supplied (N/A), unlike the threshold-0.5 reference runs. All eight runs completed; JailbreakHub has one error. Quality excludes failed samples. Latency is single-run log elapsed/processed, including failures and client/network overhead, not successful-request mean latency or pure server inference time. PII is binary present/absent classification, not extraction or masking quality; positives-only PII FPR and AUROC are undefined. Equal dataset weights; no sample-aligned ranking, v2 comparison or repeat-call consistency is inferred.",
+        "rows": 56823,
+        "valid": 56822,
+        "errors": 1,
+        "supplied_rows": [
+          {
+            "provider": "straiker.ai",
+            "dataset": "aegis2",
+            "prompt": "v1",
+            "threshold": null,
+            "rows": 1964,
+            "valid": 1964,
+            "errors": 0,
+            "tp": 615,
+            "tn": 839,
+            "fp": 66,
+            "fn": 444,
+            "accuracy": 0.740326,
+            "precision": 0.903084,
+            "recall": 0.580737,
+            "f1": 0.706897,
+            "auroc": 0.753904,
+            "fpr": 0.072928,
+            "fnr": 0.419263,
+            "elapsed_s": 2998.64,
+            "mean_elapsed_ms": 1526.8,
+            "progress": "1964/1964",
+            "complete": true,
+            "source_kind": "user_supplied_aggregate",
+            "latency_source_kind": "single_complete_run",
+            "result_directory": "outputs-straiker-full-vzs8KFDy"
+          },
+          {
+            "provider": "straiker.ai",
+            "dataset": "detect-jailbreak",
+            "prompt": "v1",
+            "threshold": null,
+            "rows": 18258,
+            "valid": 18258,
+            "errors": 0,
+            "tp": 1633,
+            "tn": 13972,
+            "fp": 2321,
+            "fn": 332,
+            "accuracy": 0.854694,
+            "precision": 0.412999,
+            "recall": 0.831043,
+            "f1": 0.551782,
+            "auroc": 0.844295,
+            "fpr": 0.142454,
+            "fnr": 0.168957,
+            "elapsed_s": 30292.04,
+            "mean_elapsed_ms": 1659.11,
+            "progress": "18258/18258",
+            "complete": true,
+            "source_kind": "user_supplied_aggregate",
+            "latency_source_kind": "single_complete_run",
+            "result_directory": "outputs-straiker-full-vzs8KFDy"
+          },
+          {
+            "provider": "straiker.ai",
+            "dataset": "hatecheck",
+            "prompt": "v1",
+            "threshold": null,
+            "rows": 3728,
+            "valid": 3728,
+            "errors": 0,
+            "tp": 2530,
+            "tn": 1052,
+            "fp": 113,
+            "fn": 33,
+            "accuracy": 0.960837,
+            "precision": 0.957246,
+            "recall": 0.987124,
+            "f1": 0.971955,
+            "auroc": 0.945064,
+            "fpr": 0.096996,
+            "fnr": 0.012876,
+            "elapsed_s": 7312.7,
+            "mean_elapsed_ms": 1961.56,
+            "progress": "3728/3728",
+            "complete": true,
+            "source_kind": "user_supplied_aggregate",
+            "latency_source_kind": "single_complete_run",
+            "result_directory": "outputs-straiker-full-vzs8KFDy"
+          },
+          {
+            "provider": "straiker.ai",
+            "dataset": "jailbreak-classification",
+            "prompt": "v1",
+            "threshold": null,
+            "rows": 1044,
+            "valid": 1044,
+            "errors": 0,
+            "tp": 462,
+            "tn": 515,
+            "fp": 2,
+            "fn": 65,
+            "accuracy": 0.935824,
+            "precision": 0.99569,
+            "recall": 0.87666,
+            "f1": 0.932392,
+            "auroc": 0.936396,
+            "fpr": 0.003868,
+            "fnr": 0.12334,
+            "elapsed_s": 1823.86,
+            "mean_elapsed_ms": 1746.99,
+            "progress": "1044/1044",
+            "complete": true,
+            "source_kind": "user_supplied_aggregate",
+            "latency_source_kind": "single_complete_run",
+            "result_directory": "outputs-straiker-full-vzs8KFDy"
+          },
+          {
+            "provider": "straiker.ai",
+            "dataset": "jailbreakhub",
+            "prompt": "v1",
+            "threshold": null,
+            "rows": 15140,
+            "valid": 15139,
+            "errors": 1,
+            "tp": 1157,
+            "tn": 10794,
+            "fp": 2940,
+            "fn": 248,
+            "accuracy": 0.789418,
+            "precision": 0.282402,
+            "recall": 0.823488,
+            "f1": 0.420574,
+            "auroc": 0.80471,
+            "fpr": 0.214067,
+            "fnr": 0.176512,
+            "elapsed_s": 25891.8,
+            "mean_elapsed_ms": 1710.16,
+            "progress": "15140/15140",
+            "complete": true,
+            "source_kind": "user_supplied_aggregate",
+            "latency_source_kind": "single_complete_run",
+            "result_directory": "outputs-straiker-full-vzs8KFDy"
+          },
+          {
+            "provider": "straiker.ai",
+            "dataset": "pii_masking_mini_10k",
+            "prompt": "v1",
+            "threshold": null,
+            "rows": 9000,
+            "valid": 9000,
+            "errors": 0,
+            "tp": 7772,
+            "tn": 0,
+            "fp": 0,
+            "fn": 1228,
+            "accuracy": 0.863556,
+            "precision": 1.0,
+            "recall": 0.863556,
+            "f1": 0.926783,
+            "auroc": null,
+            "fpr": null,
+            "fnr": 0.136444,
+            "elapsed_s": 23625.17,
+            "mean_elapsed_ms": 2625.02,
+            "progress": "9000/9000",
+            "complete": true,
+            "source_kind": "user_supplied_aggregate",
+            "latency_source_kind": "single_complete_run",
+            "result_directory": "outputs-straiker-full-vzs8KFDy"
+          },
+          {
+            "provider": "straiker.ai",
+            "dataset": "pii_masking_nano_1k",
+            "prompt": "v1",
+            "threshold": null,
+            "rows": 900,
+            "valid": 900,
+            "errors": 0,
+            "tp": 780,
+            "tn": 0,
+            "fp": 0,
+            "fn": 120,
+            "accuracy": 0.866667,
+            "precision": 1.0,
+            "recall": 0.866667,
+            "f1": 0.928571,
+            "auroc": null,
+            "fpr": null,
+            "fnr": 0.133333,
+            "elapsed_s": 2465.45,
+            "mean_elapsed_ms": 2739.38,
+            "progress": "900/900",
+            "complete": true,
+            "source_kind": "user_supplied_aggregate",
+            "latency_source_kind": "single_complete_run",
+            "result_directory": "outputs-straiker-full-vzs8KFDy"
+          },
+          {
+            "provider": "straiker.ai",
+            "dataset": "toxigen",
+            "prompt": "v1",
+            "threshold": null,
+            "rows": 6789,
+            "valid": 6789,
+            "errors": 0,
+            "tp": 1441,
+            "tn": 3355,
+            "fp": 63,
+            "fn": 1930,
+            "accuracy": 0.706437,
+            "precision": 0.958112,
+            "recall": 0.42747,
+            "f1": 0.591179,
+            "auroc": 0.704519,
+            "fpr": 0.018432,
+            "fnr": 0.57253,
+            "elapsed_s": 9530.45,
+            "mean_elapsed_ms": 1403.81,
+            "progress": "6789/6789",
+            "complete": true,
+            "source_kind": "user_supplied_aggregate",
+            "latency_source_kind": "single_complete_run",
+            "result_directory": "outputs-straiker-full-vzs8KFDy"
+          }
+        ],
+        "detail_page": "straiker_summary.html",
+        "summary_csv": "straiker_summary.csv"
       }
     },
     "category_averages_csv": "category_reference_averages.csv",

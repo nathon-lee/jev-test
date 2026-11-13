@@ -20,8 +20,8 @@ from benchmark.external_summary import (
     GLINER25_DISPLAY_NAME, GLINER25_MODEL, GLINER25_PROVIDER, LUNA_PROVIDER, METRICS,
     POC_DISPLAY_NAME, POC_MODEL, POC_PROVIDER, QWEN_PROVIDER,
     attach_finetuned_run, attach_gliguard_run, attach_gliner25_run,
-    attach_luna_summary, attach_openjev_summary, attach_poc_run,
-    attach_qwen_summary, category_reference_averages,
+    attach_luna_reference_latency, attach_luna_summary, attach_openjev_summary, attach_poc_run,
+    STRAIKER_PROVIDER, attach_straiker_summary, attach_qwen_summary, category_reference_averages,
     reference_averages, three_dataset_averages, v1_reference_scope_averages,
 )
 from benchmark.paper_figures import (
@@ -1122,6 +1122,98 @@ def fine_tuned_run(report, tmp_path):
     return report, run, log, data
 
 
+def test_straiker_summary_preserves_scopes_and_unknown_threshold(fine_tuned_run, tmp_path):
+    report, _, _, _ = fine_tuned_run
+    before = copy.deepcopy(report)
+    scopes_before = v1_reference_scope_averages(report)
+    focused_before = three_dataset_averages(report)
+    source = Path(__file__).parents[1] / "data/external/straiker_summary.csv"
+    attach_straiker_summary(report, source)
+    comparison = report["external_comparison"]
+    model = comparison["aggregate_models"][STRAIKER_PROVIDER]
+    assert model["errors"] == 1
+    assert report["runs"] == before["runs"]
+    assert report["providers"] == before["providers"]
+    assert comparison["runs"][:-8] == before["external_comparison"]["runs"]
+    assert STRAIKER_PROVIDER in external_reference_providers(comparison, "v1")
+    assert STRAIKER_PROVIDER not in external_reference_providers(comparison, "v2")
+    assert all(row["threshold"] is None for row in model["supplied_rows"])
+    assert [row for row in v1_reference_scope_averages(report)
+            if row["provider"] != STRAIKER_PROVIDER] == scopes_before
+    assert [row for row in three_dataset_averages(report)
+            if row["provider"] != STRAIKER_PROVIDER] == focused_before
+    focused = next(row for row in three_dataset_averages(report) if row["provider"] == STRAIKER_PROVIDER)
+    assert focused["f1"] == pytest.approx((0.591179 + 0.971955 + 0.706897) / 3)
+    assert focused["mean_elapsed_ms"] == pytest.approx((1403.81 + 1961.56 + 1526.80) / 3)
+    pii = next(row for row in category_reference_averages(report)
+               if row["provider"] == STRAIKER_PROVIDER and row["category"] == "pii")
+    assert pii["task_supported"] is True and pii["threshold"] is None and pii["auroc"] is None
+    assert pii["f1"] == pytest.approx((0.926783 + 0.928571) / 2)
+    assert pii["mean_elapsed_ms"] == pytest.approx((2625.02 + 2739.38) / 2)
+    write_summary_model_details(comparison, tmp_path)
+    page = (tmp_path / "straiker_summary.html").read_text()
+    assert "threshold N/A" in page and "outputs-straiker-full-vzs8KFDy" in page
+    assert "masking quality" in page
+    attach_straiker_summary(report, source)
+    assert comparison["providers"].count(STRAIKER_PROVIDER) == 1
+    assert len([row for row in comparison["runs"] if row["provider"] == STRAIKER_PROVIDER]) == 8
+    json.dumps(report, allow_nan=False)
+
+
+@pytest.mark.parametrize("kind", ["dataset", "category", "averages", "three"])
+def test_straiker_reference_chart_values(fine_tuned_run, kind):
+    report, _, _, _ = fine_tuned_run
+    attach_straiker_summary(report, Path(__file__).parents[1] / "data/external/straiker_summary.csv")
+    builders = {
+        "dataset": lambda: external_dataset_figure(report, "v1"),
+        "category": lambda: external_category_figure(report),
+        "averages": lambda: external_averages_figure(report),
+        "three": lambda: three_dataset_averages_figure(report),
+    }
+    figure = builders[kind]()
+    try:
+        assert "threshold and model/version N/A" in "\n".join(item.get_text() for item in figure.texts)
+        if kind == "dataset":
+            index = report["external_comparison"]["providers"].index(STRAIKER_PROVIDER) * len(DATASETS)
+            assert figure.axes[0].patches[index].get_height() == pytest.approx(70.6437)
+            assert figure.axes[-1].patches[index].get_height() == pytest.approx(1403.81)
+            assert math.isnan(figure.axes[4].patches[index + 6].get_height())
+        elif kind == "category":
+            index = report["external_comparison"]["providers"].index(STRAIKER_PROVIDER) * 3
+            assert figure.axes[3].patches[index + 2].get_height() == pytest.approx((92.6783 + 92.8571) / 2)
+        elif kind == "three":
+            index = next(i for i, row in enumerate(three_dataset_averages(report))
+                         if row["provider"] == STRAIKER_PROVIDER)
+            assert figure.axes[3].patches[index].get_width() == pytest.approx((59.1179 + 97.1955 + 70.6897) / 3)
+        else:
+            assert figure.axes[0].patches[-1].get_height() == pytest.approx(
+                np.mean([70.6437, 96.0837, 74.0326, 85.4694, 93.5824, 78.9418])
+            )
+    finally:
+        plt.close(figure)
+
+
+@pytest.mark.parametrize("column,value", [
+    ("valid", "1963"), ("accuracy", "1.1"), ("mean_elapsed_ms", "0"),
+    ("complete", "False"), ("dataset", "unknown"), ("auroc", "NaN"),
+])
+def test_straiker_summary_rejects_invalid_data(fine_tuned_run, tmp_path, column, value):
+    report, _, _, _ = fine_tuned_run
+    source = Path(__file__).parents[1] / "data/external/straiker_summary.csv"
+    with source.open() as stream:
+        rows = list(csv.DictReader(stream))
+    rows[0][column] = value
+    path = tmp_path / "invalid.csv"
+    with path.open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    before = copy.deepcopy(report)
+    with pytest.raises(ValueError):
+        attach_straiker_summary(report, path)
+    assert report == before
+
+
 def test_qwen_summary_preserves_existing_scopes_and_excludes_unsupported_pii(fine_tuned_run, tmp_path):
     report, _, _, _ = fine_tuned_run
     before = copy.deepcopy(report)
@@ -1634,6 +1726,41 @@ def test_luna_summary_rejects_invalid_values_without_mutation(report, tmp_path, 
     before = copy.deepcopy(report)
     with pytest.raises(ValueError):
         attach_luna_summary(report, path)
+    assert report == before
+
+
+def test_luna_supplied_latency_only_updates_three_dataset_reference(fine_tuned_run, tmp_path):
+    report, _, _, _ = fine_tuned_run
+    attach_luna_summary(report, Path(__file__).parents[1] / "data/external/luna_summary.csv")
+    before = copy.deepcopy(report)
+    scopes_before = v1_reference_scope_averages(report)
+    averages_before = three_dataset_averages(report)
+    attach_luna_reference_latency(report, 181.97)
+    averages = three_dataset_averages(report)
+    luna = next(row for row in averages if row["provider"] == LUNA_PROVIDER)
+    assert luna["mean_elapsed_ms"] == 181.97
+    assert [row for row in averages if row["provider"] != LUNA_PROVIDER] == [
+        row for row in averages_before if row["provider"] != LUNA_PROVIDER
+    ]
+    assert report["external_comparison"] == before["external_comparison"]
+    assert v1_reference_scope_averages(report) == scopes_before
+    assert all(row["mean_elapsed_ms"] is None for row in report["luna_summary"]["supplied_rows"])
+    figure = three_dataset_averages_figure(report)
+    try:
+        index = next(i for i, row in enumerate(averages) if row["provider"] == LUNA_PROVIDER)
+        assert figure.axes[-1].patches[index].get_width() == 181.97
+        assert any(text.get_text() == "181.97" for text in figure.axes[-1].texts)
+    finally:
+        plt.close(figure)
+    assert "181.97 ms" in luna_summary_section(report["luna_summary"], tmp_path)
+
+
+@pytest.mark.parametrize("value", [0, -1, float("nan"), float("inf")])
+def test_luna_supplied_reference_latency_rejects_invalid_values(report, value):
+    attach_luna_summary(report, Path(__file__).parents[1] / "data/external/luna_summary.csv")
+    before = copy.deepcopy(report)
+    with pytest.raises(ValueError):
+        attach_luna_reference_latency(report, value)
     assert report == before
 
 
