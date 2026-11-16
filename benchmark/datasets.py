@@ -20,7 +20,13 @@ def normalize_text(series: pd.Series) -> pd.Series:
     )
 def save_dataset(df: pd.DataFrame, path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(path, index=False)
+    serialized = df
+    if "privacy_mask" in df.columns:
+        serialized = df.copy()
+        serialized["privacy_mask"] = serialized["privacy_mask"].map(
+            lambda value: json.dumps(_parse_privacy_mask(value), ensure_ascii=False)
+        )
+    serialized.to_csv(path, index=False)
     print(f"\nSaved: {path}")
     print(f"Rows : {len(df)}")
     print("Label distribution:")
@@ -409,6 +415,8 @@ def prepare_jailbreakhub() -> pd.DataFrame:
 # PII Masking benchmarks
 # ============================================================
 def _parse_privacy_mask(mask_value):
+    if hasattr(mask_value, "tolist"):
+        mask_value = mask_value.tolist()
     if mask_value is None or (isinstance(mask_value, float) and pd.isna(mask_value)):
         return []
 

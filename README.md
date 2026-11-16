@@ -23,6 +23,100 @@ Supported datasets:
 - pii_masking_nano_1k
 - pii_masking_mini_10k
 
+## Local CPU PII entity benchmark (`POST /pooling`)
+
+This separate entry point evaluates **exact entity type + character start/end**
+micro/per-category Precision, Recall and F1, not binary PII classification or
+the approximate masking metrics. It also measures HTTP latency (mean, p50,
+p95, p99, max), successful requests/second and error rate. Start your inference
+server in **CPU mode** first: the client cannot select or verify the server's
+device. These are end-to-end HTTP measurements, not isolated model CPU time,
+CPU utilization or memory measurements.
+
+Use Python 3.10+ and install `httpx` (already in the root requirements). Run from
+the repository root. Start with a small single-request-concurrency run:
+
+```powershell
+python -m scripts.benchmark_pooling_pii --dataset nano --split validation --limit 20 --warmup 3 --concurrency 1
+```
+
+By default this downloads the original AI4Privacy JSONL from a pinned revision
+to `data/cache/pooling_pii`. Nano revision:
+`ca0a26dffb2c1f35947fa6d8d71b0d61e3373985`; mini revision:
+`7b686c2e7475b02e10e38add1eb54a9f604f4361`. Validation is the default split;
+`--split train` must be explicitly requested. There is no synthetic fallback
+when downloading fails. For offline use, copy the original JSONL to your machine:
+
+```powershell
+python -m scripts.benchmark_pooling_pii --input D:\datasets\pii-validation.jsonl --limit 20
+```
+
+If the official dataset host is unreachable, explicitly select a public mirror
+you trust with `--dataset-base-url https://hf-mirror.com`. The same pinned
+revision is used; there is no automatic switch to another host.
+
+The default endpoint/model/runtime are `http://127.0.0.1:8001/pooling`,
+`/models/current`, `classic`; override with `--endpoint`, `--model`, `--runtime`.
+Every request sends the original text, a fixed `data.schema.entities` object,
+`include_spans=true` and `include_confidence=true`. Pooling requests bypass
+environment proxies and do not retry failed samples.
+
+Without a mapping file, each dataset label maps to its lowercase name (for
+example `GIVENNAME` becomes `givenname`). To match your model's vocabulary,
+pass `--label-map` pointing to a JSON object such as
+`{"GIVENNAME":"person","SURNAME":"person","CITY":"location"}`.
+Unlisted labels keep their lowercase names; no category is silently dropped.
+Optional `--schema` takes an entity-name-to-description JSON object, e.g.
+`{"person":"A person's name","location":"A geographical location", ...}`; it
+must cover every mapped gold category. **Person/organization/location alone
+are not a complete PII schema.** Inspect the resulting schema/mapping in the
+summary before interpreting quality results.
+
+The default schema is derived once from the **entire input file**, before
+`--limit`, never from individual samples' gold types. Remapping categories
+changes the evaluation taxonomy: report the mapping when comparing runs.
+Exact scoring does not merge adjacent given-name/surname gold spans into a
+full name, award partial matches, or infer missing annotations.
+
+After the smoke test, compare sequential and concurrent runs on identical data:
+
+```powershell
+python -m scripts.benchmark_pooling_pii --dataset nano --warmup 5 --concurrency 1 --repeats 3 --output-dir outputs\pooling_pii\cpu-c1
+python -m scripts.benchmark_pooling_pii --dataset nano --warmup 5 --concurrency 4 --repeats 3 --output-dir outputs\pooling_pii\cpu-c4
+python -m scripts.benchmark_pooling_pii --dataset mini --warmup 5 --concurrency 1
+```
+
+Warmup requests are validated but excluded from metrics. Repeats re-run every
+selected sample and count each response in both quality and performance.
+Throughput uses successful requests divided by the whole measured wall time,
+including failed attempts; latency quantiles and quality use successful
+requests only. A warmup failure aborts; measured failures are recorded in
+`predictions.jsonl`, counted in `summary.json`, and cause exit status 1.
+Always report error rate alongside F1; excluded failures can bias quality.
+`--threshold` filters returned entities by confidence (default 0, no filtering);
+it cannot recover entities the server already suppressed.
+
+The text **plus schema** must fit the server's model context limit. For example,
+the 19-category nano validation run can exceed a 512-token server limit and
+return HTTP 400. Increase the server's `--max-model-len` if the model supports
+it, then rerun all samples. This client never silently truncates text:
+truncation would invalidate the original gold spans and make F1 misleading.
+
+Each run saves predictions, exact gold/predicted spans, configuration, input
+hashes, label mapping, metrics and errors under a new `outputs/pooling_pii`
+directory. Existing output directories are rejected, not overwritten.
+Keep CPU threads, affinity, model version, server settings and data fixed when
+comparing concurrency levels; record those server settings separately.
+
+**Older prepared PII CSVs can contain only empty `privacy_mask` lists.** This
+runner rejects such files rather than reporting a misleading F1. Prefer the
+original JSONL. CSVs with valid JSON `privacy_mask` lists are also accepted;
+each annotation requires `label`, `value`, `start`, `end`, with Python Unicode
+character offsets `[start, end)` matching the original text. The preparation
+helper now retains array-valued Hugging Face annotations; existing CSVs are not
+repaired automatically and must be regenerated to recover lost spans.
+Do not pass these JSONL results to the existing binary CSV evaluator.
+
 ## Galileo original preset benchmark (Linux)
 
 The optional [`demo-preset-benchmark/`](./demo-preset-benchmark/) runs the
